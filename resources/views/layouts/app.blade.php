@@ -19,13 +19,13 @@
             </label>
 
             {{-- Brand --}}
-            <div class="text-2xl font-bold text-primary">Midnight Sushi</div>
+            <div class="text-2xl font-extrabold italic text-primary">Midnight Sushi</div>
         </x-slot:brand>
 
         {{-- Navbar actions --}}
         <x-slot:actions>
             {{-- Navbar menu items (always visible on larger screens) --}}
-            <div class="hidden lg:flex items-center space-x-3">
+            <div class="hidden lg:flex items-center space-x-4">
                 <x-button label="About" link="/about" icon="o-information-circle" class="btn-ghost font-bold" />
                 <x-button label="Contact" link="/contact" icon="o-envelope" class="btn-ghost font-bold" />
             </div>

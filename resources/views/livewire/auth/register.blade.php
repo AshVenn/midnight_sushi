@@ -1,6 +1,6 @@
 <!-- resources/views/livewire/auth/register.blade.php -->
 <div class="w-full max-w-md mx-auto p-8 rounded shadow-sm">
-    <h2 class="text-2xl font-bold text-center mb-4">Create Your Account</h2>
+    <h2 class="text-xl font-bold text-center mb-4">Create Your Account</h2>
 
     @if (session()->has('success'))
         <div class="bg-green-100 text-green-700 p-4 mb-4 rounded">

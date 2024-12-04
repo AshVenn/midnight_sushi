@@ -2,7 +2,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="flex justify-center min-h-screen">
+<div class="flex items-center justify-center min-h-screen">
     <livewire:auth.login />
 </div>
 @endsection

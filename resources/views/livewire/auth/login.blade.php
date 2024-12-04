@@ -1,6 +1,6 @@
 
     <div>
-        <h2 class="text-2xl font-bold text-center mb-4">Welcome Back!</h2>
+        <h2 class="text-2xl font-semibold text-center mb-4">Welcome Back!</h2>
         <x-form wire:submit="login">
             <x-input
                 label="Email"
