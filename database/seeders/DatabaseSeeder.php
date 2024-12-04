@@ -23,7 +23,8 @@ class DatabaseSeeder extends Seeder
 
         // Optional: Add a test user
         \App\Models\User::factory()->create([
-            'name' => 'Test User',
+            'first_name' => 'john',
+            'last_name' => 'doe',
             'email' => 'test@example.com',
             'role' => 'admin', 
         ]);

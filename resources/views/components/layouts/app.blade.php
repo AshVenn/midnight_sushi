@@ -20,12 +20,16 @@
             </label>
  
             {{-- Brand --}}
-            <div>Midnight Sushi</div>
+            <div class="text-2xl font-bold text-primary">Midnight Sushi</div>
         </x-slot:brand>
  
         {{-- Right side actions --}}
         <x-slot:actions>
+
+            <x-button label="About" link="/about" class="btn-ghost font-bold" />
+            <x-button label="Contact" link="/contact" class="btn-ghost font-bold" />
             <x-theme-toggle class="btn btn-circle" />
+            <x-button link="/login"  icon="o-user" class="btn-circle btn-primary" responsive />
  
         </x-slot:actions>
     </x-nav>
