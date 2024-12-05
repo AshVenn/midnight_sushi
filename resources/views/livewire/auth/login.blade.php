@@ -1,4 +1,4 @@
-
+<!-- resources/views/livewire/auth/login.blade.php -->
     <div>
         <h2 class="text-2xl font-semibold text-center mb-4">Welcome Back!</h2>
         <x-form wire:submit="login">
@@ -32,5 +32,6 @@
                 </div>
             </x-slot:actions>
         </x-form>
+        
     </div>
 

@@ -23,20 +23,13 @@
         </x-slot:brand>
 
         {{-- Navbar actions --}}
-        <x-slot:actions>
-            {{-- Navbar menu items (always visible on larger screens) --}}
-            <div class="hidden lg:flex items-center space-x-4">
-                <x-button label="About" link="/about" icon="o-information-circle" class="btn-ghost font-bold" />
-                <x-button label="Contact" link="/contact" icon="o-envelope" class="btn-ghost font-bold" />
-            </div>
+        <x-slot:actions class="hidden md:flex items-center space-x-3">
 
-            {{-- Theme toggle and Login --}}
-            <div class="hidden md:flex items-center space-x-3">
-                <x-button label="About" link="/about" class="btn-ghost font-bold" />
-                <x-button label="Contact" link="/contact" class="btn-ghost font-bold" />
-                <x-theme-toggle class="btn btn-circle" />
-                <x-button link="/login" icon="o-user" class="btn-circle btn-primary" />
-            </div>
+            <x-button label="About" link="/about" class="btn-ghost font-bold" />
+            <x-button label="Contact" link="/contact" class="btn-ghost font-bold" />
+            <x-theme-toggle class="btn btn-circle" />
+            <x-button link="/login"  icon="o-user" class="btn-circle btn-primary" responsive />
+ 
         </x-slot:actions>
     </x-nav>
 

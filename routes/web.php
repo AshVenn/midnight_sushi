@@ -1,18 +1,18 @@
 <?php
 
 use Livewire\Volt\Volt;
+use App\Http\Middleware\RoleMiddleware;
 use App\Http\Controllers\Roles\AdminController;
 use App\Http\Controllers\Roles\CustomerController;
 use App\Http\Controllers\Roles\DeliveryPersonController;
 use App\Http\Controllers\Roles\ManagerController;
+use App\Http\Livewire\Auth\Register as RegisterComponent;
 
-Volt::route('/', 'home.index');
 
-// Instead of Volt route for register, use a blade view that includes the Livewire component.
+Rout::view('/login','auth.login')->name('login');
 Route::view('/register', 'auth.register')->name('register');
 
-// For login, similarly:
-Route::view('/login', 'auth.login')->name('login');
+Route::get('/register', RegisterComponent::class)->name('register');
 
 Route::middleware(['auth'])->group(function () {
     Route::middleware('role:admin')->group(function () {
