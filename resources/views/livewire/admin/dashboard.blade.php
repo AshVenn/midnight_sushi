@@ -1,12 +1,7 @@
-<div>
-    <x-card>
-        <x-card-header>
-            <h1 class="text-2xl font-bold">Admin Dashboard</h1>
-        </x-card-header>
+@extends('layouts.admin')
 
-        <x-card-body>
-            @livewire('admin.components.user-management')
-            @livewire('admin.components.reports')
-        </x-card-body>
+@section('admin-content')
+    <x-card title="Admin Dashboard" subtitle="Overview of admin activities" shadow separator>
+        
     </x-card>
-</div>
+@endsection

@@ -1,5 +1,4 @@
 <?php
-
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -15,6 +14,7 @@ class CreateProductsTable extends Migration
             $table->text('description');
             $table->json('allergens')->nullable();
             $table->string('image')->nullable();
+            $table->foreignId('category_id')->constrained()->onDelete('cascade'); // Add category relation
             $table->timestamps();
         });
     }
