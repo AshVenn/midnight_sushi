@@ -16,11 +16,12 @@
         <x-select wire:model="category_id" label="Category" :options="$categories->map(fn($c) => ['id' => $c->id, 'name' => $c->name])" placeholder="Select a category" />
 
         {{-- Image Upload --}}
-        <x-file wire:model="image" label="Image" accept="image/*">
-            @if ($image)
+        <x-file wire:model="image" label="Image" accept="image/*"/>
+        
+
+        @if ($image)
                 <img src="{{ $image->temporaryUrl() }}" class="h-40 rounded-lg mt-2" alt="Preview" />
-            @endif
-        </x-file>
+        @endif
 
         {{-- Action Buttons --}}
         <x-slot:actions>

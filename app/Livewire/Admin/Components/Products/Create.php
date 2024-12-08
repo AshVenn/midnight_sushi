@@ -20,36 +20,44 @@ class Create extends Component
         'price' => 'required|numeric|min:0',
         'description' => 'required|string',
         'allergens' => 'nullable|array',
-        'image' => 'nullable|image|max:2048',
+        'image' => 'nullable|image|max:2048', // Max size 2MB
         'category_id' => 'required|exists:categories,id',
     ];
 
     public function mount()
     {
-        $this->categories = Category::all();
+        $this->categories = Category::orderBy('name')->get(); // Fetch categories sorted by name
     }
 
     public function save()
     {
         $this->validate();
 
-        $imageUrl = $this->image
-            ? Cloudinary::upload($this->image->getRealPath())->getSecurePath()
-            : null;
+        try {
+            // Upload image to Cloudinary
+            $imageUrl = $this->image
+                ? Cloudinary::upload($this->image->getRealPath())->getSecurePath()
+                : null;
 
-        Product::create([
-            'name' => $this->name,
-            'price' => $this->price,
-            'description' => $this->description,
-            'allergens' => $this->allergens,
-            'image' => $imageUrl,
-            'category_id' => $this->category_id,
-        ]);
+            // Save product in database
+            Product::create([
+                'name' => $this->name,
+                'price' => $this->price,
+                'description' => $this->description,
+                'allergens' => !empty($this->allergens) ? json_encode($this->allergens) : null,
+                'image' => $imageUrl,
+                'category_id' => $this->category_id,
+            ]);
 
-        $this->reset(['name', 'price', 'description', 'allergens', 'image', 'category_id']);
+            // Reset form fields
+            $this->reset(['name', 'price', 'description', 'allergens', 'image', 'category_id']);
 
-        session()->flash('message', 'Product created successfully!');
-        return redirect()->route('admin.products.index');
+            // Show success message and redirect
+            session()->flash('message', 'Product created successfully!');
+            return redirect()->route('admin.products.index');
+        } catch (\Exception $e) {
+            session()->flash('error', 'Error: ' . $e->getMessage());
+        }
     }
 
     public function render()
