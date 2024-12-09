@@ -6,8 +6,12 @@ use App\Http\Controllers\Roles\ManagerController;
 use App\Http\Controllers\Roles\DeliveryPersonController;
 
 
+
 //Admin Dashboard Controller
 use App\Livewire\Admin\Dashboard as AdminDashboard;
+
+//Admin Settings Controller
+use App\Livewire\Admin\Components\Settings as AdminSettings;
 
 // Admin User Management Controllers
 use App\Livewire\Admin\Components\Users\Index as ManageUserIndex;
@@ -37,6 +41,7 @@ Route::middleware(['auth'])->group(function () {
     // Admin routes
     Route::middleware(['role:admin'])->group(function () {
         Route::get('/admin/dashboard', AdminDashboard::class)->name('admin.dashboard');
+        Route::get('/admin/settings', AdminSettings::class)->name('admin.settings');
 
         // User management routes
         Route::get('/admin/users', ManageUserIndex::class)->name('admin.users.index');

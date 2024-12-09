@@ -7,10 +7,12 @@ use App\Models\Category;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+use Mary\Traits\Toast;
 
 class Edit extends Component
 {
     use WithFileUploads;
+    use Toast;
 
     public Product $product;
     public string $name;
@@ -71,8 +73,11 @@ class Edit extends Component
             'category_id' => $this->category_id,
         ]);
 
-        session()->flash('message', 'Product updated successfully!');
-        return redirect()->route('admin.products.index');
+        $this->success(
+            title: 'Product updated Successfully',
+            description: 'The Product has been updated successfully.',
+            redirectTo: route('admin.products.index')
+        );
     }
 
     private function getPublicIdFromUrl(string $url): string

@@ -1,6 +1,6 @@
 <x-card title="User Management" separator>
     <x-slot:menu>
-        <x-button label="Create User" link="{{ route('admin.users.create') }}" class="btn-primary" />
+        <x-button label="User" link="{{ route('admin.users.create') }}" class="btn-primary" icon="o-plus" responsive/>
     </x-slot:menu>
 
     {{-- Search Input --}}
@@ -8,23 +8,28 @@
 
     {{-- Table Component --}}
     <x-table :headers="$headers" :rows="$users" with-pagination>
+     {{-- Render Avatar --}}
+        @scope('cell_avatar', $user)
+        <x-avatar :image="$user->avatar" class="!w-14 !rounded-lg" />
+        @endscope
+
         {{-- Render Full Name --}}
-        @scope('full_name', $user)
+        @scope('cell_full_name', $user)
             <div>{{ $user->full_name }}</div>
         @endscope
 
         {{-- Render Email --}}
-        @scope('email', $user)
+        @scope('cell_email', $user)
             <div>{{ $user->email }}</div>
         @endscope
 
         {{-- Render Role --}}
-        @scope('role', $user)
+        @scope('cell_role', $user)
             <div>{{ ucfirst($user->role) }}</div>
         @endscope
 
         {{-- Render Actions --}}
-        @scope('actions', $user)
+        @scope('cell_actions', $user)
             <div class="flex gap-2">
                 {{-- Delete Button --}}
                 <x-button wire:click="confirmDelete({{ $user->id }})" class="btn-error" icon="o-trash" />

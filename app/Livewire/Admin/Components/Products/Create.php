@@ -7,10 +7,12 @@ use App\Models\Category;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+use Mary\Traits\Toast;
 
 class Create extends Component
 {
     use WithFileUploads;
+    use Toast;
 
     public $name, $price, $description, $allergens = [], $image, $category_id;
     public $categories;
@@ -53,10 +55,13 @@ class Create extends Component
             $this->reset(['name', 'price', 'description', 'allergens', 'image', 'category_id']);
 
             // Show success message and redirect
-            session()->flash('message', 'Product created successfully!');
-            return redirect()->route('admin.products.index');
+            $this->success(
+                title: 'Product Created Successfully',
+                description: 'The Product has been created successfully.',
+                redirectTo: route('admin.products.index')
+            );
         } catch (\Exception $e) {
-            session()->flash('error', 'Error: ' . $e->getMessage());
+            $this->error('Error' . $e->getMessage());
         }
     }
 

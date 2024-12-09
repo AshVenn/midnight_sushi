@@ -19,9 +19,9 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->enum('role', ['admin', 'customer', 'manager', 'delivery_person'])->default('customer');
-            $table->string('phone_number')->nullable()->unique(); // Add phone number
-            $table->string('avatar')->nullable(); // For storing profile pictures
-            $table->enum('status', ['active', 'inactive', 'banned'])->default('active'); // User account status
+            $table->string('phone_number')->nullable()->unique(); 
+            $table->string('avatar')->nullable(); 
+            $table->enum('status', ['active', 'inactive', 'banned'])->default('active');
             $table->rememberToken();
             $table->timestamps();
 

@@ -1,6 +1,6 @@
 <x-card title="Product Management">
     <x-slot:menu>
-        <x-button label="Add Product" link="{{ route('admin.products.create') }}" class="btn-primary" />
+        <x-button label="Product" link="{{ route('admin.products.create') }}" class="btn-primary" icon="o-plus" responsive/>
     </x-slot:menu>
 
     {{-- Search Input --}}

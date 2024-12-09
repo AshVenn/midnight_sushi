@@ -20,12 +20,12 @@
         </x-slot:brand>
 
         <x-slot:actions>
-            <x-button label="About" link="/about" class="btn-ghost font-bold" />
-            <x-button label="Contact" link="/contact" class="btn-ghost font-bold" />
             <x-theme-toggle class="btn btn-circle" />
             @if(auth()->check())
-                <x-button label="Logout" icon="o-power" link="/logout" class="btn-primary" />
+                    <!-- add something if logged in -->
             @else
+                <x-button label="About" link="/about" class="btn-ghost font-bold" />
+                <x-button label="Contact" link="/contact" class="btn-ghost font-bold" />
                 <x-button label="Login" icon="o-user" link="/login" class="btn-primary" />
             @endif
         </x-slot:actions>
@@ -39,7 +39,11 @@
                 {{-- User Info --}}
                 <x-list-item :item="$user" value="first_name" sub-value="email" no-separator no-hover class="pt-2">
                     <x-slot:actions>
-                        <x-button icon="o-power" class="btn-circle btn-ghost btn-xs" tooltip-left="Logout" no-wire-navigate link="/logout" />
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <x-button icon="o-power" type="submit" class="btn-circle btn-ghost btn-xs" tooltip-left="Logout" no-wire-navigate />
+                    </form>
+                        
                     </x-slot:actions>
                 </x-list-item>
                 <x-menu-separator />
@@ -50,6 +54,8 @@
                         <x-menu activate-by-route>
                             <x-menu-item title="Dashboard" icon="o-home" link="/admin/dashboard" />
                             <x-menu-item title="Users" icon="o-users" link="/admin/users" />
+                            <x-menu-item title="Categories" icon="o-clipboard-document-list" link="/admin/categories" />
+                            <x-menu-item title="Products" icon="o-shopping-bag" link="/admin/products" />
                             <x-menu-item title="Reports" icon="o-chart-bar" link="/admin/reports" />
                             <x-menu-item title="Settings" icon="o-cog-6-tooth" link="/admin/settings" />
                         </x-menu>
@@ -87,7 +93,7 @@
                 {{-- Default Sidebar for Guests --}}
                 <x-menu activate-by-route>
                     <x-menu-item title="Home" icon="o-home" link="/" />
-                    <x-menu-item title="About" icon="o-info-circle" link="/about" />
+                    <x-menu-item title="About" icon="o-information-circle" link="/about" />
                     <x-menu-item title="Contact" icon="o-envelope" link="/contact" />
                 </x-menu>
             @endif

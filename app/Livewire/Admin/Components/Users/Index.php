@@ -6,6 +6,7 @@ use App\Models\User;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Mary\Traits\Toast;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class Index extends Component
 {
@@ -45,7 +46,7 @@ class Index extends Component
     }
 
     /**
-     * Delete the user.
+     * Delete the user along with their avatar.
      */
     public function deleteUser(): void
     {
@@ -53,12 +54,29 @@ class Index extends Component
             $user = User::find($this->deletingUserId);
 
             if ($user) {
+                // Delete avatar from Cloudinary if it exists
+                if ($user->avatar) {
+                    $publicId = $this->getPublicIdFromUrl($user->avatar);
+                    Cloudinary::destroy($publicId);
+                }
+
+                // Delete the user
                 $user->delete();
                 $this->success('User deleted successfully.');
             }
 
             $this->cancelDelete();
         }
+    }
+
+    /**
+     * Extract the public ID from the Cloudinary URL.
+     */
+    private function getPublicIdFromUrl(string $url): string
+    {
+        $urlParts = parse_url($url);
+        $path = $urlParts['path'] ?? '';
+        return pathinfo($path, PATHINFO_FILENAME);
     }
 
     /**
@@ -83,6 +101,7 @@ class Index extends Component
     public function headers(): array
     {
         return [
+            ['key' => 'avatar', 'label' => 'Avatar'],
             ['key' => 'full_name', 'label' => 'Full Name'],
             ['key' => 'email', 'label' => 'Email Address'],
             ['key' => 'role', 'label' => 'Role'],
