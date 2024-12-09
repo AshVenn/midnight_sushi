@@ -5,71 +5,101 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ isset($title) ? $title.' - '.config('app.name') : config('app.name') }}</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="font-sans antialiased">
- 
-    {{-- The navbar with `sticky` and `full-width` --}}
+    {{-- Navbar --}}
     <x-nav sticky full-width>
- 
         <x-slot:brand>
-            {{-- Drawer toggle for "main-drawer" --}}
             <label for="main-drawer" class="lg:hidden mr-3">
                 <x-icon name="o-bars-3" class="cursor-pointer" />
             </label>
- 
-            {{-- Brand --}}
-            <div class="text-2xl font-bold text-primary">Midnight Sushi</div>
+            <div class="text-2xl font-bold text-primary">{{config('app.name')}}</div>
         </x-slot:brand>
- 
-        {{-- Right side actions --}}
-        <x-slot:actions>
 
+        <x-slot:actions>
             <x-button label="About" link="/about" class="btn-ghost font-bold" />
             <x-button label="Contact" link="/contact" class="btn-ghost font-bold" />
             <x-theme-toggle class="btn btn-circle" />
-            <x-button link="/login"  icon="o-user" class="btn-circle btn-primary" responsive />
- 
+            @if(auth()->check())
+                <x-button label="Logout" icon="o-power" link="/logout" class="btn-primary" />
+            @else
+                <x-button label="Login" icon="o-user" link="/login" class="btn-primary" />
+            @endif
         </x-slot:actions>
     </x-nav>
- 
-    {{-- The main content with `full-width` --}}
+
+    {{-- Main Layout --}}
     <x-main with-nav full-width>
- 
-        {{-- This is a sidebar that works also as a drawer on small screens --}}
-        {{-- Notice the `main-drawer` reference here --}}
+        {{-- Sidebar --}}
         <x-slot:sidebar drawer="main-drawer" collapsible class="bg-base-200">
- 
-            {{-- User --}}
             @if($user = auth()->user())
-                <x-list-item :item="$user" value="name" sub-value="email" no-separator no-hover class="pt-2">
+                {{-- User Info --}}
+                <x-list-item :item="$user" value="first_name" sub-value="email" no-separator no-hover class="pt-2">
                     <x-slot:actions>
-                        <x-button icon="o-power" class="btn-circle btn-ghost btn-xs" tooltip-left="logoff" no-wire-navigate link="/logout" />
+                        <x-button icon="o-power" class="btn-circle btn-ghost btn-xs" tooltip-left="Logout" no-wire-navigate link="/logout" />
                     </x-slot:actions>
                 </x-list-item>
- 
                 <x-menu-separator />
+
+                {{-- Role-Based Sidebar --}}
+                @switch($user->role)
+                    @case('admin')
+                        <x-menu activate-by-route>
+                            <x-menu-item title="Dashboard" icon="o-home" link="/admin/dashboard" />
+                            <x-menu-item title="Users" icon="o-users" link="/admin/users" />
+                            <x-menu-item title="Reports" icon="o-chart-bar" link="/admin/reports" />
+                            <x-menu-item title="Settings" icon="o-cog-6-tooth" link="/admin/settings" />
+                        </x-menu>
+                        @break
+
+                    @case('customer')
+                        <x-menu activate-by-route>
+                            <x-menu-item title="Profile" icon="o-user" link="/customer/profile" />
+                            <x-menu-item title="Orders" icon="o-shopping-cart" link="/customer/orders" />
+                            <x-menu-item title="Support" icon="o-support" link="/customer/support" />
+                        </x-menu>
+                        @break
+
+                    @case('manager')
+                        <x-menu activate-by-route>
+                            <x-menu-item title="Overview" icon="o-chart-pie" link="/manager/overview" />
+                            <x-menu-item title="Teams" icon="o-users" link="/manager/teams" />
+                            <x-menu-item title="Projects" icon="o-briefcase" link="/manager/projects" />
+                        </x-menu>
+                        @break
+
+                    @case('delivery_person')
+                        <x-menu activate-by-route>
+                            <x-menu-item title="Deliveries" icon="o-truck" link="/delivery/tasks" />
+                            <x-menu-item title="Schedule" icon="o-calendar" link="/delivery/schedule" />
+                        </x-menu>
+                        @break
+
+                    @default
+                        <x-menu activate-by-route>
+                            <x-menu-item title="Home" icon="o-home" link="/" />
+                        </x-menu>
+                @endswitch
+            @else
+                {{-- Default Sidebar for Guests --}}
+                <x-menu activate-by-route>
+                    <x-menu-item title="Home" icon="o-home" link="/" />
+                    <x-menu-item title="About" icon="o-info-circle" link="/about" />
+                    <x-menu-item title="Contact" icon="o-envelope" link="/contact" />
+                </x-menu>
             @endif
- 
-            {{-- Activates the menu item when a route matches the `link` property --}}
-            <x-menu activate-by-route>
-                <x-menu-item title="Home" icon="o-home" link="###" />
-                <x-menu-item title="Messages" icon="o-envelope" link="###" />
-                <x-menu-sub title="Settings" icon="o-cog-6-tooth">
-                    <x-menu-item title="Wifi" icon="o-wifi" link="####" />
-                    <x-menu-item title="Archives" icon="o-archive-box" link="####" />
-                </x-menu-sub>
-            </x-menu>
         </x-slot:sidebar>
- 
-        {{-- The `$slot` goes here --}}
+
+        {{-- Main Content --}}
         <x-slot:content>
             {{ $slot }}
         </x-slot:content>
     </x-main>
- 
-    {{--  TOAST area --}}
+
+    {{-- Toast Notifications --}}
     <x-toast />
 </body>
 </html>

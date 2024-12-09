@@ -1,10 +1,13 @@
 <?php
 
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\Roles\AdminController;
 use App\Http\Controllers\Roles\CustomerController;
 use App\Http\Controllers\Roles\ManagerController;
 use App\Http\Controllers\Roles\DeliveryPersonController;
+
+
+//Admin Dashboard Controller
+use App\Livewire\Admin\Dashboard as AdminDashboard;
 
 // Admin User Management Controllers
 use App\Livewire\Admin\Components\Users\Index as ManageUserIndex;
@@ -33,7 +36,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::middleware(['auth'])->group(function () {
     // Admin routes
     Route::middleware(['role:admin'])->group(function () {
-        Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+        Route::get('/admin/dashboard', AdminDashboard::class)->name('admin.dashboard');
 
         // User management routes
         Route::get('/admin/users', ManageUserIndex::class)->name('admin.users.index');
