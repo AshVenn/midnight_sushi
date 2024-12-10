@@ -11,11 +11,12 @@ class CreateDeliveriesTable extends Migration
         Schema::create('deliveries', function (Blueprint $table) {
             $table->id();
             $table->foreignId('order_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('delivery_personnel_id')->constrained('users')->cascadeOnDelete();
-            $table->enum('status', ['assigned', 'in_progress', 'delivered'])->default('assigned');
+            $table->foreignId('delivery_person_id')->constrained('users')->cascadeOnDelete();
+            $table->enum('status', ['assigned', 'picked_up', 'delivered'])->default('assigned');
+            $table->timestamp('assigned_at')->nullable();
+            $table->timestamp('picked_up_at')->nullable();
+            $table->timestamp('delivered_at')->nullable();
             $table->timestamps();
-
-            $table->unique(['order_id', 'delivery_personnel_id']);
         });
     }
 

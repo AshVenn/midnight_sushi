@@ -50,5 +50,23 @@ class UsersSeeder extends Seeder
                 $user
             );
         }
+
+        User::create([
+            'first_name' => 'Admin',
+            'last_name' => 'User',
+            'email' => 'admin@example.com',
+            'password' => Hash::make('password'),
+            'role' => 'admin',
+        ]);
+
+        // Delivery Persons
+        User::factory()->count(3)->state([
+            'role' => 'delivery_person',
+        ])->create();
+
+        // Customers
+        User::factory()->count(10)->state([
+            'role' => 'customer',
+        ])->create();
     }
 }

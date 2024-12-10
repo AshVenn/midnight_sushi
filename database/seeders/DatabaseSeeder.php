@@ -12,8 +12,13 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            UsersSeeder::class,
-            CategoriesSeeder::class
+            UsersSeeder::class,            // Seed users first (required for relationships with orders and deliveries)
+            AddressesSeeder::class,       // Seed addresses (required for deliveries)
+            CategoriesSeeder::class,      // Seed categories (required for products)
+            ProductsSeeder::class,        // Seed products (depends on categories)
+            OrdersSeeder::class,          // Seed orders (depends on users)
+            OrderItemsSeeder::class,      // Seed order items (depends on orders and products)
+            DeliveriesSeeder::class,      // Seed deliveries (depends on orders and addresses)
         ]);
     }
 }

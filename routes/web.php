@@ -1,10 +1,12 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+
+use App\Livewire\About\About;
+
 use App\Http\Controllers\Roles\CustomerController;
 use App\Http\Controllers\Roles\ManagerController;
 use App\Http\Controllers\Roles\DeliveryPersonController;
-
 
 
 //Admin Dashboard Controller
@@ -29,12 +31,19 @@ use App\Livewire\Admin\Components\Products\Index as ProductIndex;
 use App\Livewire\Admin\Components\Products\Create as ProductCreate;
 use App\Livewire\Admin\Components\Products\Edit as ProductEdit;
 
+
+
+
+
 // Public routes
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+
+Route::get('/about', About::class)->name('about');
 
 // Protected routes
 Route::middleware(['auth'])->group(function () {

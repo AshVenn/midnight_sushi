@@ -12,9 +12,11 @@ class CreateOrdersTable extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->decimal('total_price', 10, 2);
-            $table->enum('status', ['pending', 'confirmed', 'preparing', 'out_for_delivery', 'delivered', 'cancelled'])->default('pending');
+            $table->enum('status', ['pending', 'confirmed', 'preparing', 'out_for_delivery', 'delivered', 'cancelled'])
+                  ->default('pending');
             $table->string('payment_method')->nullable();
             $table->string('payment_status')->default('unpaid');
+            $table->foreignId('shipping_address_id')->nullable()->constrained('addresses')->cascadeOnDelete(); // Corrected line
             $table->timestamps();
         });
     }

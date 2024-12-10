@@ -16,17 +16,35 @@
             <label for="main-drawer" class="lg:hidden mr-3">
                 <x-icon name="o-bars-3" class="cursor-pointer" />
             </label>
-            <div class="text-2xl font-bold text-primary">{{config('app.name')}}</div>
+            <div class="text-2xl font-bold text-primary italic">{{config('app.name')}}</div>
         </x-slot:brand>
 
         <x-slot:actions>
             <x-theme-toggle class="btn btn-circle" />
             @if(auth()->check())
-                    <!-- add something if logged in -->
+            <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <x-button icon="o-power" type="submit" class="btn-circle btn-ghost btn-xs" tooltip-left="Logout" no-wire-navigate />
+            </form>
             @else
-                <x-button label="About" link="/about" class="btn-ghost font-bold" />
-                <x-button label="Contact" link="/contact" class="btn-ghost font-bold" />
-                <x-button label="Login" icon="o-user" link="/login" class="btn-primary" />
+                <div class="hidden md:flex space-x-6">
+                    <x-button label="About" link="/about" class="btn-ghost font-bold" />
+                    <x-button label="Contact" link="/contact" class="btn-ghost font-bold" />
+                    <x-button label="Login" icon="o-user" link="/login" class="btn-primary ml-2" />
+                </div>
+                <div class="lg:hidden block">
+                    <x-dropdown icon="o-cog-8-tooth" class="btn-circle">
+                        <x-menu-separator />
+                        <x-menu-item @click.stop="">
+                            <x-checkbox label="Activate" />
+                        </x-menu-item>
+                        <x-menu-item @click.stop="">
+                            <x-toggle label="Sleep mode" right />
+                        </x-menu-item>
+                    </x-dropdown>
+                </div>
+
+
             @endif
         </x-slot:actions>
     </x-nav>
@@ -56,6 +74,7 @@
                             <x-menu-item title="Users" icon="o-users" link="/admin/users" />
                             <x-menu-item title="Categories" icon="o-clipboard-document-list" link="/admin/categories" />
                             <x-menu-item title="Products" icon="o-shopping-bag" link="/admin/products" />
+                            <x-menu-item title="Deliveries" icon="o-truck" link="/admin/deliveries" />
                             <x-menu-item title="Reports" icon="o-chart-bar" link="/admin/reports" />
                             <x-menu-item title="Settings" icon="o-cog-6-tooth" link="/admin/settings" />
                         </x-menu>

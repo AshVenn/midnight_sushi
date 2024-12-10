@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Models\Category;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Model>
@@ -22,6 +23,7 @@ class ProductFactory extends Factory
             'description' => $this->faker->sentence(),
             'allergens' => json_encode(['soy', 'fish']), // Example allergens
             'image' => $this->faker->imageUrl(640, 480, 'food', true, 'sushi'),
+            'category_id' => Category::inRandomOrder()->first()->id,
         ];
     }
 }

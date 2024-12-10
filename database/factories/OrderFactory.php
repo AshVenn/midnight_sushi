@@ -2,25 +2,23 @@
 
 namespace Database\Factories;
 
+use App\Models\User;
+use App\Models\Address;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Model>
- */
 class OrderFactory extends Factory
 {
     /**
      * Define the model's default state.
-     *
-     * @return array<string, mixed>
      */
     public function definition(): array
     {
         return [
-            'user_id' => \App\Models\User::factory(),
-            'total_price' => $this->faker->randomFloat(2, 20, 200), // e.g., 20.00 to 200.00
+            'user_id' => User::inRandomOrder()->first()->id, // Ensure User is imported
+            'shipping_address_id' => Address::inRandomOrder()->first()->id, // Ensure Address is imported
+            'total_price' => $this->faker->randomFloat(2, 10, 500),
             'status' => $this->faker->randomElement(['pending', 'confirmed', 'preparing', 'out_for_delivery', 'delivered', 'cancelled']),
-            'payment_method' => $this->faker->randomElement(['Stripe', 'PayPal']),
+            'payment_method' => $this->faker->randomElement(['credit_card', 'paypal', 'cash']),
             'payment_status' => $this->faker->randomElement(['paid', 'unpaid']),
         ];
     }

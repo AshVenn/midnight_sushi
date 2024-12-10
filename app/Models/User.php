@@ -20,12 +20,11 @@ class User extends Authenticatable
         'last_name',
         'email',
         'password',
-        'role',           // Role field for user types
-        'phone_number',   // Phone number
-        'avatar',         // Profile picture
-        'status',         // Account status (active, inactive, banned)
+        'role',
+        'phone_number',
+        'avatar',
+        'status',
     ];
-
     /**
      * The attributes that should be hidden for serialization.
      *
