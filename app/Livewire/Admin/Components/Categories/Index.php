@@ -15,12 +15,27 @@ class Index extends Component
     public bool $showDeleteModal = false;
     public ?int $deletingCategoryId = null;
     public ?string $deletingCategoryName = null;
+    public array $sortBy = ['column' => 'name', 'direction' => 'asc'];
 
+    /**
+     * Reset pagination when search changes.
+     */
     public function updatingSearch(): void
     {
         $this->resetPage();
     }
 
+    /**
+     * Explicit search function to trigger manual search if needed.
+     */
+    public function search(): void
+    {
+        $this->resetPage();
+    }
+
+    /**
+     * Open the delete confirmation modal.
+     */
     public function confirmDelete(int $categoryId): void
     {
         $category = Category::findOrFail($categoryId);
@@ -30,11 +45,17 @@ class Index extends Component
         $this->showDeleteModal = true;
     }
 
+    /**
+     * Close the delete modal.
+     */
     public function cancelDelete(): void
     {
         $this->reset(['showDeleteModal', 'deletingCategoryId', 'deletingCategoryName']);
     }
 
+    /**
+     * Delete the category.
+     */
     public function deleteCategory(): void
     {
         if ($this->deletingCategoryId) {
@@ -49,23 +70,34 @@ class Index extends Component
         }
     }
 
+    /**
+     * Fetch filtered and paginated categories.
+     */
     public function categories()
     {
         return Category::query()
-            ->when($this->search, fn($query) => $query->where('name', 'like', "%{$this->search}%"))
-            ->orderBy('name')
+            ->when($this->search, function ($query) {
+                $query->where('name', 'like', "%{$this->search}%");
+            })
+            ->orderBy($this->sortBy['column'], $this->sortBy['direction'])
             ->paginate(10);
     }
 
+    /**
+     * Define table headers.
+     */
     public function headers(): array
     {
         return [
             ['key' => 'name', 'label' => 'Name'],
-            ['key' => 'description', 'label' => 'Description'], // Added description
+            ['key' => 'description', 'label' => 'Description'],
             ['key' => 'actions', 'label' => 'Actions'],
         ];
     }
 
+    /**
+     * Render the Livewire view.
+     */
     public function render()
     {
         return view('livewire.admin.components.categories.index', [

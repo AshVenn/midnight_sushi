@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 
 use App\Livewire\About\About;
+use App\Livewire\FAQ\FAQ;
 
 use App\Http\Controllers\Roles\CustomerController;
 use App\Http\Controllers\Roles\ManagerController;
@@ -52,6 +53,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 
 Route::get('/about', About::class)->name('about');
+Route::get('/faq', FAQ::class)->name('faq');
 
 // Protected routes
 Route::middleware(['auth'])->group(function () {

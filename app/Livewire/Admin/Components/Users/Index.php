@@ -13,16 +13,40 @@ class Index extends Component
     use WithPagination, Toast;
 
     public string $search = '';
-    public bool $showDeleteModal = false;
-    public ?int $deletingUserId = null; 
-    public ?string $deletingUserName = null; 
-    public array $sortBy = ['column' => 'name', 'direction' => 'asc'];
+    public string $roleFilter = 'all'; // Role filter with default value
+    public array $sortBy = ['column' => 'first_name', 'direction' => 'asc'];
+    public bool $showDeleteModal = false; // Controls modal visibility
+    public ?int $deletingUserId = null; // ID of the user to be deleted
+    public ?string $deletingUserName = null; // Name of the user to be deleted
 
     /**
-     * Reset pagination when search changes.
+     * Reset pagination when search or filter changes.
      */
     public function updatingSearch(): void
     {
+        $this->resetPage();
+    }
+
+    public function updateFilter():void {
+        $this->users();
+    }
+
+    public function updatingRoleFilter(): void
+    {
+        $this->resetPage();
+    }
+
+    /**
+     * Change sorting column and direction.
+     */
+    public function sortByColumn(string $column): void
+    {
+        if ($this->sortBy['column'] === $column) {
+            $this->sortBy['direction'] = $this->sortBy['direction'] === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortBy['column'] = $column;
+            $this->sortBy['direction'] = 'asc';
+        }
         $this->resetPage();
     }
 
@@ -81,20 +105,29 @@ class Index extends Component
     }
 
     /**
-     * Fetch filtered and paginated users.
+     * Fetch filtered, sorted, and paginated users.
      */
     public function users()
     {
         return User::query()
-            ->select(['users.*', \DB::raw("CONCAT(first_name, ' ', last_name) AS full_name")])
             ->when($this->search, function ($query) {
-                $query->where('first_name', 'like', "%{$this->search}%")
+                $query->where(function ($q) {
+                    $q->where('first_name', 'like', "%{$this->search}%")
                       ->orWhere('last_name', 'like', "%{$this->search}%")
                       ->orWhere('email', 'like', "%{$this->search}%");
+                });
             })
-            ->orderBy('first_name')
-            ->paginate(10);
+            ->when($this->roleFilter !== 'all', function ($query) {
+                $query->where('role', $this->roleFilter);
+            })
+            ->orderBy($this->sortBy['column'], $this->sortBy['direction'])
+            ->paginate(10)
+            ->through(function ($user) {
+                $user->full_name = $user->full_name; // Use the accessor
+                return $user;
+            });
     }
+    
 
     /**
      * Define table headers.
@@ -102,11 +135,11 @@ class Index extends Component
     public function headers(): array
     {
         return [
-            ['key' => 'avatar', 'label' => 'Avatar'],
-            ['key' => 'full_name', 'label' => 'Full Name'],
-            ['key' => 'email', 'label' => 'Email Address'],
-            ['key' => 'role', 'label' => 'Role'],
-            ['key' => 'actions', 'label' => 'Actions'],
+            ['key' => 'avatar', 'label' => 'Avatar', 'sortable' => false],
+            ['key' => 'full_name', 'label' => 'Full Name', 'sortable' => true, 'column' => 'first_name'],
+            ['key' => 'email', 'label' => 'Email Address', 'sortable' => true, 'column' => 'email'],
+            ['key' => 'role', 'label' => 'Role', 'sortable' => true, 'column' => 'role'],
+            ['key' => 'actions', 'label' => 'Actions', 'sortable' => false],
         ];
     }
 

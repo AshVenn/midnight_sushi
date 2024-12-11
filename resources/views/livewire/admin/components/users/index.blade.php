@@ -1,16 +1,34 @@
 <x-card title="User Management" separator>
     <x-slot:menu>
-        <x-button label="User" link="{{ route('admin.users.create') }}" class="btn-primary" icon="o-plus" responsive/>
+        <x-button label="Add User" link="{{ route('admin.users.create') }}" class="btn-primary" icon="o-plus" responsive />
     </x-slot:menu>
 
-    {{-- Search Input --}}
-    <x-input wire:model="search" placeholder="Search users..." icon="o-magnifying-glass" />
+    <div class="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0 mb-4 items-center">
+        {{-- Search Input --}}
+        <div class="flex-grow w-full">
+            <x-input wire:model.lazy="search" placeholder="Search users..." icon="o-magnifying-glass" autocomplete="off"/>
+        </div>
+
+        {{-- Role Filter --}}
+        @php
+            $roleOptions = [
+                ['id' => 'all', 'name' => 'All Roles'],
+                ['id' => 'admin', 'name' => 'Admin'],
+                ['id' => 'manager', 'name' => 'Manager'],
+                ['id' => 'delivery_person', 'name' => 'Delivery Person'],
+                ['id' => 'customer', 'name' => 'Customer'],
+            ];
+        @endphp
+        <div class="w-full md:w-1/3">
+            <x-select wire:model="roleFilter" wire:change="updateFilter" :options="$roleOptions" placeholder="Filter by Role" />
+        </div>
+    </div>
 
     {{-- Table Component --}}
-    <x-table :headers="$headers" :rows="$users" with-pagination :sort-by="$sortBy">
-     {{-- Render Avatar --}}
+    <x-table :headers="$headers" :rows="$users" :sort-by="$sortBy" with-pagination>
+        {{-- Render Avatar --}}
         @scope('cell_avatar', $user)
-        <x-avatar :image="$user->avatar"  class="!w-16 !h-16"/>
+            <x-avatar :image="$user->avatar" class="!w-16 !h-16" />
         @endscope
 
         {{-- Render Full Name --}}
@@ -31,23 +49,17 @@
         {{-- Render Actions --}}
         @scope('cell_actions', $user)
             <div class="flex gap-2">
-                {{-- Delete Button --}}
                 <x-button wire:click="confirmDelete({{ $user->id }})" class="btn-error" icon="o-trash" />
-
-                {{-- Edit Button --}}
                 <x-button link="{{ route('admin.users.edit', ['user' => $user->id]) }}" class="btn-primary" icon="o-pencil" />
             </div>
         @endscope
     </x-table>
 
     {{-- Delete Confirmation Modal --}}
-    <x-modal wire:model="showDeleteModal" title="Confirm Deletion" separator>
-        <div class="text-center">
-            Are you sure you want to delete <strong>{{ $deletingUserName }}</strong>? This action cannot be undone.
-        </div>
-
+    <x-modal wire:model="showDeleteModal" title="Confirm Deletion">
+        <p>Are you sure you want to delete <strong>{{ $deletingUserName }}</strong>? This action cannot be undone.</p>
         <x-slot:actions>
-            <x-button label="Cancel" @click="$wire.cancelDelete()" />
+            <x-button label="Cancel" wire:click="cancelDelete" />
             <x-button label="Delete" class="btn-error" wire:click="deleteUser" />
         </x-slot:actions>
     </x-modal>
