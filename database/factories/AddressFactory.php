@@ -2,21 +2,20 @@
 
 namespace Database\Factories;
 
+use App\Models\Address;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Address>
- */
 class AddressFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    protected $model = Address::class;
+
     public function definition(): array
     {
+        $user = User::where('role', 'customer')->inRandomOrder()->first() ?? User::factory()->create(['role' => 'customer']);
+
         return [
+            'user_id' => $user->id,
             'recipient_name' => $this->faker->name,
             'street_address' => $this->faker->streetAddress,
             'city' => $this->faker->city,

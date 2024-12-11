@@ -9,10 +9,8 @@ class Address extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     */
     protected $fillable = [
+        'user_id',
         'recipient_name',
         'street_address',
         'city',
@@ -20,22 +18,18 @@ class Address extends Model
         'country',
     ];
 
-    /**
-     * Define relationship to the Order model.
-     */
     public function orders()
     {
         return $this->hasMany(Order::class, 'shipping_address_id');
     }
 
-    /**
-     * Get the full address as a formatted string.
-     *
-     * @return string
-     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function getFullAddressAttribute(): string
     {
         return "{$this->recipient_name}, {$this->street_address}, {$this->city}, {$this->postal_code}, {$this->country}";
     }
-
 }

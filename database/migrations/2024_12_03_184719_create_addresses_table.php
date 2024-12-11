@@ -10,12 +10,12 @@ class CreateAddressesTable extends Migration
     {
         Schema::create('addresses', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete(); 
             $table->string('recipient_name');
             $table->string('street_address');
             $table->string('city');
             $table->string('postal_code');
             $table->string('country')->default('Switzerland');
-
             $table->timestamps();
         });
     }

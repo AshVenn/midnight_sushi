@@ -37,7 +37,8 @@ use App\Livewire\Admin\Orders\AssignOrder as AssignOrder;
 
 //Admin Delivery Management Controllers
 use App\Livewire\Admin\Deliveries\Index as DeliveryIndex;
-use App\Livewire\Admin\Deliveries\AssignDelivery as AssignDelivery;
+
+
 
 
 
@@ -81,7 +82,6 @@ Route::middleware(['auth'])->group(function () {
 
         // Delivery Management routes
         Route::get('/admin/deliveries', DeliveryIndex::class)->name('admin.deliveries.index');
-        Route::get('/admin/deliveries/{delivery}/assign', AssignDelivery::class)->name('admin.deliveries.assign');
 
         
     });

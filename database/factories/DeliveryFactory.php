@@ -2,24 +2,26 @@
 
 namespace Database\Factories;
 
+use App\Models\Order;
+use App\Models\User;
+use App\Models\Delivery;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Model>
- */
 class DeliveryFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    protected $model = Delivery::class;
+
     public function definition(): array
     {
+        $deliveryPerson = User::where('role', 'delivery_person')->inRandomOrder()->first() ?? User::factory()->create(['role' => 'delivery_person']);
+        $order = Order::factory()->create();
+        
         return [
-            'order_id' => \App\Models\Order::factory(),
-            'delivery_personnel_id' => \App\Models\User::factory(),
-            'status' => $this->faker->randomElement(['assigned', 'in_progress', 'delivered']),
+            'order_id' => $order->id,
+            'delivery_person_id' => $deliveryPerson->id,
+            'status' => $this->faker->randomElement(['assigned', 'picked_up', 'delivered']),
+            'assigned_at' => now(),
+            'address_text' => $order->address_text,
         ];
     }
 }
