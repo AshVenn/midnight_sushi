@@ -27,7 +27,7 @@
                 <p>Are you sure you want to delete the category "{{ $deletingCategoryName }}"?</p>
             </div>
             <x-slot:actions>
-                <x-button label="Cancel" @click="cancelDelete" />
+                <x-button label="Cancel" wire:click="cancelDelete" />
                 <x-button label="Delete" class="btn-error" wire:click="deleteCategory" />
             </x-slot:actions>
         </x-modal>

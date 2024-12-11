@@ -13,9 +13,10 @@ class Index extends Component
     use WithPagination, Toast;
 
     public string $search = '';
-    public bool $showDeleteModal = false; // Controls modal visibility
-    public ?int $deletingUserId = null; // ID of the user to be deleted
-    public ?string $deletingUserName = null; // Name of the user to be deleted
+    public bool $showDeleteModal = false;
+    public ?int $deletingUserId = null; 
+    public ?string $deletingUserName = null; 
+    public array $sortBy = ['column' => 'name', 'direction' => 'asc'];
 
     /**
      * Reset pagination when search changes.

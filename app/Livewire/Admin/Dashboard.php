@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Models\User;
 use App\Models\Product;
 use App\Models\Category;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class Dashboard extends Component
@@ -26,13 +27,16 @@ class Dashboard extends Component
     public function mount()
     {
         // Total Revenue
-        $this->totalRevenue = Order::sum('total_price') ?? 0;
+        $this->totalRevenue = Order::whereNotIn('status', ['cancelled'])
+            ->sum('total_price') ?? 0;
 
         // Total Orders
         $this->totalOrders = Order::count() ?? 0;
 
         // New Customers
-        $this->newCustomers = User::where('role', 'customer')->count() ?? 0;
+        $this->newCustomers = User::where('role', 'customer')
+            ->whereDate('created_at', '>=', now()->subMonth())
+            ->count() ?? 0;
 
         // Active Products
         $this->activeProducts = Product::count() ?? 0;
@@ -43,19 +47,25 @@ class Dashboard extends Component
             ['key' => 'email', 'label' => 'Email'],
             ['key' => 'revenue', 'label' => 'Revenue'],
         ];
+
         $this->topCustomersRows = User::where('role', 'customer')
-            ->withSum('orders', 'total_price')
+            ->withSum(['orders as orders_sum_total_price' => function ($query) {
+                $query->whereNotIn('status', ['cancelled']);
+            }], 'total_price')
             ->orderByDesc('orders_sum_total_price')
             ->limit(5)
             ->get()
             ->map(function ($customer) {
                 return [
-                    'name' => ($customer->first_name ?? '') . ' ' . ($customer->last_name ?? ''),
+                    'name' => trim(($customer->first_name ?? '') . ' ' . ($customer->last_name ?? '')),
                     'email' => $customer->email ?? 'N/A',
                     'revenue' => $customer->orders_sum_total_price ?? 0,
                 ];
             })
             ->toArray();
+    
+    
+
 
         // Best-Selling Products
         $this->bestSellingProductsHeaders = [
@@ -66,6 +76,8 @@ class Dashboard extends Component
         $this->bestSellingProductsRows = Product::select('products.*')
             ->selectRaw('SUM(order_items.quantity) as total_sales')
             ->join('order_items', 'products.id', '=', 'order_items.product_id')
+            ->join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->whereNotIn('orders.status', ['cancelled'])
             ->groupBy('products.id')
             ->orderByDesc('total_sales')
             ->limit(5)
@@ -87,7 +99,7 @@ class Dashboard extends Component
             ['key' => 'total', 'label' => 'Total'],
             ['key' => 'status', 'label' => 'Status'],
         ];
-        $this->recentOrdersRows = Order::with('user')
+        $this->recentOrdersRows = Order::with('customer')
             ->latest()
             ->limit(5)
             ->get()
@@ -95,9 +107,9 @@ class Dashboard extends Component
                 return [
                     'id' => $order->id ?? 'N/A',
                     'date' => $order->created_at ? $order->created_at->format('M d, Y') : 'N/A',
-                    'customer' => ($order->user->first_name ?? 'N/A') . ' ' . ($order->user->last_name ?? ''),
+                    'customer' => ($order->customer->first_name ?? 'N/A') . ' ' . ($order->customer->last_name ?? ''),
                     'total' => $order->total_price ?? 0,
-                    'status' => $order->status ?? 'N/A',
+                    'status' => ucfirst($order->status) ?? 'N/A',
                 ];
             })
             ->toArray();
@@ -134,15 +146,24 @@ class Dashboard extends Component
             ]
         ];
 
-        // Gross Revenue Chart
+        // Dynamic Gross Revenue Chart
+        $grossRevenueData = Order::selectRaw('MONTH(created_at) as month, SUM(total_price) as revenue')
+            ->whereNotIn('status', ['cancelled'])
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get()
+            ->mapWithKeys(function ($item) {
+                return [date('M', mktime(0, 0, 0, $item->month, 1)) => $item->revenue];
+            });
+
         $this->grossRevenueChart = [
             'type' => 'line',
             'data' => [
-                'labels' => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+                'labels' => $grossRevenueData->keys()->toArray(),
                 'datasets' => [
                     [
                         'label' => 'Revenue (€)',
-                        'data' => [12000, 19000, 3000, 5000, 20000, 15000, 10000],
+                        'data' => $grossRevenueData->values()->toArray(),
                         'backgroundColor' => 'rgba(75, 192, 192, 0.2)',
                         'borderColor' => 'rgba(75, 192, 192, 1)',
                         'borderWidth' => 1,

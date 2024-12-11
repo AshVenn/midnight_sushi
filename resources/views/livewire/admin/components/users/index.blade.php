@@ -7,10 +7,10 @@
     <x-input wire:model="search" placeholder="Search users..." icon="o-magnifying-glass" />
 
     {{-- Table Component --}}
-    <x-table :headers="$headers" :rows="$users" with-pagination>
+    <x-table :headers="$headers" :rows="$users" with-pagination :sort-by="$sortBy">
      {{-- Render Avatar --}}
         @scope('cell_avatar', $user)
-        <x-avatar :image="$user->avatar" class="!w-14 !rounded-lg" />
+        <x-avatar :image="$user->avatar"  class="!w-16 !h-16"/>
         @endscope
 
         {{-- Render Full Name --}}

@@ -31,6 +31,13 @@ use App\Livewire\Admin\Components\Products\Index as ProductIndex;
 use App\Livewire\Admin\Components\Products\Create as ProductCreate;
 use App\Livewire\Admin\Components\Products\Edit as ProductEdit;
 
+// Admin Order Management Controllers
+use App\Livewire\Admin\Orders\Index as OrdersIndex;
+use App\Livewire\Admin\Orders\AssignOrder as AssignOrder;
+
+//Admin Delivery Management Controllers
+use App\Livewire\Admin\Deliveries\Index as DeliveryIndex;
+use App\Livewire\Admin\Deliveries\AssignDelivery as AssignDelivery;
 
 
 
@@ -67,6 +74,16 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/admin/products', ProductIndex::class)->name('admin.products.index');
         Route::get('/admin/products/create', ProductCreate::class)->name('admin.products.create');
         Route::get('/admin/products/{product}/edit', ProductEdit::class)->name('admin.products.edit');
+
+        // Orders Management routes
+        Route::get('/admin/orders', OrdersIndex::class)->name('admin.orders.index');
+        Route::get('/admin/orders/assign/{order}', AssignOrder::class)->name('admin.orders.assign');
+
+        // Delivery Management routes
+        Route::get('/admin/deliveries', DeliveryIndex::class)->name('admin.deliveries.index');
+        Route::get('/admin/deliveries/{delivery}/assign', AssignDelivery::class)->name('admin.deliveries.assign');
+
+        
     });
 
     // Customer routes

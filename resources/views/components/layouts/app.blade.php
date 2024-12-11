@@ -74,7 +74,10 @@
                             <x-menu-item title="Users" icon="o-users" link="/admin/users" />
                             <x-menu-item title="Categories" icon="o-clipboard-document-list" link="/admin/categories" />
                             <x-menu-item title="Products" icon="o-shopping-bag" link="/admin/products" />
-                            <x-menu-item title="Deliveries" icon="o-truck" link="/admin/deliveries" />
+                            <x-menu-sub title="Menage" icon="o-user-group">
+                                <x-menu-item title="Orders" icon="s-shopping-cart" link="/admin/orders" />
+                                <x-menu-item title="Deliveries" icon="o-truck" link="/admin/deliveries" />
+                            </x-menu-sub>
                             <x-menu-item title="Reports" icon="o-chart-bar" link="/admin/reports" />
                             <x-menu-item title="Settings" icon="o-cog-6-tooth" link="/admin/settings" />
                         </x-menu>

@@ -10,7 +10,8 @@ class Order extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
+        'customer_id', 
+        'delivery_person_id', 
         'shipping_address_id',
         'total_price',
         'status',
@@ -18,9 +19,16 @@ class Order extends Model
         'payment_status',
     ];
 
-    public function user()
+    // Relationship to the customer (user with role "customer")
+    public function customer()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'customer_id');
+    }
+
+    // Relationship to the delivery person (user with role "delivery_person")
+    public function deliveryPerson()
+    {
+        return $this->belongsTo(User::class, 'delivery_person_id');
     }
 
     public function shippingAddress()
