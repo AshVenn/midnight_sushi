@@ -1,28 +1,28 @@
-<x-card title="Category Management" separator>
+<x-card title="Gestion des Catégories" separator>
     <x-slot:menu>
-        <x-button label="Add Category" link="{{ route('admin.categories.create') }}" class="btn-primary" icon="o-plus" responsive/>
+        <x-button label="Ajouter une Catégorie" link="{{ route('admin.categories.create') }}" class="btn-primary" icon="o-plus" responsive/>
     </x-slot:menu>
 
     <div class="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0 mb-4 items-center">
-        {{-- Search Input --}}
+        {{-- Barre de recherche --}}
         <div class="flex-grow">
-            <x-input wire:model.lazy="search" placeholder="Search categories..." icon="o-magnifying-glass" autocomplete="off" wire:enter="search" />
+            <x-input wire:model.lazy="search" placeholder="Rechercher des catégories..." icon="o-magnifying-glass" autocomplete="off" wire:enter="search" />
         </div>
     </div>
 
-    {{-- Table Component --}}
+    {{-- Composant Table --}}
     <x-table :headers="$headers" :rows="$categories" :sort-by="$sortBy" with-pagination>
-        {{-- Render Name --}}
+        {{-- Affichage du Nom --}}
         @scope('cell_name', $category)
             <div>{{ $category->name }}</div>
         @endscope
 
-        {{-- Render Description --}}
+        {{-- Affichage de la Description --}}
         @scope('cell_description', $category)
             <div>{{ $category->description }}</div>
         @endscope
 
-        {{-- Render Actions --}}
+        {{-- Actions --}}
         @scope('cell_actions', $category)
             <div class="flex gap-2">
                 <x-button wire:click="confirmDelete({{ $category->id }})" class="btn-error" icon="o-trash" />
@@ -31,12 +31,12 @@
         @endscope
     </x-table>
 
-    {{-- Delete Confirmation Modal --}}
-    <x-modal wire:model="showDeleteModal" title="Confirm Deletion">
-        <p>Are you sure you want to delete the category "{{ $deletingCategoryName }}"?</p>
+    {{-- Modal de Confirmation de Suppression --}}
+    <x-modal wire:model="showDeleteModal" title="Confirmer la Suppression">
+        <p>Êtes-vous sûr(e) de vouloir supprimer la catégorie "{{ $deletingCategoryName }}" ?</p>
         <x-slot:actions>
-            <x-button label="Cancel" wire:click="cancelDelete" />
-            <x-button label="Delete" class="btn-error" wire:click="deleteCategory" />
+            <x-button label="Annuler" wire:click="cancelDelete" />
+            <x-button label="Supprimer" class="btn-error" wire:click="deleteCategory" />
         </x-slot:actions>
     </x-modal>
 </x-card>

@@ -1,24 +1,24 @@
-<x-card title="Edit Category">
+<x-card title="Modifier la Catégorie">
     <x-form wire:submit.prevent="save">
-        {{-- Name --}}
+        {{-- Nom --}}
         <x-input 
             wire:model="name" 
-            label="Category Name" 
-            placeholder="Enter the category name" 
+            label="Nom de la Catégorie" 
+            placeholder="Entrez le nom de la catégorie" 
         />
 
         {{-- Description --}}
         <x-textarea 
             wire:model="description" 
             label="Description" 
-            placeholder="Enter a brief description of the category" 
+            placeholder="Entrez une brève description de la catégorie" 
             rows="5" 
         />
 
-        {{-- Action Buttons --}}
+        {{-- Boutons d'Action --}}
         <x-slot:actions>
-            <x-button label="Cancel" link="{{ route('admin.categories.index') }}" />
-            <x-button label="Save Changes" type="submit" class="btn-primary" />
+            <x-button label="Annuler" link="{{ route('admin.categories.index') }}" />
+            <x-button label="Enregistrer les Modifications" type="submit" class="btn-primary" />
         </x-slot:actions>
     </x-form>
 </x-card>

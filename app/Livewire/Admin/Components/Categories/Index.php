@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin\Components\Categories;
 
 use App\Models\Category;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Mary\Traits\Toast;
@@ -17,9 +18,8 @@ class Index extends Component
     public ?string $deletingCategoryName = null;
     public array $sortBy = ['column' => 'name', 'direction' => 'asc'];
 
-
     /**
-     * Explicit search function to trigger manual search if needed.
+     * Fonction explicite de recherche pour un déclenchement manuel.
      */
     public function search(): void
     {
@@ -27,10 +27,20 @@ class Index extends Component
     }
 
     /**
-     * Open the delete confirmation modal.
+     * Ouvre la modal de confirmation de suppression.
      */
     public function confirmDelete(int $categoryId): void
     {
+        $authenticatedUser = Auth::user();
+
+        if (!$authenticatedUser) {
+            $this->error(
+                title: 'Erreur',
+                description: 'Utilisateur non authentifié.'
+            );
+            return;
+        }
+
         $category = Category::findOrFail($categoryId);
 
         $this->deletingCategoryId = $category->id;
@@ -39,7 +49,7 @@ class Index extends Component
     }
 
     /**
-     * Close the delete modal.
+     * Ferme la modal de suppression.
      */
     public function cancelDelete(): void
     {
@@ -47,16 +57,29 @@ class Index extends Component
     }
 
     /**
-     * Delete the category.
+     * Supprime la catégorie.
      */
     public function deleteCategory(): void
     {
+        $authenticatedUser = Auth::user();
+
+        if (!$authenticatedUser) {
+            $this->error(
+                title: 'Erreur',
+                description: 'Utilisateur non authentifié.'
+            );
+            return;
+        }
+
         if ($this->deletingCategoryId) {
             $category = Category::find($this->deletingCategoryId);
 
             if ($category) {
                 $category->delete();
-                $this->success('Category deleted successfully.');
+                $this->success(
+                    title: 'Catégorie Supprimée',
+                    description: 'La catégorie a été supprimée avec succès.'
+                );
             }
 
             $this->cancelDelete();
@@ -64,7 +87,21 @@ class Index extends Component
     }
 
     /**
-     * Fetch filtered and paginated categories.
+     * Modifie le tri des colonnes et la direction.
+     */
+    public function sortByColumn(string $column): void
+    {
+        if ($this->sortBy['column'] === $column) {
+            $this->sortBy['direction'] = $this->sortBy['direction'] === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortBy['column'] = $column;
+            $this->sortBy['direction'] = 'asc';
+        }
+        $this->resetPage();
+    }
+
+    /**
+     * Récupère les catégories filtrées, triées et paginées.
      */
     public function categories()
     {
@@ -77,19 +114,19 @@ class Index extends Component
     }
 
     /**
-     * Define table headers.
+     * Définit les en-têtes du tableau.
      */
     public function headers(): array
     {
         return [
-            ['key' => 'name', 'label' => 'Name'],
+            ['key' => 'name', 'label' => 'Nom'],
             ['key' => 'description', 'label' => 'Description'],
             ['key' => 'actions', 'label' => 'Actions'],
         ];
     }
 
     /**
-     * Render the Livewire view.
+     * Rend la vue du composant Livewire.
      */
     public function render()
     {

@@ -33,11 +33,11 @@ use App\Livewire\Admin\Components\Products\Create as ProductCreate;
 use App\Livewire\Admin\Components\Products\Edit as ProductEdit;
 
 // Admin Order Management Controllers
-use App\Livewire\Admin\Orders\Index as OrdersIndex;
-use App\Livewire\Admin\Orders\AssignOrder as AssignOrder;
+use App\Livewire\Admin\Components\Orders\Index as OrdersIndex;
+use App\Livewire\Admin\Components\Orders\AssignOrder as AssignOrder;
 
 //Admin Delivery Management Controllers
-use App\Livewire\Admin\Deliveries\Index as DeliveryIndex;
+use App\Livewire\Admin\Components\Deliveries\Index as DeliveryIndex;
 
 
 

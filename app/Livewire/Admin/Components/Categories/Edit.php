@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin\Components\Categories;
 
 use App\Models\Category;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Mary\Traits\Toast;
 
@@ -15,7 +16,7 @@ class Edit extends Component
     public string $description = '';
 
     /**
-     * Mount the component with the given category.
+     * Méthode d'initialisation du composant avec la catégorie donnée.
      */
     public function mount(Category $category): void
     {
@@ -25,7 +26,7 @@ class Edit extends Component
     }
 
     /**
-     * Validation rules.
+     * Règles de validation.
      */
     protected function rules(): array
     {
@@ -36,26 +37,42 @@ class Edit extends Component
     }
 
     /**
-     * Save the updated category.
+     * Enregistrer les modifications de la catégorie.
      */
     public function save(): void
     {
-        $this->validate();
+        try {
+            $authenticatedUser = Auth::user();
+            if (!$authenticatedUser) {
+                $this->error(
+                    title: 'Non autorisé',
+                    description: 'Vous devez être connecté pour effectuer cette action.'
+                );
+                return;
+            }
 
-        $this->category->update([
-            'name' => $this->name,
-            'description' => $this->description,
-        ]);
+            $this->validate();
 
-        $this->success(
-            title: 'Category Updated',
-            description: 'The category has been updated successfully.',
-            redirectTo: route('admin.categories.index')
-        );
+            $this->category->update([
+                'name' => $this->name,
+                'description' => $this->description,
+            ]);
+
+            $this->success(
+                title: 'Catégorie mise à jour',
+                description: 'La catégorie a été mise à jour avec succès.',
+                redirectTo: route('admin.categories.index')
+            );
+        } catch (\Exception $e) {
+            $this->error(
+                title: 'Erreur',
+                description: 'Une erreur est survenue : ' . $e->getMessage()
+            );
+        }
     }
 
     /**
-     * Render the edit view.
+     * Rendre la vue d'édition.
      */
     public function render()
     {

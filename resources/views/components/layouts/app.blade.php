@@ -75,18 +75,19 @@
                 {{-- Role-Based Sidebar --}}
                 @switch($user->role)
                     @case('admin')
-                        <x-menu activate-by-route>
-                            <x-menu-item title="Dashboard" icon="o-home" link="/admin/dashboard" />
-                            <x-menu-item title="Users" icon="o-users" link="/admin/users" />
-                            <x-menu-item title="Categories" icon="o-clipboard-document-list" link="/admin/categories" />
-                            <x-menu-item title="Products" icon="o-shopping-bag" link="/admin/products" />
-                            <x-menu-sub title="Menage" icon="o-user-group">
-                                <x-menu-item title="Orders" icon="s-shopping-cart" link="/admin/orders" />
-                                <x-menu-item title="Deliveries" icon="o-truck" link="/admin/deliveries" />
-                            </x-menu-sub>
-                            <x-menu-item title="Reports" icon="o-chart-bar" link="/admin/reports" />
-                            <x-menu-item title="Settings" icon="o-cog-6-tooth" link="/admin/settings" />
-                        </x-menu>
+                    <x-menu activate-by-route>
+                        <x-menu-item title="Tableau de Bord" icon="o-home" link="/admin/dashboard" />
+                        <x-menu-item title="Utilisateurs" icon="o-users" link="/admin/users" />
+                        <x-menu-item title="Catégories" icon="o-clipboard-document-list" link="/admin/categories" />
+                        <x-menu-item title="Produits" icon="o-shopping-bag" link="/admin/products" />
+                        <x-menu-sub title="Gestion" icon="o-user-group">
+                            <x-menu-item title="Commandes" icon="s-shopping-cart" link="/admin/orders" />
+                            <x-menu-item title="Livraisons" icon="o-truck" link="/admin/deliveries" />
+                        </x-menu-sub>
+                        <x-menu-item title="Rapports" icon="o-chart-bar" link="/admin/reports" />
+                        <x-menu-item title="Paramètres" icon="o-cog-6-tooth" link="/admin/settings" />
+                    </x-menu>
+
                         @break
 
                     @case('customer')
@@ -99,10 +100,18 @@
 
                     @case('manager')
                         <x-menu activate-by-route>
-                            <x-menu-item title="Overview" icon="o-chart-pie" link="/manager/overview" />
-                            <x-menu-item title="Teams" icon="o-users" link="/manager/teams" />
-                            <x-menu-item title="Projects" icon="o-briefcase" link="/manager/projects" />
+                            <x-menu-item title="Tableau de Bord" icon="o-home" link="/manager/dashboard" />
+                            <x-menu-item title="Utilisateurs" icon="o-users" link="/manager/users" />
+                            <x-menu-item title="Catégories" icon="o-clipboard-document-list" link="/manager/categories" />
+                            <x-menu-item title="Produits" icon="o-shopping-bag" link="/manager/products" />
+                            <x-menu-sub title="Gestion" icon="o-user-group">
+                                <x-menu-item title="Commandes" icon="s-shopping-cart" link="/manager/orders" />
+                                <x-menu-item title="Livraisons" icon="o-truck" link="/manager/deliveries" />
+                            </x-menu-sub>
+                            <x-menu-item title="Rapports" icon="o-chart-bar" link="/manager/reports" />
+                            <x-menu-item title="Paramètres" icon="o-cog-6-tooth" link="/manager/settings" />
                         </x-menu>
+
                         @break
 
                     @case('delivery_person')

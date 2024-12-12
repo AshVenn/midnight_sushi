@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Admin\Orders;
+namespace App\Livewire\Admin\Components\Orders;
 
 use Livewire\Component;
 use Livewire\WithPagination;
