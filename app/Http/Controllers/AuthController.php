@@ -43,7 +43,7 @@ class AuthController extends Controller
                 case 'manager':
                     return redirect()->intended('/manager/dashboard');
                 case 'delivery_person':
-                    return redirect()->intended('/delivery-person/dashboard');
+                    return redirect()->intended('/deliveryperson/dashboard');
                 default:
                     return redirect('/dashboard'); // Fallback for unknown roles
             }

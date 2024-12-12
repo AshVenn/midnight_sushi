@@ -7,6 +7,7 @@
                 type="email"
                 wire:model="email"
                 required
+                autocomplete="off"
             />
 
             <x-input

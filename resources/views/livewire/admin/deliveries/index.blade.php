@@ -1,10 +1,10 @@
 <x-card title="Gestion des Livraisons" separator>
-    {{-- Filters Modal --}}
+    {{-- Modal des Filtres --}}
     <x-modal wire:model="showFiltersModal" title="Filtres" right separator with-close-button>
         <div class="space-y-4">
             <p class="text-center font-semibold">Filtrer par :</p>
             
-            {{-- Status Filter --}}
+            {{-- Filtre par Statut --}}
             <x-select 
                 wire:model="statusFilter" 
                 :options="$deliveryStatusOptions" 
@@ -12,7 +12,7 @@
                 label="Statut"
             />
 
-            {{-- Delivery Person Filter --}}
+            {{-- Filtre par Livreur --}}
             <x-select 
                 wire:model="deliveryPersonFilter" 
                 :options="$deliveryPeople" 
@@ -20,7 +20,7 @@
                 label="Livreur"
             />
 
-            {{-- Date Range Filter --}}
+            {{-- Filtre par Période --}}
             @php
                 $dateConfig = [
                     'altFormat' => 'j F, Y',
@@ -54,12 +54,12 @@
     </x-modal>
 
     <div class="mb-4 sm:space-x-2 space-y-4 lg:flex lg:space-y-0 lg:items-center lg:justify-between">
-        {{-- Filters Button --}}
+        {{-- Bouton Filtres --}}
         <div class="lg:flex-shrink-0">
             <x-button label="Filtres" wire:click="openFiltersModal" icon="o-flag" class="w-full lg:w-auto" />
         </div>
 
-        {{-- Search Input --}}
+        {{-- Champ de Recherche --}}
         <div class="lg:flex-grow">
             <x-input 
                 wire:model.lazy="search" 
@@ -72,7 +72,7 @@
     </div>
 
     <x-table :headers="$headers" :rows="$deliveries" :sort-by="$sortBy">
-        {{-- Table Content --}}
+        {{-- Contenu de la Table --}}
         @scope('cell_id', $delivery)
             <div>{{ $delivery->id }}</div>
         @endscope
@@ -91,14 +91,21 @@
 
         @scope('cell_status', $delivery)
             @php
-                $translatedStatus = match ($delivery->status) {
+                $statusLabels = [
                     'assigned' => 'Attribuée',
                     'picked_up' => 'Ramassée',
                     'delivered' => 'Livrée',
-                    default => ucfirst($delivery->status),
-                };
+                ];
+                $badgeColors = [
+                    'assigned' => 'bg-blue-500 text-white',
+                    'picked_up' => 'bg-yellow-500 text-white',
+                    'delivered' => 'bg-green-500 text-white',
+                    'default' => 'bg-gray-500 text-white',
+                ];
+                $translatedStatus = $statusLabels[$delivery->status] ?? ucfirst($delivery->status);
+                $badgeClass = $badgeColors[$delivery->status] ?? $badgeColors['default'];
             @endphp
-            <x-badge :value="$translatedStatus" />
+            <x-badge :value="$translatedStatus" class="{{ $badgeClass }}" />
         @endscope
 
         @scope('cell_assigned_at', $delivery)
@@ -123,19 +130,19 @@
         @endscope
     </x-table>
 
-    {{-- Reassign Modal --}}
+    {{-- Modal de Réassignation --}}
     <x-modal wire:model="showReassignModal" title="Réassigner une Livraison" separator>
         <div class="text-center">
             <x-select wire:model="selectedDeliveryPerson" :options="$deliveryPeople" placeholder="Sélectionnez un Livreur" />
         </div>
 
         <x-slot:actions>
-            <x-button label="Annuler" @click="$wire.cancelReassign()" />
+            <x-button label="Annuler" wire:click="cancelReassign" />
             <x-button label="Réassigner" class="btn-warning" wire:click="confirmReassign" />
         </x-slot:actions>
     </x-modal>
 
-    {{-- Actions Modal --}}
+    {{-- Modal Actions --}}
     <x-modal wire:model="showActionModal" title="Effectuer une Action" separator>
         <div class="text-center">
             <x-select wire:model="selectedAction" :options="$actionsOptions" placeholder="Sélectionnez une Action" />

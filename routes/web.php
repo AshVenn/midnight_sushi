@@ -7,7 +7,6 @@ use App\Livewire\FAQ\FAQ;
 
 use App\Http\Controllers\Roles\CustomerController;
 use App\Http\Controllers\Roles\ManagerController;
-use App\Http\Controllers\Roles\DeliveryPersonController;
 
 
 //Admin Dashboard Controller
@@ -40,7 +39,11 @@ use App\Livewire\Admin\Components\Orders\AssignOrder as AssignOrder;
 use App\Livewire\Admin\Components\Deliveries\Index as DeliveryIndex;
 
 
-
+//DeliveryPerson Delivery Management Controllers
+use App\Livewire\DeliveryPerson\Dashboard as DeliveryPersonDashboard;
+use App\Livewire\DeliveryPerson\Settings as DeliveryPersonSettings;
+use App\Livewire\DeliveryPerson\Components\Deliveries as DeliveryPersonDeliveries;
+use App\Livewire\DeliveryPerson\Components\PastDeliveries as DeliveryPersonPastDeliveries;
 
 
 
@@ -100,6 +103,10 @@ Route::middleware(['auth'])->group(function () {
 
     // Delivery Person routes
     Route::middleware(['role:delivery_person'])->group(function () {
-        Route::get('/delivery-person/dashboard', [DeliveryPersonController::class, 'dashboard'])->name('delivery-person.dashboard');
+
+        Route::get('/deliveryperson/dashboard', DeliveryPersonDashboard::class)->name('delivery-person.deliveries.index');
+        Route::get('/deliveryperson/deliveries', DeliveryPersonDeliveries::class)->name('delivery-person.deliveries.index');
+        Route::get('/deliveryperson/pastdeliveries', DeliveryPersonPastDeliveries::class)->name('delivery-person.past-deliveries.index');
+        Route::get('/deliveryperson/settings', DeliveryPersonSettings::class)->name('delivery-person.settings.index');
     });
 });

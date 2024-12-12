@@ -1,10 +1,10 @@
 <x-card title="Gestion des Commandes" separator>
-    {{-- Filters Modal --}}
+    {{-- Modal des Filtres --}}
     <x-modal wire:model="showFiltersModal" title="Filtres" right separator with-close-button>
         <div class="space-y-4">
             <p class="text-center font-semibold">Filtrer par divers critères :</p>
 
-            {{-- Status Filter --}}
+            {{-- Filtre par Statut --}}
             <x-select 
                 wire:model="deliveryStatusFilter" 
                 :options="$deliveryStatusOptions" 
@@ -13,7 +13,7 @@
                 label="Statut de Livraison"
             />
 
-            {{-- Delivery Person Filter --}}
+            {{-- Filtre par Livreur --}}
             <x-select 
                 wire:model="deliveryPersonFilter"
                 :options="$deliveryPeople"
@@ -21,7 +21,7 @@
                 label="Livreur Assigné"
             />
 
-            {{-- Date Range Filter --}}
+            {{-- Filtre par Période --}}
             @php
                 $dateConfig = [
                     'altFormat' => 'F j, Y',
@@ -55,14 +55,14 @@
     </x-modal>
 
     <div class="mb-4 sm:space-x-2 space-y-4 lg:flex lg:space-y-0 lg:items-center lg:justify-between">
-        {{-- Filters Button --}}
+        {{-- Bouton Filtres --}}
         <div class="lg:flex-shrink-0">
             <x-button label="Filtres" wire:click="openFiltersModal" icon="o-flag" class="w-full lg:w-auto" />
         </div>
 
-        {{-- Search Input --}}
+        {{-- Champ de Recherche --}}
         <div class="lg:flex-grow">
-            <x-input wire:model.lazy="search" placeholder="Search by order ID or customer full name..." icon="o-magnifying-glass" autocomplete="off" wire:enter="search" />
+            <x-input wire:model.lazy="search" placeholder="Rechercher par ID de commande ou nom complet du client..." icon="o-magnifying-glass" autocomplete="off" wire:enter="search" />
         </div>
     </div>
 
@@ -89,17 +89,27 @@
 
         @scope('cell_status', $order)
             @php
+                $statusLabels = [
+                    'pending' => 'En attente',
+                    'confirmed' => 'Confirmée',
+                    'preparing' => 'En préparation',
+                    'ready' => 'Prête',
+                    'out_for_delivery' => 'En livraison',
+                    'delivered' => 'Livrée',
+                    'cancelled' => 'Annulée',
+                ];
                 $statusClass = match($order->status) {
                     'pending' => 'badge-warning',
                     'confirmed' => 'badge-primary',
                     'preparing' => 'badge-info',
+                    'ready' => 'badge-success',
                     'out_for_delivery' => 'badge-primary',
                     'delivered' => 'badge-success',
                     'cancelled' => 'badge-error',
                     default => 'badge-secondary',
                 };
             @endphp
-            <x-badge :value="ucfirst($order->status)" :class="$statusClass" />
+            <x-badge :value="$statusLabels[$order->status] ?? 'Inconnu'" :class="$statusClass" />
         @endscope
 
         @scope('cell_assigned_to', $order)
@@ -111,7 +121,7 @@
                 @if (in_array($order->status, ['delivered', 'cancelled']))
                     <x-badge value="-" class="badge-error" />
                 @elseif ($order->status === 'preparing')
-                    <x-button wire:click="markAsReady({{ $order->id }})" class="btn-secondary" label="Prêt !" />
+                    <x-button wire:click="markAsReady({{ $order->id }})" class="btn-secondary" label="Prête !" />
                 @elseif ($order->status === 'ready' && $order->currentDelivery()?->deliveryPerson)
                     <x-button wire:click="reassignDelivery({{ $order->id }})" class="btn-warning" label="Réassigner" />
                 @elseif ($order->status === 'ready' && !$order->currentDelivery()?->deliveryPerson)
@@ -123,7 +133,7 @@
         @endscope
     </x-table>
 
-    {{-- Assign Delivery Modal --}}
+    {{-- Modal d'Assignation de Livraison --}}
     <x-modal wire:model="showAssignModal" title="Assigner une Livraison" separator>
         <div class="text-center">
             <x-select wire:model="selectedDeliveryPerson" :options="$deliveryPeople" placeholder="Sélectionnez un Livreur" />
@@ -134,7 +144,7 @@
         </x-slot:actions>
     </x-modal>
 
-    {{-- Reassign Delivery Modal --}}
+    {{-- Modal de Réassignation de Livraison --}}
     <x-modal wire:model="showReassignModal" title="Réassigner une Livraison" separator>
         <div class="text-center">
             <x-select wire:model="selectedDeliveryPerson" :options="$deliveryPeople" placeholder="Sélectionnez un Nouveau Livreur" />

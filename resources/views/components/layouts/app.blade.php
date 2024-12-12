@@ -30,7 +30,7 @@
             @if(auth()->check())
             <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <x-button icon="o-power" type="submit" class="btn-circle btn-ghost btn-xs" tooltip-left="Logout" no-wire-navigate />
+                        <x-button icon="o-power" type="submit" class="btn-circle btn-ghost btn-xs" tooltip-left="Déconnexion" no-wire-navigate />
             </form>
             @else
                 <div class="hidden md:flex space-x-6">
@@ -65,7 +65,7 @@
                     <x-slot:actions>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <x-button icon="o-power" type="submit" class="btn-circle btn-ghost btn-xs" tooltip-left="Logout" no-wire-navigate />
+                        <x-button icon="o-power" type="submit" class="btn-circle btn-ghost btn-xs" tooltip-left="Déconnexion" no-wire-navigate />
                     </form>
                         
                     </x-slot:actions>
@@ -114,11 +114,13 @@
 
                         @break
 
-                    @case('delivery_person')
-                        <x-menu activate-by-route>
-                            <x-menu-item title="Deliveries" icon="o-truck" link="/delivery/tasks" />
-                            <x-menu-item title="Schedule" icon="o-calendar" link="/delivery/schedule" />
-                        </x-menu>
+                        @case('delivery_person')
+                            <x-menu activate-by-route>
+                            <x-menu-item title="Tableau de Bord" icon="o-home" link="/deliveryperson/dashboard" />
+                                <x-menu-item title="Livraisons" icon="o-truck" link="/deliveryperson/deliveries" />
+                                <x-menu-item title="Livraisons Passées" icon="o-document-check" link="/deliveryperson/pastdeliveries" />
+                                <x-menu-item title="Paramètres" icon="o-cog-6-tooth" link="/deliveryperson/settings" />
+                            </x-menu>
                         @break
 
                     @default

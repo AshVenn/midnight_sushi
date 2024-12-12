@@ -15,7 +15,7 @@ class CreateDeliveriesTable extends Migration
             $table->timestamp('assigned_at')->nullable();
             $table->timestamp('picked_up_at')->nullable();
             $table->timestamp('delivered_at')->nullable();
-            $table->text('address_text')->nullable();
+            $table->text('address_text');
             $table->timestamps();
         });
     }
