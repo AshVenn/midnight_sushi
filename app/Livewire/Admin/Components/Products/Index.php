@@ -13,16 +13,16 @@ class Index extends Component
     use WithPagination;
 
     public string $search = '';
-    public string $categoryFilter = 'all'; // Category filter
+    public string $categoryFilter = 'all'; // Filtre de catégorie
     public array $sortBy = ['column' => 'name', 'direction' => 'asc'];
     public bool $showDeleteModal = false;
     public ?int $deletingProductId = null;
     public ?string $deletingProductName = null;
 
     /**
-     * Reset pagination when search or filter changes.
+     * Réinitialiser la pagination lors de la recherche ou des changements de filtre.
      */
-    public function updatingSearch(): void
+    public function search(): void
     {
         $this->resetPage();
     }
@@ -32,13 +32,13 @@ class Index extends Component
         $this->resetPage();
     }
 
-    public function updateCategoryFilter(): void{
+    public function updateCategoryFilter(): void
+    {
         $this->products();
     }
 
-    
     /**
-     * Confirm delete action for a specific product.
+     * Confirmer la suppression d'un produit spécifique.
      */
     public function confirmDelete(int $productId): void
     {
@@ -50,7 +50,7 @@ class Index extends Component
     }
 
     /**
-     * Cancel the delete action.
+     * Annuler l'action de suppression.
      */
     public function cancelDelete(): void
     {
@@ -58,7 +58,7 @@ class Index extends Component
     }
 
     /**
-     * Delete the selected product and its Cloudinary image.
+     * Supprimer le produit sélectionné et son image Cloudinary.
      */
     public function deleteProduct(): void
     {
@@ -66,15 +66,13 @@ class Index extends Component
             $product = Product::find($this->deletingProductId);
 
             if ($product) {
-                // Delete image from Cloudinary
                 if ($product->image) {
                     $publicId = pathinfo($product->image, PATHINFO_FILENAME);
                     Cloudinary::destroy($publicId);
                 }
 
-                // Delete the product
                 $product->delete();
-                session()->flash('message', 'Product deleted successfully.');
+                session()->flash('message', 'Produit supprimé avec succès.');
             }
 
             $this->cancelDelete();
@@ -82,12 +80,12 @@ class Index extends Component
     }
 
     /**
-     * Fetch paginated products with search and category filters.
+     * Récupérer les produits paginés avec recherche et filtres de catégorie.
      */
     public function products()
     {
         return Product::query()
-            ->with('category') // Load category relationship
+            ->with('category') // Charger la relation de catégorie
             ->when($this->search, function ($query) {
                 $query->where('name', 'like', "%{$this->search}%")
                     ->orWhereHas('category', function ($q) {
@@ -97,41 +95,55 @@ class Index extends Component
             ->when($this->categoryFilter !== 'all', function ($query) {
                 $query->where('category_id', $this->categoryFilter);
             })
-            ->when($this->sortBy['column'] !== 'category.name', function ($query) {
+            ->when($this->sortBy['column'], function ($query) {
                 $query->orderBy($this->sortBy['column'], $this->sortBy['direction']);
             })
             ->paginate(10);
     }
-       
 
     /**
-     * Get categories for the filter dropdown.
+     * Récupérer les catégories pour le filtre de catégorie.
      */
     public function categories(): array
     {
         return Category::select(['id', 'name'])
             ->get()
             ->map(fn($category) => ['id' => $category->id, 'name' => $category->name])
-            ->prepend(['id' => 'all', 'name' => 'All Categories'])
+            ->prepend(['id' => 'all', 'name' => 'Toutes les catégories'])
             ->toArray();
     }
 
     /**
-     * Define the table headers.
+     * Définir les en-têtes du tableau.
      */
     public function headers(): array
     {
         return [
             ['key' => 'image', 'label' => 'Image', 'sortable' => false],
-            ['key' => 'name', 'label' => 'Name', 'sortable' => true, 'column' => 'name'],
-            ['key' => 'category.name', 'label' => 'Category', 'sortable' => true, 'column' => 'category_id'],
-            ['key' => 'price', 'label' => 'Price', 'sortable' => true, 'column' => 'price'],
+            ['key' => 'name', 'label' => 'Nom', 'sortable' => true],
+            ['key' => 'category.name', 'label' => 'Catégorie', 'sortable' => false],
+            ['key' => 'price', 'label' => 'Prix', 'sortable' => true],
             ['key' => 'actions', 'label' => 'Actions', 'sortable' => false],
         ];
     }
 
     /**
-     * Render the component view.
+     * Gérer le tri des colonnes.
+     */
+    public function sortBy(string $column): void
+    {
+        if ($this->sortBy['column'] === $column) {
+            $this->sortBy['direction'] = $this->sortBy['direction'] === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortBy['column'] = $column;
+            $this->sortBy['direction'] = 'asc';
+        }
+
+        $this->resetPage();
+    }
+
+    /**
+     * Afficher la vue du composant.
      */
     public function render()
     {

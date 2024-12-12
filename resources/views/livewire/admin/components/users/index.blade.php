@@ -1,52 +1,60 @@
-<x-card title="User Management" separator>
+<x-card title="Gestion des Utilisateurs" separator>
     <x-slot:menu>
-        <x-button label="Add User" link="{{ route('admin.users.create') }}" class="btn-primary" icon="o-plus" responsive />
+        <x-button label="Ajouter un Utilisateur" link="{{ route('admin.users.create') }}" class="btn-primary" icon="o-plus" responsive />
     </x-slot:menu>
 
     <div class="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0 mb-4 items-center">
-        {{-- Search Input --}}
+        {{-- Barre de recherche --}}
         <div class="flex-grow w-full">
-            <x-input wire:model.lazy="search" placeholder="Search users..." icon="o-magnifying-glass" autocomplete="off"/>
+            <x-input wire:model.lazy="search" placeholder="Rechercher des utilisateurs..." icon="o-magnifying-glass" autocomplete="off" />
         </div>
 
-        {{-- Role Filter --}}
+        {{-- Filtre des rôles --}}
         @php
             $roleOptions = [
-                ['id' => 'all', 'name' => 'All Roles'],
-                ['id' => 'admin', 'name' => 'Admin'],
-                ['id' => 'manager', 'name' => 'Manager'],
-                ['id' => 'delivery_person', 'name' => 'Delivery Person'],
-                ['id' => 'customer', 'name' => 'Customer'],
+                ['id' => 'all', 'name' => 'Tous les Rôles'],
+                ['id' => 'admin', 'name' => 'Administrateur'],
+                ['id' => 'manager', 'name' => 'Responsable'],
+                ['id' => 'delivery_person', 'name' => 'Livreur'],
+                ['id' => 'customer', 'name' => 'Client'],
             ];
         @endphp
         <div class="w-full md:w-1/3">
-            <x-select wire:model="roleFilter" wire:change="updateFilter" :options="$roleOptions" placeholder="Filter by Role" />
+            <x-select wire:model="roleFilter" wire:change="updateFilter" :options="$roleOptions" placeholder="Filtrer par Rôle" />
         </div>
     </div>
 
     {{-- Table Component --}}
     <x-table :headers="$headers" :rows="$users" :sort-by="$sortBy" with-pagination>
-        {{-- Render Avatar --}}
+        {{-- Colonne Avatar --}}
         @scope('cell_avatar', $user)
             <x-avatar :image="$user->avatar" class="!w-16 !h-16" />
         @endscope
 
-        {{-- Render Full Name --}}
+        {{-- Colonne Nom Complet --}}
         @scope('cell_full_name', $user)
             <div>{{ $user->full_name }}</div>
         @endscope
 
-        {{-- Render Email --}}
+        {{-- Colonne Email --}}
         @scope('cell_email', $user)
             <div>{{ $user->email }}</div>
         @endscope
 
-        {{-- Render Role --}}
+        {{-- Colonne Rôle --}}
         @scope('cell_role', $user)
-            <div>{{ ucfirst($user->role) }}</div>
+            @php
+                $roleTranslations = [
+                    'admin' => 'Administrateur',
+                    'manager' => 'Responsable',
+                    'delivery_person' => 'Livreur',
+                    'customer' => 'Client',
+                ];
+            @endphp
+            <div>{{ $roleTranslations[$user->role] ?? ucfirst($user->role) }}</div>
         @endscope
 
-        {{-- Render Actions --}}
+        {{-- Colonne Actions --}}
         @scope('cell_actions', $user)
             <div class="flex gap-2">
                 <x-button wire:click="confirmDelete({{ $user->id }})" class="btn-error" icon="o-trash" />
@@ -55,12 +63,12 @@
         @endscope
     </x-table>
 
-    {{-- Delete Confirmation Modal --}}
-    <x-modal wire:model="showDeleteModal" title="Confirm Deletion">
-        <p>Are you sure you want to delete <strong>{{ $deletingUserName }}</strong>? This action cannot be undone.</p>
+    {{-- Modal de Confirmation de Suppression --}}
+    <x-modal wire:model="showDeleteModal" title="Confirmer la Suppression">
+        <p>Êtes-vous sûr(e) de vouloir supprimer <strong>{{ $deletingUserName }}</strong> ? Cette action est irréversible.</p>
         <x-slot:actions>
-            <x-button label="Cancel" wire:click="cancelDelete" />
-            <x-button label="Delete" class="btn-error" wire:click="deleteUser" />
+            <x-button label="Annuler" wire:click="cancelDelete" />
+            <x-button label="Supprimer" class="btn-error" wire:click="deleteUser" />
         </x-slot:actions>
     </x-modal>
 </x-card>

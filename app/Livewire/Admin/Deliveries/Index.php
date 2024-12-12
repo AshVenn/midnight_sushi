@@ -32,29 +32,29 @@ class Index extends Component
     public ?string $startDate = null;
     public ?string $endDate = null;
 
+    public array $sortBy = ['column' => 'id', 'direction' => 'asc'];
+
     public function mount(): void
     {
-        // Fetch delivery persons
         $this->deliveryPeople = User::where('role', 'delivery_person')
             ->get()
             ->map(fn($user) => ['id' => $user->id, 'name' => $user->full_name])
             ->toArray();
 
         $this->deliveryStatusOptions = [
-            ['id' => 'all', 'name' => 'All'],
-            ['id' => 'assigned', 'name' => 'Assigned'],
-            ['id' => 'picked_up', 'name' => 'Picked Up'],
-            ['id' => 'delivered', 'name' => 'Delivered'],
+            ['id' => 'all', 'name' => 'Tous'],
+            ['id' => 'assigned', 'name' => 'Attribué'],
+            ['id' => 'picked_up', 'name' => 'Ramassé'],
+            ['id' => 'delivered', 'name' => 'Livré'],
         ];
 
-        // Actions that can be performed on deliveries
         $this->actionsOptions = [
-            ['id' => 'mark_picked_up', 'name' => 'Mark as Picked Up'],
-            ['id' => 'mark_delivered', 'name' => 'Mark as Delivered'],
+            ['id' => 'mark_picked_up', 'name' => 'Marquer comme Ramassé'],
+            ['id' => 'mark_delivered', 'name' => 'Marquer comme Livré'],
         ];
     }
 
-    public function updatingSearch(): void
+    public function search(): void
     {
         $this->resetPage();
     }
@@ -82,28 +82,46 @@ class Index extends Component
     public function headers(): array
     {
         return [
-            ['key' => 'id', 'label' => 'ID'],
-            ['key' => 'order_id', 'label' => 'Order ID'],
-            ['key' => 'customer', 'label' => 'Customer'],
-            ['key' => 'delivery_person', 'label' => 'Delivery Person'],
-            ['key' => 'status', 'label' => 'Status'],
-            ['key' => 'assigned_at', 'label' => 'Assigned At'],
-            ['key' => 'delivered_at', 'label' => 'Delivered At'],
-            ['key' => 'actions', 'label' => 'Actions'],
+            ['key' => 'id', 'label' => 'ID Livraison', 'sortable' => true],
+            ['key' => 'order_id', 'label' => 'ID Commande', 'sortable' => true],
+            ['key' => 'customer', 'label' => 'Client', 'sortable' => false],
+            ['key' => 'delivery_person', 'label' => 'Livreur', 'sortable' => false],
+            ['key' => 'status', 'label' => 'Statut', 'sortable' => true],
+            ['key' => 'assigned_at', 'label' => 'Assigné à', 'sortable' => true],
+            ['key' => 'delivered_at', 'label' => 'Livré à', 'sortable' => true],
+            ['key' => 'actions', 'label' => 'Actions', 'sortable' => false],
         ];
     }
+
+    protected function isSortable(string $column): bool
+    {
+        $header = collect($this->headers())->firstWhere('key', $column);
+        return $header && ($header['sortable'] ?? false);
+    }
+    public function sortBy(string $column): void
+    {
+        if ($this->sortBy['column'] === $column) {
+            $this->sortBy['direction'] = $this->sortBy['direction'] === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortBy['column'] = $column;
+            $this->sortBy['direction'] = 'asc';
+        }
+
+        $this->resetPage();
+    }
+
 
     public function deliveries()
     {
         return Delivery::with(['order.customer', 'deliveryPerson'])
             ->when($this->search, function ($query) {
-                $query->whereHas('order', function ($q) {
-                    $q->where('id', 'like', "%{$this->search}%")
-                      ->orWhereHas('customer', function ($q2) {
-                          $q2->where('first_name', 'like', "%{$this->search}%")
-                             ->orWhere('last_name', 'like', "%{$this->search}%");
-                      });
-                });
+                $query->where('id', 'like', "%{$this->search}%")
+                    ->orWhere('order_id', 'like', "%{$this->search}%")
+                    ->orWhereHas('order.customer', function ($q) {
+                        $q->where('first_name', 'like', "%{$this->search}%")
+                          ->orWhere('last_name', 'like', "%{$this->search}%")
+                          ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$this->search}%"]);
+                    });
             })
             ->when($this->statusFilter !== 'all', function ($query) {
                 $query->where('status', $this->statusFilter);
@@ -112,12 +130,13 @@ class Index extends Component
                 $query->where('delivery_person_id', $this->deliveryPersonFilter);
             })
             ->when($this->startDate && $this->endDate, function ($query) {
-                // Filter by assigned_at date range
                 $start = Carbon::parse($this->startDate)->startOfDay();
                 $end = Carbon::parse($this->endDate)->endOfDay();
                 $query->whereBetween('assigned_at', [$start, $end]);
             })
-            ->orderByDesc('id')
+            ->when($this->isSortable($this->sortBy['column']), function ($query) {
+                $query->orderBy($this->sortBy['column'], $this->sortBy['direction']);
+            })
             ->paginate(10);
     }
 

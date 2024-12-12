@@ -17,13 +17,6 @@ class Index extends Component
     public ?string $deletingCategoryName = null;
     public array $sortBy = ['column' => 'name', 'direction' => 'asc'];
 
-    /**
-     * Reset pagination when search changes.
-     */
-    public function updatingSearch(): void
-    {
-        $this->resetPage();
-    }
 
     /**
      * Explicit search function to trigger manual search if needed.

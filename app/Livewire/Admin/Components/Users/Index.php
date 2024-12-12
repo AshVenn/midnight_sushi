@@ -3,24 +3,25 @@
 namespace App\Livewire\Admin\Components\Users;
 
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Mary\Traits\Toast;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+use Mary\Traits\Toast;
 
 class Index extends Component
 {
     use WithPagination, Toast;
 
-    public string $search = '';
-    public string $roleFilter = 'all'; // Role filter with default value
-    public array $sortBy = ['column' => 'first_name', 'direction' => 'asc'];
-    public bool $showDeleteModal = false; // Controls modal visibility
-    public ?int $deletingUserId = null; // ID of the user to be deleted
-    public ?string $deletingUserName = null; // Name of the user to be deleted
+    public string $search = ''; // Recherche
+    public string $roleFilter = 'all'; // Filtre par rôle avec valeur par défaut
+    public array $sortBy = ['column' => 'first_name', 'direction' => 'asc']; // Tri par défaut
+    public bool $showDeleteModal = false; // Contrôle de la visibilité du modal
+    public ?int $deletingUserId = null; // ID de l'utilisateur à supprimer
+    public ?string $deletingUserName = null; // Nom de l'utilisateur à supprimer
 
     /**
-     * Reset pagination when search or filter changes.
+     * Réinitialise la pagination lorsque la recherche ou le filtre change.
      */
     public function updatingSearch(): void
     {
@@ -37,7 +38,7 @@ class Index extends Component
     }
 
     /**
-     * Change sorting column and direction.
+     * Met à jour le tri des colonnes.
      */
     public function sortByColumn(string $column): void
     {
@@ -51,19 +52,35 @@ class Index extends Component
     }
 
     /**
-     * Open the delete confirmation modal.
+     * Ouvre la fenêtre de confirmation de suppression.
      */
     public function confirmDelete(int $userId): void
     {
-        $user = User::findOrFail($userId);
+        try {
+            $authenticatedUser = Auth::user();
 
-        $this->deletingUserId = $user->id;
-        $this->deletingUserName = "{$user->first_name} {$user->last_name}";
-        $this->showDeleteModal = true;
+            if (!$authenticatedUser) {
+                $this->error(
+                    title: 'Erreur',
+                    description: 'Vous devez être authentifié pour effectuer cette action.'
+                );
+                return;
+            }
+
+            $user = User::findOrFail($userId);
+            $this->deletingUserId = $user->id;
+            $this->deletingUserName = "{$user->first_name} {$user->last_name}";
+            $this->showDeleteModal = true;
+        } catch (\Exception $e) {
+            $this->error(
+                title: 'Erreur',
+                description: 'Une erreur est survenue lors de la récupération des données de l\'utilisateur.'
+            );
+        }
     }
 
     /**
-     * Close the delete modal.
+     * Ferme le modal de suppression.
      */
     public function cancelDelete(): void
     {
@@ -71,31 +88,51 @@ class Index extends Component
     }
 
     /**
-     * Delete the user along with their avatar.
+     * Supprime un utilisateur et son avatar.
      */
     public function deleteUser(): void
     {
-        if ($this->deletingUserId) {
-            $user = User::find($this->deletingUserId);
+        try {
+            $authenticatedUser = Auth::user();
 
-            if ($user) {
-                // Delete avatar from Cloudinary if it exists
-                if ($user->avatar) {
-                    $publicId = $this->getPublicIdFromUrl($user->avatar);
-                    Cloudinary::destroy($publicId);
-                }
-
-                // Delete the user
-                $user->delete();
-                $this->success('User deleted successfully.');
+            if (!$authenticatedUser) {
+                $this->error(
+                    title: 'Erreur',
+                    description: 'Vous devez être authentifié pour effectuer cette action.'
+                );
+                return;
             }
 
-            $this->cancelDelete();
+            if ($this->deletingUserId) {
+                $user = User::find($this->deletingUserId);
+
+                if ($user) {
+                    // Supprime l'avatar sur Cloudinary s'il existe
+                    if ($user->avatar) {
+                        $publicId = $this->getPublicIdFromUrl($user->avatar);
+                        Cloudinary::destroy($publicId);
+                    }
+
+                    // Supprime l'utilisateur
+                    $user->delete();
+                    $this->success(
+                        title: 'Utilisateur supprimé',
+                        description: 'L\'utilisateur a été supprimé avec succès.'
+                    );
+                }
+
+                $this->cancelDelete();
+            }
+        } catch (\Exception $e) {
+            $this->error(
+                title: 'Erreur',
+                description: 'Une erreur est survenue lors de la suppression de l\'utilisateur.'
+            );
         }
     }
 
     /**
-     * Extract the public ID from the Cloudinary URL.
+     * Extraire l'ID public de l'URL Cloudinary.
      */
     private function getPublicIdFromUrl(string $url): string
     {
@@ -105,7 +142,7 @@ class Index extends Component
     }
 
     /**
-     * Fetch filtered, sorted, and paginated users.
+     * Récupère les utilisateurs filtrés, triés et paginés.
      */
     public function users()
     {
@@ -113,8 +150,9 @@ class Index extends Component
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
                     $q->where('first_name', 'like', "%{$this->search}%")
-                      ->orWhere('last_name', 'like', "%{$this->search}%")
-                      ->orWhere('email', 'like', "%{$this->search}%");
+                        ->orWhere('last_name', 'like', "%{$this->search}%")
+                        ->orWhere('email', 'like', "%{$this->search}%")
+                        ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$this->search}%"]);
                 });
             })
             ->when($this->roleFilter !== 'all', function ($query) {
@@ -123,28 +161,27 @@ class Index extends Component
             ->orderBy($this->sortBy['column'], $this->sortBy['direction'])
             ->paginate(10)
             ->through(function ($user) {
-                $user->full_name = $user->full_name; // Use the accessor
+                $user->full_name = "{$user->first_name} {$user->last_name}";
                 return $user;
             });
     }
-    
 
     /**
-     * Define table headers.
+     * Définit les en-têtes de la table.
      */
     public function headers(): array
     {
         return [
             ['key' => 'avatar', 'label' => 'Avatar', 'sortable' => false],
-            ['key' => 'full_name', 'label' => 'Full Name', 'sortable' => true, 'column' => 'first_name'],
-            ['key' => 'email', 'label' => 'Email Address', 'sortable' => true, 'column' => 'email'],
-            ['key' => 'role', 'label' => 'Role', 'sortable' => true, 'column' => 'role'],
+            ['key' => 'full_name', 'label' => 'Nom Complet', 'sortable' => false],
+            ['key' => 'email', 'label' => 'Adresse Email', 'sortable' => true],
+            ['key' => 'role', 'label' => 'Rôle', 'sortable' => true],
             ['key' => 'actions', 'label' => 'Actions', 'sortable' => false],
         ];
     }
 
     /**
-     * Render the Livewire view.
+     * Rend la vue du composant Livewire.
      */
     public function render()
     {

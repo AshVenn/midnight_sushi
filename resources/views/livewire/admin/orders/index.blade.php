@@ -1,25 +1,24 @@
-<x-card title="Order Management" separator>
+<x-card title="Gestion des Commandes" separator>
     {{-- Filters Modal --}}
-    <x-modal wire:model="showFiltersModal" title="Filters" right separator with-close-button>
+    <x-modal wire:model="showFiltersModal" title="Filtres" right separator with-close-button>
         <div class="space-y-4">
-
-            <p class="text-center font-semibold">Filter by various criteria:</p>
+            <p class="text-center font-semibold">Filtrer par divers critères :</p>
 
             {{-- Status Filter --}}
             <x-select 
                 wire:model="deliveryStatusFilter" 
                 :options="$deliveryStatusOptions" 
                 icon="o-flag" 
-                placeholder="Select Status" 
-                label="Delivery Status"
+                placeholder="Sélectionnez un Statut" 
+                label="Statut de Livraison"
             />
 
             {{-- Delivery Person Filter --}}
             <x-select 
                 wire:model="deliveryPersonFilter"
                 :options="$deliveryPeople"
-                placeholder="Select Delivery Person"
-                label="Assigned Delivery Person"
+                placeholder="Sélectionnez un Livreur"
+                label="Livreur Assigné"
             />
 
             {{-- Date Range Filter --}}
@@ -31,63 +30,61 @@
             @endphp
 
             <div>
-                <label class="block font-medium mb-1">Created From:</label>
+                <label class="block font-medium mb-1">Créé Depuis :</label>
                 <x-datepicker 
                     wire:model="startDate" 
                     :config="$dateConfig"
-                    placeholder="Start Date" 
+                    placeholder="Date Début" 
                     icon="o-calendar"
                 />
             </div>
 
             <div>
-                <label class="block font-medium mb-1">Created To:</label>
+                <label class="block font-medium mb-1">Créé Jusqu'à :</label>
                 <x-datepicker 
                     wire:model="endDate" 
                     :config="$dateConfig"
-                    placeholder="End Date" 
+                    placeholder="Date Fin" 
                     icon="o-calendar"
                 />
             </div>
-
         </div>
         <x-slot:actions>
-            <x-button label="Close" wire:click="$set('showFiltersModal', false)" />
+            <x-button label="Fermer" wire:click="$set('showFiltersModal', false)" />
         </x-slot:actions>
     </x-modal>
 
     <div class="mb-4 sm:space-x-2 space-y-4 lg:flex lg:space-y-0 lg:items-center lg:justify-between">
         {{-- Filters Button --}}
         <div class="lg:flex-shrink-0">
-            <x-button label="Filters" wire:click="openFiltersModal" icon="o-flag" class="w-full lg:w-auto" />
+            <x-button label="Filtres" wire:click="openFiltersModal" icon="o-flag" class="w-full lg:w-auto" />
         </div>
 
         {{-- Search Input --}}
         <div class="lg:flex-grow">
-            <x-input 
-                wire:model="search" 
-                placeholder="Search orders..." 
-                icon="o-magnifying-glass" 
-                class="w-full"
-            />
+            <x-input wire:model.lazy="search" placeholder="Search by order ID or customer full name..." icon="o-magnifying-glass" autocomplete="off" wire:enter="search" />
         </div>
     </div>
 
-    <x-table :headers="$headers" :rows="$orders">
+    <x-table :headers="$headers" :rows="$orders" :sort-by="$sortBy">
         @scope('cell_id', $order)
             <div>{{ $order->id }}</div>
         @endscope
 
         @scope('cell_customer', $order)
-            <div>{{ $order->customer->full_name ?? 'No Customer' }}</div>
+            <div>{{ $order->customer->full_name ?? 'Pas de Client' }}</div>
         @endscope
 
         @scope('cell_delivery_address', $order)
-            <div>{{ $order->address_text ?? 'No Address' }}</div>
+            <div>{{ $order->address_text ?? 'Adresse Manquante' }}</div>
         @endscope
 
         @scope('cell_total_price', $order)
-            <div>€{{ number_format($order->total_price, 2) }}</div>
+            <div>{{ number_format($order->total_price, 2) }} €</div>
+        @endscope
+
+        @scope('cell_created_at', $order)
+            <div>{{ $order->created_at->format('d/m/Y H:i') }}</div>
         @endscope
 
         @scope('cell_status', $order)
@@ -106,7 +103,7 @@
         @endscope
 
         @scope('cell_assigned_to', $order)
-            <div>{{ $order->currentDelivery()?->deliveryPerson->full_name ?? 'Unassigned' }}</div>
+            <div>{{ $order->currentDelivery()?->deliveryPerson->full_name ?? 'Non Assigné' }}</div>
         @endscope
 
         @scope('cell_actions', $order)
@@ -114,12 +111,11 @@
                 @if (in_array($order->status, ['delivered', 'cancelled']))
                     <x-badge value="-" class="badge-error" />
                 @elseif ($order->status === 'preparing')
-                    {{-- "Mark as Ready" button --}}
-                    <x-button wire:click="markAsReady({{ $order->id }})" class="btn-secondary" label="Ready!" />
+                    <x-button wire:click="markAsReady({{ $order->id }})" class="btn-secondary" label="Prêt !" />
                 @elseif ($order->status === 'ready' && $order->currentDelivery()?->deliveryPerson)
-                    <x-button wire:click="reassignDelivery({{ $order->id }})" class="btn-warning" label="Reassign" />
+                    <x-button wire:click="reassignDelivery({{ $order->id }})" class="btn-warning" label="Réassigner" />
                 @elseif ($order->status === 'ready' && !$order->currentDelivery()?->deliveryPerson)
-                    <x-button wire:click="assignDelivery({{ $order->id }})" class="btn-primary" label="Assign" />
+                    <x-button wire:click="assignDelivery({{ $order->id }})" class="btn-primary" label="Assigner" />
                 @else
                     <x-badge value="-" class="badge-secondary" />
                 @endif
@@ -128,24 +124,24 @@
     </x-table>
 
     {{-- Assign Delivery Modal --}}
-    <x-modal wire:model="showAssignModal" title="Assign Delivery" separator>
+    <x-modal wire:model="showAssignModal" title="Assigner une Livraison" separator>
         <div class="text-center">
-            <x-select wire:model="selectedDeliveryPerson" :options="$deliveryPeople" placeholder="Select Delivery Person" />
+            <x-select wire:model="selectedDeliveryPerson" :options="$deliveryPeople" placeholder="Sélectionnez un Livreur" />
         </div>
         <x-slot:actions>
-            <x-button label="Cancel" @click="$wire.cancelAssign()" />
-            <x-button label="Assign" class="btn-primary" wire:click="confirmAssign" />
+            <x-button label="Annuler" @click="$wire.cancelAssign()" />
+            <x-button label="Assigner" class="btn-primary" wire:click="confirmAssign" />
         </x-slot:actions>
     </x-modal>
 
     {{-- Reassign Delivery Modal --}}
-    <x-modal wire:model="showReassignModal" title="Reassign Delivery" separator>
+    <x-modal wire:model="showReassignModal" title="Réassigner une Livraison" separator>
         <div class="text-center">
-            <x-select wire:model="selectedDeliveryPerson" :options="$deliveryPeople" placeholder="Select New Delivery Person" />
+            <x-select wire:model="selectedDeliveryPerson" :options="$deliveryPeople" placeholder="Sélectionnez un Nouveau Livreur" />
         </div>
         <x-slot:actions>
-            <x-button label="Cancel" wire:click="cancelReassign()" />
-            <x-button label="Reassign" class="btn-warning" wire:click="confirmReassign" />
+            <x-button label="Annuler" wire:click="cancelReassign" />
+            <x-button label="Réassigner" class="btn-warning" wire:click="confirmReassign" />
         </x-slot:actions>
     </x-modal>
 

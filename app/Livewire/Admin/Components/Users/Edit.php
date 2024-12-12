@@ -2,7 +2,9 @@
 
 namespace App\Livewire\Admin\Components\Users;
 
+
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
@@ -29,6 +31,10 @@ class Edit extends Component
         'avatar' => 'nullable|image|max:2048',
     ];
 
+    /**
+     * Méthode appelée au montage du composant.
+     * Initialise les champs avec les données de l'utilisateur.
+     */
     public function mount(User $user): void
     {
         $this->user = $user;
@@ -39,35 +45,60 @@ class Edit extends Component
         $this->oldAvatarUrl = $user->avatar;
     }
 
+    /**
+     * Sauvegarde les modifications apportées à l'utilisateur.
+     */
     public function save()
     {
         $this->validate();
 
-        // Handle avatar replacement
-        if ($this->avatar) {
-            if ($this->oldAvatarUrl) {
-                $publicId = $this->getPublicIdFromUrl($this->oldAvatarUrl);
-                Cloudinary::destroy($publicId);
+        try {
+            $authenticatedUser = Auth::user();
+
+            if (!$authenticatedUser) {
+                $this->error(
+                    title: 'Erreur',
+                    description: 'Vous devez être authentifié pour effectuer cette action.'
+                );
+                return;
             }
 
-            $this->oldAvatarUrl = Cloudinary::upload($this->avatar->getRealPath())->getSecurePath();
+            // Gestion du remplacement de l'avatar
+            if ($this->avatar) {
+                if ($this->oldAvatarUrl) {
+                    $publicId = $this->getPublicIdFromUrl($this->oldAvatarUrl);
+                    Cloudinary::destroy($publicId);
+                }
+                $this->oldAvatarUrl = Cloudinary::upload($this->avatar->getRealPath())->getSecurePath();
+            }
+
+            // Mise à jour des données de l'utilisateur
+            $this->user->update([
+                'first_name' => $this->first_name,
+                'last_name' => $this->last_name,
+                'email' => $this->email,
+                'role' => $this->role,
+                'avatar' => $this->oldAvatarUrl,
+            ]);
+
+            // Afficher un message de succès
+            $this->success(
+                title: 'Utilisateur mis à jour avec succès',
+                description: 'Les informations de l\'utilisateur ont été mises à jour avec succès.',
+                redirectTo: route('admin.users.index')
+            );
+        } catch (\Exception $e) {
+            // Afficher un message d'erreur
+            $this->error(
+                title: 'Erreur',
+                description: 'Une erreur est survenue : ' . $e->getMessage()
+            );
         }
-
-        $this->user->update([
-            'first_name' => $this->first_name,
-            'last_name' => $this->last_name,
-            'email' => $this->email,
-            'role' => $this->role,
-            'avatar' => $this->oldAvatarUrl,
-        ]);
-
-        $this->success(
-            title: 'User updated Successfully',
-            description: 'The User has been updated successfully.',
-            redirectTo: route('admin.users.index')
-        );
     }
 
+    /**
+     * Extraire l'ID public de l'URL Cloudinary.
+     */
     private function getPublicIdFromUrl(string $url): string
     {
         $urlParts = parse_url($url);
@@ -75,6 +106,9 @@ class Edit extends Component
         return pathinfo($path, PATHINFO_FILENAME);
     }
 
+    /**
+     * Rendre la vue du composant Livewire.
+     */
     public function render()
     {
         return view('livewire.admin.components.users.edit');

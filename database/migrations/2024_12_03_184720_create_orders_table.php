@@ -15,7 +15,6 @@ class CreateOrdersTable extends Migration
                   ->default('pending');
             $table->string('payment_method')->nullable();
             $table->string('payment_status')->default('unpaid');
-            $table->foreignId('shipping_address_id')->nullable()->constrained('addresses')->cascadeOnDelete();
             $table->text('address_text')->nullable(); 
             $table->timestamps();
         });

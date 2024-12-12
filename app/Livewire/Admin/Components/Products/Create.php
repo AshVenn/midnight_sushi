@@ -22,13 +22,13 @@ class Create extends Component
         'price' => 'required|numeric|min:0',
         'description' => 'required|string',
         'allergens' => 'nullable|array',
-        'image' => 'nullable|image|max:2048', // Max size 2MB
+        'image' => 'nullable|image|max:2048', // Taille maximale de 2MB
         'category_id' => 'required|exists:categories,id',
     ];
 
     public function mount()
     {
-        $this->categories = Category::orderBy('name')->get(); // Fetch categories sorted by name
+        $this->categories = Category::orderBy('name')->get(); // Récupérer les catégories triées par nom
     }
 
     public function save()
@@ -36,12 +36,12 @@ class Create extends Component
         $this->validate();
 
         try {
-            // Upload image to Cloudinary
+            // Téléchargement de l'image sur Cloudinary
             $imageUrl = $this->image
                 ? Cloudinary::upload($this->image->getRealPath())->getSecurePath()
                 : null;
 
-            // Save product in database
+            // Enregistrer le produit dans la base de données
             Product::create([
                 'name' => $this->name,
                 'price' => $this->price,
@@ -51,17 +51,17 @@ class Create extends Component
                 'category_id' => $this->category_id,
             ]);
 
-            // Reset form fields
+            // Réinitialiser les champs du formulaire
             $this->reset(['name', 'price', 'description', 'allergens', 'image', 'category_id']);
 
-            // Show success message and redirect
+            // Afficher un message de succès et rediriger
             $this->success(
-                title: 'Product Created Successfully',
-                description: 'The Product has been created successfully.',
+                title: 'Produit Créé avec Succès',
+                description: 'Le produit a été créé avec succès.',
                 redirectTo: route('admin.products.index')
             );
         } catch (\Exception $e) {
-            $this->error('Error' . $e->getMessage());
+            $this->error('Erreur : ' . $e->getMessage());
         }
     }
 

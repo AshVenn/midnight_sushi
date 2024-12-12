@@ -25,28 +25,29 @@ class Index extends Component
     public array $deliveryStatusOptions = [];
     public string $deliveryStatusFilter = 'all';
 
-    public ?int $deliveryPersonFilter = null; // New: Filter by delivery person
-    public ?string $startDate = null; // New: Start date for filtering
-    public ?string $endDate = null;   // New: End date for filtering
+    public ?int $deliveryPersonFilter = null;
+    public ?string $startDate = null;
+    public ?string $endDate = null;
+
+    public array $sortBy = ['column' => 'created_at', 'direction' => 'asc'];
 
     public function mount(): void
     {
-        // Fetch delivery people for filtering and assigning
         $this->deliveryPeople = User::where('role', 'delivery_person')
             ->get()
             ->map(fn($user) => ['id' => $user->id, 'name' => $user->full_name])
             ->toArray();
 
         $this->deliveryStatusOptions = [
-            ['id' => 'all', 'name' => 'All'],
-            ['id' => 'assigned', 'name' => 'Assigned'],
-            ['id' => 'unassigned', 'name' => 'Unassigned'],
-            ['id' => 'preparing', 'name' => 'Preparing'],
-            ['id' => 'ready', 'name' => 'Ready'],
+            ['id' => 'all', 'name' => 'Tous'],
+            ['id' => 'assigned', 'name' => 'Attribué'],
+            ['id' => 'unassigned', 'name' => 'Non attribué'],
+            ['id' => 'preparing', 'name' => 'En préparation'],
+            ['id' => 'ready', 'name' => 'Prêts'],
         ];
     }
 
-    public function updatingSearch(): void
+    public function search(): void
     {
         $this->resetPage();
     }
@@ -74,32 +75,34 @@ class Index extends Component
     public function headers(): array
     {
         return [
-            ['key' => 'id', 'label' => 'ID'],
-            ['key' => 'customer', 'label' => 'Customer'],
-            ['key' => 'delivery_address', 'label' => 'Delivery Address'],
-            ['key' => 'total_price', 'label' => 'Total Price'],
-            ['key' => 'status', 'label' => 'Status'],
-            ['key' => 'assigned_to', 'label' => 'Assigned To'],
-            ['key' => 'actions', 'label' => 'Actions'],
+            ['key' => 'id', 'label' => 'ID', 'sortable' => true],
+            ['key' => 'customer', 'label' => 'Client', 'sortable' => false],
+            ['key' => 'address_text', 'label' => 'Adresse de livraison', 'sortable' => true],
+            ['key' => 'total_price', 'label' => 'Prix total', 'sortable' => true],
+            ['key' => 'status', 'label' => 'Statut', 'sortable' => true],
+            ['key' => 'created_at', 'label' => 'Date et heure', 'sortable' => true],
+            ['key' => 'assigned_to', 'label' => 'Attribué à', 'sortable' => false],
+            ['key' => 'actions', 'label' => 'Actions', 'sortable' => false],
         ];
     }
+    
 
     public function markAsReady(int $orderId): void
     {
         $order = Order::find($orderId);
 
         if (!$order) {
-            $this->error('Order not found.');
+            $this->error('Commande introuvable.');
             return;
         }
 
         if ($order->status !== 'preparing') {
-            $this->error('This order cannot be marked as ready.');
+            $this->error('Cette commande ne peut pas être marquée comme prête.');
             return;
         }
 
         $order->update(['status' => 'ready']);
-        $this->success('Order marked as ready!');
+        $this->success('Commande marquée comme prête !');
     }
 
     public function assignDelivery(int $orderId): void
@@ -132,13 +135,13 @@ class Index extends Component
                     ]);
                 }
 
-                $this->success('Delivery person assigned successfully.');
+                $this->success('Livreur attribué avec succès.');
                 $this->reset(['showAssignModal', 'selectedDeliveryPerson', 'orderToAssign']);
             } else {
-                $this->error('Order not found.');
+                $this->error('Commande introuvable.');
             }
         } else {
-            $this->error('Failed to assign delivery person.');
+            $this->error("Echec de l'attribution du livreur.");
         }
     }
 
@@ -172,13 +175,13 @@ class Index extends Component
                     ]);
                 }
 
-                $this->success('Delivery person reassigned successfully.');
+                $this->success('Livreur réattribué avec succès.');
                 $this->reset(['showReassignModal', 'selectedDeliveryPerson', 'orderToAssign']);
             } else {
-                $this->error('Order not found.');
+                $this->error('Commande introuvable.');
             }
         } else {
-            $this->error('Failed to reassign delivery person.');
+            $this->error('Echec de la réattribution du livreur.');
         }
     }
 
@@ -192,45 +195,57 @@ class Index extends Component
         $this->reset(['showReassignModal', 'selectedDeliveryPerson', 'orderToAssign']);
     }
 
-    public function orders()
-    {
-        return Order::with(['customer', 'deliveries.deliveryPerson'])
-            ->when($this->search, function ($query) {
-                $query->whereHas('customer', function ($query) {
-                    $query->where('first_name', 'like', "%{$this->search}%")
-                          ->orWhere('last_name', 'like', "%{$this->search}%");
-                });
-            })
-            ->when($this->deliveryStatusFilter !== 'all', function ($query) {
-                if ($this->deliveryStatusFilter === 'assigned') {
-                    $query->whereHas('deliveries', function($q) {
-                        $q->whereIn('status', ['assigned','picked_up']);
+    protected function isSortable(string $column): bool
+        {
+            $header = collect($this->headers())->firstWhere('key', $column);
+            return $header && ($header['sortable'] ?? false);
+        }
+
+
+        public function orders()
+        {
+            return Order::with(['customer', 'deliveries.deliveryPerson'])
+                ->when($this->search, function ($query) {
+                    $query->where('id', 'like', "%{$this->search}%")
+                        ->orWhereHas('customer', function ($q) {
+                            $q->where('first_name', 'like', "%{$this->search}%")
+                              ->orWhere('last_name', 'like', "%{$this->search}%")
+                              ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$this->search}%"]);
+                        });
+                })
+                ->when($this->deliveryStatusFilter !== 'all', function ($query) {
+                    if ($this->deliveryStatusFilter === 'assigned') {
+                        $query->whereHas('deliveries', function ($q) {
+                            $q->whereIn('status', ['assigned', 'picked_up']);
+                        });
+                    } elseif ($this->deliveryStatusFilter === 'unassigned') {
+                        $query->whereDoesntHave('deliveries', function ($q) {
+                            $q->whereIn('status', ['assigned', 'picked_up']);
+                        });
+                    } elseif ($this->deliveryStatusFilter === 'preparing') {
+                        $query->where('status', 'preparing');
+                    } elseif ($this->deliveryStatusFilter === 'ready') {
+                        $query->where('status', 'ready');
+                    }
+                })
+                ->when($this->deliveryPersonFilter, function ($query) {
+                    $query->whereHas('deliveries', function ($q) {
+                        $q->where('delivery_person_id', $this->deliveryPersonFilter)
+                            ->whereIn('status', ['assigned', 'picked_up']);
                     });
-                } elseif ($this->deliveryStatusFilter === 'unassigned') {
-                    $query->whereDoesntHave('deliveries', function($q) {
-                        $q->whereIn('status', ['assigned','picked_up']);
-                    });
-                } elseif ($this->deliveryStatusFilter === 'preparing') {
-                    $query->where('status', 'preparing');
-                } elseif ($this->deliveryStatusFilter === 'ready') {
-                    $query->where('status', 'ready');
-                }
-            })
-            ->when($this->deliveryPersonFilter, function($query) {
-                // Filter orders by the currently assigned delivery person
-                // We assume an assigned or picked_up delivery = current delivery.
-                $query->whereHas('deliveries', function($q) {
-                    $q->where('delivery_person_id', $this->deliveryPersonFilter)
-                      ->whereIn('status', ['assigned', 'picked_up']);
-                });
-            })
-            ->when($this->startDate && $this->endDate, function ($query) {
-                $start = Carbon::parse($this->startDate)->startOfDay();
-                $end = Carbon::parse($this->endDate)->endOfDay();
-                $query->whereBetween('created_at', [$start, $end]);
-            })
-            ->paginate(10);
-    }
+                })
+                ->when($this->startDate && $this->endDate, function ($query) {
+                    $start = Carbon::parse($this->startDate)->startOfDay();
+                    $end = Carbon::parse($this->endDate)->endOfDay();
+                    $query->whereBetween('created_at', [$start, $end]);
+                })
+                ->when($this->isSortable($this->sortBy['column']), function ($query) {
+                    $query->orderBy($this->sortBy['column'], $this->sortBy['direction']);
+                })
+                ->paginate(10);
+        }
+    
+    
 
     public function openFiltersModal(): void
     {

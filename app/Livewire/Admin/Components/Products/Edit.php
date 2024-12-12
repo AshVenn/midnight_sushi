@@ -19,8 +19,8 @@ class Edit extends Component
     public float $price;
     public string $description;
     public array $allergens = [];
-    public $image; // New uploaded image
-    public ?string $oldImageUrl = null; // To track the existing image URL
+    public $image; 
+    public ?string $oldImageUrl = null; 
     public int $category_id;
     public $categories;
 
@@ -42,7 +42,7 @@ class Edit extends Component
         $this->price = $product->price;
         $this->description = $product->description;
         $this->allergens = $product->allergens ? json_decode($product->allergens, true) : [];
-        $this->oldImageUrl = $product->image; // Set the old image URL
+        $this->oldImageUrl = $product->image; // Définir l'URL de l'image existante
         $this->category_id = $product->category_id;
         $this->categories = Category::all();
     }
@@ -51,19 +51,19 @@ class Edit extends Component
     {
         $this->validate();
 
-        // Handle image replacement
+        // Gérer le remplacement de l'image
         if ($this->image) {
-            // Delete old image if it exists
+            // Supprimer l'ancienne image si elle existe
             if ($this->oldImageUrl) {
                 $publicId = $this->getPublicIdFromUrl($this->oldImageUrl);
                 Cloudinary::destroy($publicId);
             }
 
-            // Upload the new image
+            // Télécharger la nouvelle image
             $this->oldImageUrl = Cloudinary::upload($this->image->getRealPath())->getSecurePath();
         }
 
-        // Update the product
+        // Mettre à jour le produit
         $this->product->update([
             'name' => $this->name,
             'price' => $this->price,
@@ -74,15 +74,15 @@ class Edit extends Component
         ]);
 
         $this->success(
-            title: 'Product updated Successfully',
-            description: 'The Product has been updated successfully.',
+            title: 'Produit mis à jour avec succès',
+            description: 'Le produit a été mis à jour avec succès.',
             redirectTo: route('admin.products.index')
         );
     }
 
     private function getPublicIdFromUrl(string $url): string
     {
-        // Extract the public ID from the Cloudinary URL
+        // Extraire l'ID public de l'URL Cloudinary
         $urlParts = parse_url($url);
         $path = $urlParts['path'] ?? '';
         return pathinfo($path, PATHINFO_FILENAME);
