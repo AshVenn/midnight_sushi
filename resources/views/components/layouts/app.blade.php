@@ -34,7 +34,7 @@
             </form>
             @else
                 <div class="hidden md:flex space-x-6">
-                    <x-button label="About" link="/about" class="btn-ghost font-bold" />
+                    <x-button label="À propos" link="/about" class="btn-ghost font-bold" />
                     <x-button label="Contact" link="/contact" class="btn-ghost font-bold" />
                     <x-button label="Login" icon="o-user" link="/login" class="btn-primary ml-2" />
                 </div>
@@ -132,7 +132,7 @@
                 {{-- Default Sidebar for Guests --}}
                 <x-menu activate-by-route>
                     <x-menu-item title="Home" icon="o-home" link="/" />
-                    <x-menu-item title="About" icon="o-information-circle" link="/about" />
+                    <x-menu-item title="À propos" icon="o-information-circle" link="/about" />
                     <x-menu-item title="Contact" icon="o-envelope" link="/contact" />
                 </x-menu>
             @endif

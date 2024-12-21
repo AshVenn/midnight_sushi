@@ -11,7 +11,8 @@ class OrderItem extends Model
 
     protected $fillable = [
         'order_id',
-        'product_id',
+        'orderable_type',
+        'orderable_id',
         'quantity',
         'price',
     ];
@@ -21,8 +22,9 @@ class OrderItem extends Model
         return $this->belongsTo(Order::class);
     }
 
-    public function product()
+    // Polymorphic relation: product or menu
+    public function orderable()
     {
-        return $this->belongsTo(Product::class);
+        return $this->morphTo();
     }
 }

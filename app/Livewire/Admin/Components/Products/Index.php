@@ -8,9 +8,12 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
+use Mary\Traits\Toast;
+use Illuminate\Support\Facades\Auth;
+
 class Index extends Component
 {
-    use WithPagination;
+    use WithPagination ,Toast;
 
     public string $search = '';
     public string $categoryFilter = 'all'; // Filtre de catégorie
@@ -42,11 +45,17 @@ class Index extends Component
      */
     public function confirmDelete(int $productId): void
     {
-        $product = Product::findOrFail($productId);
+        try {
+            $product = Product::findOrFail($productId);
 
-        $this->deletingProductId = $product->id;
-        $this->deletingProductName = $product->name;
-        $this->showDeleteModal = true;
+            $this->deletingProductId = $product->id;
+            $this->deletingProductName = $product->name;
+            $this->showDeleteModal = true;
+
+        } catch (\Exception $e) {
+            $this->error(title:'Erreur',description: 'Une erreur est survenue : ' . $e->getMessage());
+        }
+     
     }
 
     /**
@@ -62,6 +71,16 @@ class Index extends Component
      */
     public function deleteProduct(): void
     {
+        $authenticatedUser = Auth::user();
+
+        if (!$authenticatedUser) {
+            $this->error(
+                title: 'Erreur',
+                description: 'Utilisateur non authentifié.'
+            );
+            return;
+        }
+
         if ($this->deletingProductId) {
             $product = Product::find($this->deletingProductId);
 
@@ -72,7 +91,7 @@ class Index extends Component
                 }
 
                 $product->delete();
-                session()->flash('message', 'Produit supprimé avec succès.');
+                $this->success( title: 'Produit supprimé.',description: 'Le produit a été supprimé avec succès.');
             }
 
             $this->cancelDelete();

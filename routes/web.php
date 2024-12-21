@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 
+use App\Livewire\Home\Home;
 use App\Livewire\About\About;
 use App\Livewire\FAQ\FAQ;
 
@@ -46,6 +47,9 @@ use App\Livewire\DeliveryPerson\Components\Deliveries as DeliveryPersonDeliverie
 use App\Livewire\DeliveryPerson\Components\PastDeliveries as DeliveryPersonPastDeliveries;
 
 
+
+//Home View
+Route::get('/', Home::class)->name('home');
 
 // Public routes
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');

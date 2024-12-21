@@ -16,10 +16,12 @@ class Order extends Model
         'payment_method',
         'payment_status',
         'address_text',
+        'notes', // new notes field
     ];
 
     public function customer()
     {
+        // Assumes you have a User model (App\Models\User)
         return $this->belongsTo(User::class, 'customer_id');
     }
 
@@ -28,6 +30,7 @@ class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
+    // Relationship for deliveries
     public function deliveries()
     {
         return $this->hasMany(Delivery::class);
@@ -35,9 +38,10 @@ class Order extends Model
 
     public function currentDelivery()
     {
+        // Example usage: find the latest assigned/picked_up
         return $this->deliveries()
-            ->whereIn('status', ['assigned', 'picked_up'])
-            ->orderByDesc('id')
-            ->first();
+                    ->whereIn('status', ['assigned', 'picked_up'])
+                    ->orderByDesc('id')
+                    ->first();
     }
 }

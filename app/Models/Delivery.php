@@ -17,14 +17,17 @@ class Delivery extends Model
         'picked_up_at',
         'delivered_at',
         'address_text',
+        'phone_number',
+        'notes',        // new notes field for delivery
+        'delivery_fee',
     ];
 
     protected $casts = [
-        'assigned_at' => 'datetime',
-        'picked_up_at' => 'datetime',
-        'delivered_at' => 'datetime',
+        'assigned_at'   => 'datetime',
+        'picked_up_at'  => 'datetime',
+        'delivered_at'  => 'datetime',
+        'delivery_fee'  => 'decimal:2',
     ];
-    
 
     public function order()
     {

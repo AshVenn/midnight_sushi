@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
             AddressesSeeder::class,       // Seed addresses (required for deliveries)
             CategoriesSeeder::class,      // Seed categories (required for products)
             ProductsSeeder::class,        // Seed products (depends on categories)
+            MenuSeeder::class,            // Seed menus (depends on products),
             OrdersSeeder::class,          // Seed orders (depends on users)
             OrderItemsSeeder::class,      // Seed order items (depends on orders and products)
             DeliveriesSeeder::class,      // Seed deliveries (depends on orders and addresses)

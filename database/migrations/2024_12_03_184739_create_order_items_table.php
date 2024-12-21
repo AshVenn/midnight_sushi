@@ -11,9 +11,12 @@ class CreateOrderItemsTable extends Migration
         Schema::create('order_items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('order_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('product_id')->constrained();
+
+
+            $table->morphs('orderable');
+
             $table->integer('quantity');
-            $table->decimal('price', 8, 2); // Price at the time of purchase
+            $table->decimal('price', 8, 2);
             $table->timestamps();
         });
     }
