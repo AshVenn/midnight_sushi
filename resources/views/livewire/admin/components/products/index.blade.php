@@ -1,18 +1,34 @@
 <x-card title="Gestion des Produits">
     <x-slot:menu>
-        <x-button label="Ajouter un Produit" link="{{ route('admin.products.create') }}" class="btn-primary" icon="o-plus" responsive />
+        <x-button 
+            label="Ajouter un Produit" 
+            link="{{ route('admin.products.create') }}" 
+            class="btn-primary" 
+            icon="o-plus" 
+            responsive 
+        />
     </x-slot:menu>
 
     {{-- Filtres --}}
     <div class="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0 mb-4 w-full">
         {{-- Champ de recherche --}}
         <div class="w-full">
-            <x-input wire:model.lazy="search" placeholder="Rechercher des produits..." icon="o-magnifying-glass" autocomplete="off" />
+            <x-input 
+                wire:model.lazy="search" 
+                placeholder="Rechercher des produits (nom, slug)..." 
+                icon="o-magnifying-glass" 
+                autocomplete="off" 
+            />
         </div>
 
         {{-- Filtre de catégorie --}}
         <div class="w-full md:w-1/3">
-            <x-select wire:model="categoryFilter" :options="$categories" placeholder="Filtrer par catégorie" wire:change="updateCategoryFilter" />
+            <x-select 
+                wire:model="categoryFilter" 
+                :options="$categories" 
+                placeholder="Filtrer par catégorie" 
+                wire:change="updateCategoryFilter" 
+            />
         </div>
     </div>
 
@@ -26,6 +42,9 @@
         {{-- Colonne Nom --}}
         @scope('cell_name', $product)
             {{ $product->name }}
+            <div class="text-xs text-gray-400">
+                Slug: {{ $product->slug ?? '(none)' }}
+            </div>
         @endscope
 
         {{-- Colonne Catégorie --}}
@@ -33,15 +52,54 @@
             {{ $product->category->name ?? 'Pas de catégorie' }}
         @endscope
 
-        {{-- Colonne Prix --}}
+        {{-- Colonne Prix Actuel (en tenant compte de la promotion) --}}
         @scope('cell_price', $product)
-            {{ number_format($product->price, 2) }} €
+            @php
+                // If there's a discount_price, you might want to show it, or show both
+                $actualPrice = $product->price; // Using getPriceAttribute
+            @endphp
+            <div>
+                {{ number_format($actualPrice, 2) }} €
+            </div>
+            @if ($product->discount_price)
+                <div class="text-sm text-green-600">
+                    Promo: {{ number_format($product->discount_price, 2) }} €
+                </div>
+            @endif
+        @endscope
+
+        {{-- Colonne Disponible ? --}}
+        @scope('cell_is_available', $product)
+            <x-button 
+                wire:click="toggleAvailability({{ $product->id }})"
+                :label="$product->is_available ? 'Oui (cliquer pour rendre indisponible)' : 'Non (cliquer pour rendre disponible)'" 
+                class="{{ $product->is_available ? 'btn-success' : 'btn-warning' }}"
+            />
         @endscope
 
         {{-- Colonne Actions --}}
         @scope('cell_actions', $product)
-            <x-button wire:click="confirmDelete({{ $product->id }})" class="btn-error" icon="o-trash" />
-            <x-button link="{{ route('admin.products.edit', $product) }}" class="btn-primary" icon="o-pencil" />
+            <div class="flex space-x-2">
+                {{-- Stop Promotion if discount_price is set --}}
+                @if ($product->discount_price)
+                    <x-button 
+                        wire:click="stopPromotion({{ $product->id }})" 
+                        class="btn-secondary" 
+                        label="Stop Promo"
+                    />
+                @endif
+
+                <x-button 
+                    wire:click="confirmDelete({{ $product->id }})" 
+                    class="btn-error" 
+                    icon="o-trash" 
+                />
+                <x-button 
+                    link="{{ route('admin.products.edit', $product) }}" 
+                    class="btn-primary" 
+                    icon="o-pencil" 
+                />
+            </div>
         @endscope
     </x-table>
 

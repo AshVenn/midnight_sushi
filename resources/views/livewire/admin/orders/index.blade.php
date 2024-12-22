@@ -62,7 +62,13 @@
 
         {{-- Champ de Recherche --}}
         <div class="lg:flex-grow">
-            <x-input wire:model.lazy="search" placeholder="Rechercher par ID de commande ou nom complet du client..." icon="o-magnifying-glass" autocomplete="off" wire:enter="search" />
+            <x-input 
+                wire:model.lazy="search" 
+                placeholder="Rechercher par ID de commande ou nom complet du client..." 
+                icon="o-magnifying-glass" 
+                autocomplete="off" 
+                wire:enter="search"
+            />
         </div>
     </div>
 
@@ -75,16 +81,12 @@
             <div>{{ $order->customer->full_name ?? 'Pas de Client' }}</div>
         @endscope
 
-        @scope('cell_delivery_address', $order)
+        @scope('cell_address_text', $order)
             <div>{{ $order->address_text ?? 'Adresse Manquante' }}</div>
         @endscope
 
         @scope('cell_total_price', $order)
             <div>{{ number_format($order->total_price, 2) }} €</div>
-        @endscope
-
-        @scope('cell_created_at', $order)
-            <div>{{ $order->created_at->format('d/m/Y H:i') }}</div>
         @endscope
 
         @scope('cell_status', $order)
@@ -112,12 +114,19 @@
             <x-badge :value="$statusLabels[$order->status] ?? 'Inconnu'" :class="$statusClass" />
         @endscope
 
+        @scope('cell_created_at', $order)
+            <div>{{ $order->created_at->format('d/m/Y H:i') }}</div>
+        @endscope
+
         @scope('cell_assigned_to', $order)
             <div>{{ $order->currentDelivery()?->deliveryPerson->full_name ?? 'Non Assigné' }}</div>
         @endscope
 
         @scope('cell_actions', $order)
-            <div class="flex gap-2">
+            <div class="flex gap-2 items-center">
+                {{-- Eye Button to view details --}}
+                <x-button icon="o-eye" wire:click="viewOrderDetails({{ $order->id }})" />
+
                 @if (in_array($order->status, ['delivered', 'cancelled']))
                     <x-badge value="-" class="badge-error" />
                 @elseif ($order->status === 'preparing')
@@ -136,10 +145,14 @@
     {{-- Modal d'Assignation de Livraison --}}
     <x-modal wire:model="showAssignModal" title="Assigner une Livraison" separator>
         <div class="text-center">
-            <x-select wire:model="selectedDeliveryPerson" :options="$deliveryPeople" placeholder="Sélectionnez un Livreur" />
+            <x-select 
+                wire:model="selectedDeliveryPerson" 
+                :options="$deliveryPeople" 
+                placeholder="Sélectionnez un Livreur"
+            />
         </div>
         <x-slot:actions>
-            <x-button label="Annuler" @click="$wire.cancelAssign()" />
+            <x-button label="Annuler" wire:click="cancelAssign" />
             <x-button label="Assigner" class="btn-primary" wire:click="confirmAssign" />
         </x-slot:actions>
     </x-modal>
@@ -147,11 +160,78 @@
     {{-- Modal de Réassignation de Livraison --}}
     <x-modal wire:model="showReassignModal" title="Réassigner une Livraison" separator>
         <div class="text-center">
-            <x-select wire:model="selectedDeliveryPerson" :options="$deliveryPeople" placeholder="Sélectionnez un Nouveau Livreur" />
+            <x-select 
+                wire:model="selectedDeliveryPerson" 
+                :options="$deliveryPeople" 
+                placeholder="Sélectionnez un Nouveau Livreur"
+            />
         </div>
         <x-slot:actions>
             <x-button label="Annuler" wire:click="cancelReassign" />
             <x-button label="Réassigner" class="btn-warning" wire:click="confirmReassign" />
+        </x-slot:actions>
+    </x-modal>
+
+    {{-- Modal for Viewing Order Details --}}
+    <x-modal wire:model="showOrderDetailsModal" title="Détails de la Commande" separator>
+        @if($orderDetails)
+            <div class="space-y-4">
+                <div>
+                    <strong>Commande #:</strong> {{ $orderDetails->id }}<br>
+                    <strong>Client:</strong> {{ $orderDetails->customer->full_name ?? 'N/A' }}<br>
+                    <strong>Téléphone:</strong> {{ $orderDetails->phone_number ?? 'N/A' }}<br>
+                    <strong>Adresse:</strong> {{ $orderDetails->address_text ?? 'N/A' }}<br>
+                    <strong>Notes:</strong> {{ $orderDetails->notes ?? 'N/A' }}<br>
+                    <strong>Statut:</strong> {{ $orderDetails->status }}<br>
+                    <strong>Date de Création:</strong> {{ $orderDetails->created_at->format('d/m/Y H:i') }}
+                </div>
+
+                <hr>
+
+                <div>
+                    <strong>Articles commandés:</strong>
+                    <table class="min-w-full divide-y divide-gray-200 mt-2">
+                        <thead>
+                            <tr>
+                                <th class="px-4 py-2">Article</th>
+                                <th class="px-4 py-2">Quantité</th>
+                                <th class="px-4 py-2">Prix Unitaire</th>
+                                <th class="px-4 py-2">Sous-total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($orderDetails->orderItems as $item)
+                                @php
+                                    // If using direct references: $item->product->name
+                                    // If using polymorphic: $item->orderable->name
+                                    $name  = method_exists($item->orderable, 'getAttribute') 
+                                              ? $item->orderable->name 
+                                              : 'N/A';
+                                    $price = $item->price;
+                                    $qty   = $item->quantity;
+                                @endphp
+                                <tr>
+                                    <td class="px-4 py-2">{{ $name }}</td>
+                                    <td class="px-4 py-2 text-center">{{ $qty }}</td>
+                                    <td class="px-4 py-2">{{ number_format($price, 2) }} €</td>
+                                    <td class="px-4 py-2">
+                                        {{ number_format($price * $qty, 2) }} €
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                <hr>
+
+                <div>
+                    <strong>Total:</strong> {{ number_format($orderDetails->total_price, 2) }} €
+                </div>
+            </div>
+        @endif
+        <x-slot:actions>
+            <x-button label="Fermer" wire:click="$set('showOrderDetailsModal', false)" />
         </x-slot:actions>
     </x-modal>
 

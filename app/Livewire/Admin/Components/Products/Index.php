@@ -10,17 +10,24 @@ use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 use Mary\Traits\Toast;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class Index extends Component
 {
-    use WithPagination ,Toast;
+    use WithPagination, Toast;
 
     public string $search = '';
-    public string $categoryFilter = 'all'; // Filtre de catégorie
+    public string $categoryFilter = 'all'; 
     public array $sortBy = ['column' => 'name', 'direction' => 'asc'];
+
     public bool $showDeleteModal = false;
     public ?int $deletingProductId = null;
     public ?string $deletingProductName = null;
+
+    protected $listeners = [
+        'stopPromotionConfirmed',
+        'toggleAvailabilityConfirmed',
+    ];
 
     /**
      * Réinitialiser la pagination lors de la recherche ou des changements de filtre.
@@ -55,7 +62,6 @@ class Index extends Component
         } catch (\Exception $e) {
             $this->error(title:'Erreur',description: 'Une erreur est survenue : ' . $e->getMessage());
         }
-     
     }
 
     /**
@@ -85,17 +91,65 @@ class Index extends Component
             $product = Product::find($this->deletingProductId);
 
             if ($product) {
+                // Supprime l'image Cloudinary si elle existe
                 if ($product->image) {
                     $publicId = pathinfo($product->image, PATHINFO_FILENAME);
                     Cloudinary::destroy($publicId);
                 }
 
                 $product->delete();
-                $this->success( title: 'Produit supprimé.',description: 'Le produit a été supprimé avec succès.');
+                $this->success(
+                    title: 'Produit supprimé.',
+                    description: 'Le produit a été supprimé avec succès.'
+                );
             }
 
             $this->cancelDelete();
         }
+    }
+
+    /**
+     * Action: Stop Promotion (set discount_price to null, promotion_start/end to null)
+     */
+    public function stopPromotion(int $productId): void
+    {
+        $product = Product::find($productId);
+        if (!$product) {
+            $this->error('Produit introuvable');
+            return;
+        }
+
+        $product->update([
+            'discount_price' => null,
+            'promotion_start' => null,
+            'promotion_end' => null,
+        ]);
+
+        $this->success(
+            title: 'Promotion arrêtée',
+            description: "La promotion pour {$product->name} a été arrêtée."
+        );
+    }
+
+    /**
+     * Action: Toggle Availability (flip is_available)
+     */
+    public function toggleAvailability(int $productId): void
+    {
+        $product = Product::find($productId);
+        if (!$product) {
+            $this->error('Produit introuvable');
+            return;
+        }
+
+        $product->update(['is_available' => !$product->is_available]);
+
+        $this->success(
+            title: 'Disponibilité mise à jour',
+            description: $product->is_available 
+                ? "Le produit {$product->name} est maintenant disponible." 
+                : "Le produit {$product->name} est maintenant indisponible."
+        );
     }
 
     /**
@@ -104,9 +158,10 @@ class Index extends Component
     public function products()
     {
         return Product::query()
-            ->with('category') // Charger la relation de catégorie
+            ->with('category')
             ->when($this->search, function ($query) {
                 $query->where('name', 'like', "%{$this->search}%")
+                    ->orWhere('slug', 'like', "%{$this->search}%")
                     ->orWhereHas('category', function ($q) {
                         $q->where('name', 'like', "%{$this->search}%");
                     });
@@ -138,11 +193,12 @@ class Index extends Component
     public function headers(): array
     {
         return [
-            ['key' => 'image', 'label' => 'Image', 'sortable' => false],
-            ['key' => 'name', 'label' => 'Nom', 'sortable' => true],
-            ['key' => 'category.name', 'label' => 'Catégorie', 'sortable' => false],
-            ['key' => 'price', 'label' => 'Prix', 'sortable' => true],
-            ['key' => 'actions', 'label' => 'Actions', 'sortable' => false],
+            ['key' => 'image',         'label' => 'Image',         'sortable' => false],
+            ['key' => 'name',          'label' => 'Nom',           'sortable' => true],
+            ['key' => 'category.name', 'label' => 'Catégorie',     'sortable' => false],
+            ['key' => 'price',         'label' => 'Prix Actuel',   'sortable' => true],
+            ['key' => 'is_available',  'label' => 'Disponible ?',  'sortable' => false],
+            ['key' => 'actions',       'label' => 'Actions',       'sortable' => false],
         ];
     }
 
@@ -154,7 +210,7 @@ class Index extends Component
         if ($this->sortBy['column'] === $column) {
             $this->sortBy['direction'] = $this->sortBy['direction'] === 'asc' ? 'desc' : 'asc';
         } else {
-            $this->sortBy['column'] = $column;
+            $this->sortBy['column']    = $column;
             $this->sortBy['direction'] = 'asc';
         }
 
@@ -167,8 +223,8 @@ class Index extends Component
     public function render()
     {
         return view('livewire.admin.components.products.index', [
-            'products' => $this->products(),
-            'headers' => $this->headers(),
+            'products'   => $this->products(),
+            'headers'    => $this->headers(),
             'categories' => $this->categories(),
         ]);
     }

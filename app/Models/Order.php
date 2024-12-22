@@ -15,6 +15,7 @@ class Order extends Model
         'status',
         'payment_method',
         'payment_status',
+        'phone_number',
         'address_text',
         'notes', // new notes field
     ];

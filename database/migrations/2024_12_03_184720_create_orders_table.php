@@ -23,6 +23,7 @@ class CreateOrdersTable extends Migration
             ])->default('pending');
             $table->string('payment_method')->nullable();
             $table->string('payment_status')->default('unpaid');
+            $table->string('phone_number')->nullable();
             $table->text('address_text')->nullable();
             $table->text('notes')->nullable();
 

@@ -1,4 +1,4 @@
-<div class="relative bg-cover bg-center h-screen" style="background-image: url('/images/sushi/hero-bg.jpg');">
+<div class="relative bg-cover bg-center h-screen">
     <div class="absolute inset-0"></div>
     <div class="relative z-10 text-center flex flex-col items-center justify-center h-full space-y-4 px-4">
         <h1 class="text-4xl md:text-6xl font-bold ">Midnight Sushi</h1>

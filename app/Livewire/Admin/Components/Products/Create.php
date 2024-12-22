@@ -11,19 +11,30 @@ use Mary\Traits\Toast;
 
 class Create extends Component
 {
-    use WithFileUploads;
-    use Toast;
+    use WithFileUploads, Toast;
 
-    public $name, $price, $description, $allergens = [], $image, $category_id;
+    public $name, $slug;
+    public $price, $discount_price;
+    public $promotion_start, $promotion_end;
+    public $description, $allergens = [];
+    public $image;
+    public $category_id;
+    public $is_available = true;
+
     public $categories;
 
     protected $rules = [
-        'name' => 'required|string|max:255',
-        'price' => 'required|numeric|min:0',
-        'description' => 'required|string',
-        'allergens' => 'nullable|array',
-        'image' => 'nullable|image|max:2048', // Taille maximale de 2MB
-        'category_id' => 'required|exists:categories,id',
+        'name'             => 'required|string|max:255',
+        'slug'             => 'nullable|string|max:255',
+        'price'            => 'required|numeric|min:0',
+        'discount_price'   => 'nullable|numeric|min:0',
+        'promotion_start'  => 'nullable|date',
+        'promotion_end'    => 'nullable|date|after_or_equal:promotion_start',
+        'description'      => 'required|string',
+        'allergens'        => 'nullable|array',
+        'image'            => 'nullable|image|max:2048',
+        'category_id'      => 'required|exists:categories,id',
+        'is_available'     => 'boolean',
     ];
 
     public function mount()
@@ -31,30 +42,34 @@ class Create extends Component
         $this->categories = Category::orderBy('name')->get(); // Récupérer les catégories triées par nom
     }
 
-    public function save()
+public function save()
     {
         $this->validate();
 
         try {
-            // Téléchargement de l'image sur Cloudinary
             $imageUrl = $this->image
                 ? Cloudinary::upload($this->image->getRealPath())->getSecurePath()
                 : null;
 
-            // Enregistrer le produit dans la base de données
             Product::create([
-                'name' => $this->name,
-                'price' => $this->price,
-                'description' => $this->description,
-                'allergens' => !empty($this->allergens) ? json_encode($this->allergens) : null,
-                'image' => $imageUrl,
-                'category_id' => $this->category_id,
+                'name'             => $this->name,
+                'slug'             => $this->slug,  
+                'price'            => $this->price,
+                'discount_price'   => $this->discount_price,
+                'promotion_start'  => $this->promotion_start,
+                'promotion_end'    => $this->promotion_end,
+                'description'      => $this->description,
+                'allergens'        => !empty($this->allergens) ? json_encode($this->allergens) : null,
+                'image'            => $imageUrl,
+                'category_id'      => $this->category_id,
+                'is_available'     => $this->is_available,
             ]);
 
-            // Réinitialiser les champs du formulaire
-            $this->reset(['name', 'price', 'description', 'allergens', 'image', 'category_id']);
+            $this->reset([
+                'name', 'slug', 'price', 'discount_price', 'promotion_start', 'promotion_end',
+                'description', 'allergens', 'image', 'category_id', 'is_available'
+            ]);
 
-            // Afficher un message de succès et rediriger
             $this->success(
                 title: 'Produit Créé avec Succès',
                 description: 'Le produit a été créé avec succès.',

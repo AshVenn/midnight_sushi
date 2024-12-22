@@ -17,6 +17,7 @@ class CreateMenusTable extends Migration
             $table->decimal('discount_price', 8, 2)->nullable();
             $table->date('promotion_start')->nullable();
             $table->date('promotion_end')->nullable();
+            $table->string('image')->nullable();
             $table->timestamps();
         });
     }

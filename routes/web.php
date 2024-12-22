@@ -32,9 +32,14 @@ use App\Livewire\Admin\Components\Products\Index as ProductIndex;
 use App\Livewire\Admin\Components\Products\Create as ProductCreate;
 use App\Livewire\Admin\Components\Products\Edit as ProductEdit;
 
+//Admin Menu Management Controllers
+use App\Livewire\Admin\Components\Menus\Index as MenuIndex;
+use App\Livewire\Admin\Components\Menus\Create as MenuCreate;
+use App\Livewire\Admin\Components\Menus\Edit as MenuEdit;
+use App\Livewire\Admin\Components\Menus\Show as MenuShow;
+
 // Admin Order Management Controllers
 use App\Livewire\Admin\Components\Orders\Index as OrdersIndex;
-use App\Livewire\Admin\Components\Orders\AssignOrder as AssignOrder;
 
 //Admin Delivery Management Controllers
 use App\Livewire\Admin\Components\Deliveries\Index as DeliveryIndex;
@@ -85,9 +90,14 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/admin/products/create', ProductCreate::class)->name('admin.products.create');
         Route::get('/admin/products/{product}/edit', ProductEdit::class)->name('admin.products.edit');
 
+        // Menu management route
+        Route::get('/admin/menus', MenuIndex::class)->name('admin.menus.index');
+        Route::get('/admin/menus/create', MenuCreate::class)->name('admin.menus.create');
+        Route::get('/admin/menus/{menu}/edit', MenuEdit::class)->name('admin.menus.edit');
+        Route::get('/admin/menus/{menu}', MenuShow::class)->name('admin.menus.show');
+
         // Orders Management routes
         Route::get('/admin/orders', OrdersIndex::class)->name('admin.orders.index');
-        Route::get('/admin/orders/assign/{order}', AssignOrder::class)->name('admin.orders.assign');
 
         // Delivery Management routes
         Route::get('/admin/deliveries', DeliveryIndex::class)->name('admin.deliveries.index');

@@ -5,7 +5,7 @@ namespace App\Livewire\Admin\Components\Deliveries;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Carbon\Carbon;
-use Mary\Traits\Toast;
+use Mary\Traits\Toast; // Assuming this is a custom trait
 use App\Models\Delivery;
 use App\Models\User;
 use App\Models\Order;
@@ -18,6 +18,10 @@ class Index extends Component
     public bool $showFiltersModal = false;
     public bool $showReassignModal = false;
     public bool $showActionModal = false;
+
+    // NEW: For showing delivery details in a modal
+    public bool $showDeliveryDetailsModal = false;
+    public ?Delivery $deliveryToShow = null;
 
     public ?int $selectedDeliveryId = null;
     public ?int $selectedDeliveryPerson = null;
@@ -42,8 +46,8 @@ class Index extends Component
             ->toArray();
 
         $this->deliveryStatusOptions = [
-            ['id' => 'all', 'name' => 'Tous'],
-            ['id' => 'assigned', 'name' => 'Attribué'],
+            ['id' => 'all',       'name' => 'Tous'],
+            ['id' => 'assigned',  'name' => 'Attribué'],
             ['id' => 'picked_up', 'name' => 'Ramassé'],
             ['id' => 'delivered', 'name' => 'Livré'],
         ];
@@ -82,14 +86,14 @@ class Index extends Component
     public function headers(): array
     {
         return [
-            ['key' => 'id', 'label' => 'ID Livraison', 'sortable' => true],
-            ['key' => 'order_id', 'label' => 'ID Commande', 'sortable' => true],
-            ['key' => 'customer', 'label' => 'Client', 'sortable' => false],
-            ['key' => 'delivery_person', 'label' => 'Livreur', 'sortable' => false],
-            ['key' => 'status', 'label' => 'Statut', 'sortable' => true],
-            ['key' => 'assigned_at', 'label' => 'Assigné à', 'sortable' => true],
-            ['key' => 'delivered_at', 'label' => 'Livré à', 'sortable' => true],
-            ['key' => 'actions', 'label' => 'Actions', 'sortable' => false],
+            ['key' => 'id',             'label' => 'ID Livraison',    'sortable' => true],
+            ['key' => 'order_id',       'label' => 'ID Commande',     'sortable' => true],
+            ['key' => 'customer',       'label' => 'Client',          'sortable' => false],
+            ['key' => 'delivery_person','label' => 'Livreur',         'sortable' => false],
+            ['key' => 'status',         'label' => 'Statut',          'sortable' => true],
+            ['key' => 'assigned_at',    'label' => 'Assigné à',       'sortable' => true],
+            ['key' => 'delivered_at',   'label' => 'Livré à',         'sortable' => true],
+            ['key' => 'actions',        'label' => 'Actions',         'sortable' => false],
         ];
     }
 
@@ -98,22 +102,22 @@ class Index extends Component
         $header = collect($this->headers())->firstWhere('key', $column);
         return $header && ($header['sortable'] ?? false);
     }
+
     public function sortBy(string $column): void
     {
         if ($this->sortBy['column'] === $column) {
             $this->sortBy['direction'] = $this->sortBy['direction'] === 'asc' ? 'desc' : 'asc';
         } else {
-            $this->sortBy['column'] = $column;
+            $this->sortBy['column']    = $column;
             $this->sortBy['direction'] = 'asc';
         }
 
         $this->resetPage();
     }
 
-
     public function deliveries()
     {
-        return Delivery::with(['order.customer', 'deliveryPerson'])
+        return Delivery::with(['order.customer', 'deliveryPerson', 'order.orderItems.orderable'])
             ->when($this->search, function ($query) {
                 $query->where('id', 'like', "%{$this->search}%")
                     ->orWhere('order_id', 'like', "%{$this->search}%")
@@ -131,7 +135,7 @@ class Index extends Component
             })
             ->when($this->startDate && $this->endDate, function ($query) {
                 $start = Carbon::parse($this->startDate)->startOfDay();
-                $end = Carbon::parse($this->endDate)->endOfDay();
+                $end   = Carbon::parse($this->endDate)->endOfDay();
                 $query->whereBetween('assigned_at', [$start, $end]);
             })
             ->when($this->isSortable($this->sortBy['column']), function ($query) {
@@ -145,11 +149,15 @@ class Index extends Component
         $this->showFiltersModal = true;
     }
 
+    // ======================
+    //  REASSIGN DELIVERY
+    // ======================
+
     public function reassignDelivery(int $deliveryId): void
     {
-        $this->selectedDeliveryId = $deliveryId;
+        $this->selectedDeliveryId    = $deliveryId;
         $this->selectedDeliveryPerson = null;
-        $this->showReassignModal = true;
+        $this->showReassignModal     = true;
     }
 
     public function confirmReassign(): void
@@ -159,8 +167,8 @@ class Index extends Component
             if ($delivery) {
                 $delivery->update([
                     'delivery_person_id' => $this->selectedDeliveryPerson,
-                    'assigned_at' => now(),
-                    'status' => 'assigned', // reassign sets it back to assigned
+                    'assigned_at'        => now(),
+                    'status'             => 'assigned', // reassign sets it back to assigned
                 ]);
                 $this->success('Delivery person reassigned successfully.');
                 $this->reset(['showReassignModal', 'selectedDeliveryPerson', 'selectedDeliveryId']);
@@ -177,11 +185,14 @@ class Index extends Component
         $this->reset(['showReassignModal', 'selectedDeliveryPerson', 'selectedDeliveryId']);
     }
 
+    // ======================
+    //  ACTIONS ON DELIVERY
+    // ======================
     public function performAction(int $deliveryId): void
     {
         $this->selectedDeliveryId = $deliveryId;
-        $this->selectedAction = '';
-        $this->showActionModal = true;
+        $this->selectedAction     = '';
+        $this->showActionModal    = true;
     }
 
     public function confirmAction(): void
@@ -204,7 +215,7 @@ class Index extends Component
                 return;
             }
             $delivery->update([
-                'status' => 'picked_up',
+                'status'       => 'picked_up',
                 'picked_up_at' => now(),
             ]);
             $this->success('Delivery marked as picked up.');
@@ -214,7 +225,7 @@ class Index extends Component
                 return;
             }
             $delivery->update([
-                'status' => 'delivered',
+                'status'       => 'delivered',
                 'delivered_at' => now(),
             ]);
             $this->success('Delivery marked as delivered.');
@@ -228,11 +239,37 @@ class Index extends Component
         $this->reset(['showActionModal', 'selectedAction', 'selectedDeliveryId']);
     }
 
+    // ======================
+    //  NEW: SHOW DETAILS
+    // ======================
+    /**
+     * Show detailed info about the delivery,
+     * including the order, items, customer, phone, notes, etc.
+     */
+    public function showDeliveryDetails(int $deliveryId): void
+    {
+        $delivery = Delivery::with(['order.customer', 'order.orderItems.orderable', 'deliveryPerson'])
+            ->find($deliveryId);
+
+        if (!$delivery) {
+            $this->error('Delivery not found.');
+            return;
+        }
+
+        $this->deliveryToShow           = $delivery;
+        $this->showDeliveryDetailsModal = true;
+    }
+
+    public function closeDeliveryDetailsModal(): void
+    {
+        $this->reset(['showDeliveryDetailsModal', 'deliveryToShow']);
+    }
+
     public function render()
     {
         return view('livewire.admin.deliveries.index', [
             'deliveries' => $this->deliveries(),
-            'headers' => $this->headers(),
+            'headers'    => $this->headers(),
         ]);
     }
 }

@@ -91,12 +91,28 @@ class Index extends Component
      */
     public function sortByColumn(string $column): void
     {
+        // Validate the column exists in the headers
+        $sortableColumns = collect($this->headers())
+            ->filter(fn($header) => $header['sortable'] ?? false)
+            ->pluck('key')
+            ->toArray();
+
+        if (!in_array($column, $sortableColumns)) {
+            $this->error(
+                title: 'Erreur de tri',
+                description: 'La colonne sélectionnée pour le tri est invalide.'
+            );
+            return;
+        }
+
+        // Toggle sorting direction if the same column is clicked
         if ($this->sortBy['column'] === $column) {
             $this->sortBy['direction'] = $this->sortBy['direction'] === 'asc' ? 'desc' : 'asc';
         } else {
             $this->sortBy['column'] = $column;
             $this->sortBy['direction'] = 'asc';
         }
+
         $this->resetPage();
     }
 
@@ -107,10 +123,24 @@ class Index extends Component
     {
         return Category::query()
             ->when($this->search, function ($query) {
-                $query->where('name', 'like', "%{$this->search}%");
+                $query->where('name', 'like', "%{$this->search}%")
+                      ->orWhere('slug', 'like', "%{$this->search}%");
             })
-            ->orderBy($this->sortBy['column'], $this->sortBy['direction'])
+            ->when($this->isSortable($this->sortBy['column']), function ($query) {
+                $query->orderBy($this->sortBy['column'], $this->sortBy['direction']);
+            })
             ->paginate(10);
+    }
+
+    /**
+     * Vérifie si la colonne est triable.
+     */
+    protected function isSortable(string $column): bool
+    {
+        return collect($this->headers())
+            ->filter(fn($header) => $header['sortable'] ?? false)
+            ->pluck('key')
+            ->contains($column);
     }
 
     /**
@@ -119,9 +149,11 @@ class Index extends Component
     public function headers(): array
     {
         return [
-            ['key' => 'name', 'label' => 'Nom'],
-            ['key' => 'description', 'label' => 'Description'],
-            ['key' => 'actions', 'label' => 'Actions'],
+            ['key' => 'name', 'label' => 'Nom', 'sortable' => true],
+            ['key' => 'slug', 'label' => 'Slug', 'sortable' => true],
+            ['key' => 'description', 'label' => 'Description', 'sortable' => false],
+            ['key' => 'created_at', 'label' => 'Créé le', 'sortable' => true],
+            ['key' => 'actions', 'label' => 'Actions', 'sortable' => false],
         ];
     }
 

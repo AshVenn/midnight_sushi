@@ -1,21 +1,14 @@
 <x-card title="Créer une Catégorie">
     <x-form wire:submit.prevent="save">
         {{-- Nom --}}
-        <x-input 
-            wire:model.defer="name" 
-            label="Nom de la Catégorie" 
-            placeholder="Entrez le nom de la catégorie" 
-        />
+        <x-input wire:model="name" label="Nom" placeholder="Entrez le nom de la catégorie" />
+
+        {{-- Slug --}}
+        <x-input wire:model="slug" label="Slug (optionnel)" placeholder="Laissez vide pour auto-générer" />
 
         {{-- Description --}}
-        <x-textarea 
-            wire:model.defer="description" 
-            label="Description" 
-            placeholder="Entrez une brève description de la catégorie" 
-            rows="5" 
-        />
+        <x-textarea wire:model="description" label="Description" placeholder="Entrez une description" rows="4" />
 
-        {{-- Boutons d'Action --}}
         <x-slot:actions>
             <x-button label="Annuler" link="{{ route('admin.categories.index') }}" />
             <x-button label="Créer la Catégorie" type="submit" class="btn-primary" />

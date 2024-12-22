@@ -6,6 +6,7 @@ use App\Models\Category;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Mary\Traits\Toast;
+use Illuminate\Support\Str;
 
 class Edit extends Component
 {
@@ -13,6 +14,7 @@ class Edit extends Component
 
     public Category $category;
     public string $name = '';
+    public string $slug = '';
     public string $description = '';
 
     /**
@@ -22,6 +24,7 @@ class Edit extends Component
     {
         $this->category = $category;
         $this->name = $category->name;
+        $this->slug = $category->slug ?? '';
         $this->description = $category->description ?? '';
     }
 
@@ -32,6 +35,7 @@ class Edit extends Component
     {
         return [
             'name' => 'required|string|max:255|unique:categories,name,' . $this->category->id,
+            'slug' => 'nullable|string|max:255|unique:categories,slug,' . $this->category->id,
             'description' => 'nullable|string|max:500',
         ];
     }
@@ -55,6 +59,7 @@ class Edit extends Component
 
             $this->category->update([
                 'name' => $this->name,
+                'slug' => $this->slug ?: Str::slug($this->name),
                 'description' => $this->description,
             ]);
 

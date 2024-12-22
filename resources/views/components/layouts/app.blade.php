@@ -27,6 +27,7 @@
 
         <x-slot:actions>
             <x-theme-toggle class="btn btn-circle" />
+            <x-button class="btn btn-circle" icon="o-shopping-cart"/>
             @if(auth()->check())
             <form method="POST" action="{{ route('logout') }}">
                         @csrf
@@ -37,17 +38,6 @@
                     <x-button label="À propos" link="/about" class="btn-ghost font-bold" />
                     <x-button label="Contact" link="/contact" class="btn-ghost font-bold" />
                     <x-button label="Login" icon="o-user" link="/login" class="btn-primary ml-2" />
-                </div>
-                <div class="lg:hidden block">
-                    <x-dropdown icon="o-cog-8-tooth" class="btn-circle">
-                        <x-menu-separator />
-                        <x-menu-item @click.stop="">
-                            <x-checkbox label="Activate" />
-                        </x-menu-item>
-                        <x-menu-item @click.stop="">
-                            <x-toggle label="Sleep mode" right />
-                        </x-menu-item>
-                    </x-dropdown>
                 </div>
 
 
@@ -80,6 +70,7 @@
                         <x-menu-item title="Utilisateurs" icon="o-users" link="/admin/users" />
                         <x-menu-item title="Catégories" icon="o-clipboard-document-list" link="/admin/categories" />
                         <x-menu-item title="Produits" icon="o-shopping-bag" link="/admin/products" />
+                        <x-menu-item title="Menus" icon="o-swatch" link="/admin/menus" />
                         <x-menu-sub title="Gestion" icon="o-user-group">
                             <x-menu-item title="Commandes" icon="s-shopping-cart" link="/admin/orders" />
                             <x-menu-item title="Livraisons" icon="o-truck" link="/admin/deliveries" />

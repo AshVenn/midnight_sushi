@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use Illuminate\Support\Carbon;
 
 class Product extends Model
 {
@@ -26,6 +27,9 @@ class Product extends Model
 
     protected $casts = [
         'allergens' => 'array',
+        'promotion_start' => 'datetime',
+        'promotion_end' => 'datetime',
+        'is_available' => 'boolean',
     ];
 
     protected static function boot()
@@ -33,25 +37,31 @@ class Product extends Model
         parent::boot();
 
         static::saving(function ($product) {
-            // Generate slug if empty
             if (empty($product->slug)) {
                 $product->slug = Str::slug($product->name);
             }
         });
     }
 
+    /**
+     * Relationship with Category
+     */
     public function category()
     {
         return $this->belongsTo(Category::class);
     }
 
-    // Polymorphic relation: one product can be an "orderable" item
+    /**
+     * Polymorphic relation: one product can be an "orderable" item
+     */
     public function orderItems()
     {
         return $this->morphMany(OrderItem::class, 'orderable');
     }
 
-    // Many-to-many with Menu
+    /**
+     * Many-to-many relationship with Menu
+     */
     public function menus()
     {
         return $this->belongsToMany(Menu::class, 'menu_product')
@@ -59,17 +69,21 @@ class Product extends Model
                     ->withTimestamps();
     }
 
-    // Check if product is in discount period
-    public function isOnPromotion()
+    /**
+     * Check if product is currently on promotion
+     */
+    public function isOnPromotion(): bool
     {
-        return $this->discount_price !== null
-            && $this->promotion_start <= now()
-            && $this->promotion_end >= now();
+        return !is_null($this->discount_price) &&
+            (!$this->promotion_start || $this->promotion_start->isPast()) &&
+            (!$this->promotion_end || $this->promotion_end->isFuture());
     }
 
-    // Avoid recursion by using $originalPrice
-    public function getPriceAttribute($originalPrice)
+    /**
+     * Accessor for Price with Promotion Check
+     */
+    public function getFinalPriceAttribute(): float
     {
-        return $this->isOnPromotion() ? $this->discount_price : $originalPrice;
+        return $this->isOnPromotion() ? $this->discount_price : $this->price;
     }
 }

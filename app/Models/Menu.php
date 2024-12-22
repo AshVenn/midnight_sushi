@@ -18,6 +18,7 @@ class Menu extends Model
         'discount_price',
         'promotion_start',
         'promotion_end',
+        'image',
     ];
 
     protected static function boot()

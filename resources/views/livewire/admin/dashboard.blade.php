@@ -12,11 +12,11 @@
         <div class="flex flex-wrap justify-between gap-4 mb-6">
             <div class="flex-1 min-w-[300px] shadow-lg p-4">
                 <h3 class="text-lg font-semibold mb-2">Revenu Brut</h3>
-                <x-chart wire:model="grossRevenueChart" class="h-64" />
+                <x-chart :config="$grossRevenueChart" class="h-64" />
             </div>
             <div class="flex-1 min-w-[300px] shadow-lg p-4">
                 <h3 class="text-lg font-semibold mb-2">Catégories de Produits</h3>
-                <x-chart wire:model="productCategoryChart" class="h-64" />
+                <x-chart :config="$productCategoryChart" class="h-64" />
             </div>
         </div>
 
@@ -26,7 +26,7 @@
             <div class="flex-1 min-w-[300px] shadow-lg p-4">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-lg font-semibold">Meilleurs Clients</h3>
-                    <x-button icon="o-arrow-long-right" link="/admin/users" label="Voir Tout" class="btn-ghost btn-sm" />
+                    <x-button icon="o-arrow-long-right" link="{{ route('admin.users.index') }}" label="Voir Tout" class="btn-ghost btn-sm" />
                 </div>
                 <x-table :headers="$topCustomersHeaders" :rows="$topCustomersRows">
                     @scope('cell_name', $row)
@@ -47,7 +47,7 @@
             <div class="flex-1 min-w-[300px] shadow-lg p-4">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-lg font-semibold">Produits les Plus Vendus</h3>
-                    <x-button icon="o-arrow-long-right" link="/admin/products" label="Voir Tout" class="btn-ghost btn-sm" />
+                    <x-button icon="o-arrow-long-right" link="{{ route('admin.products.index') }}" label="Voir Tout" class="btn-ghost btn-sm" />
                 </div>
                 <x-table :headers="$bestSellingProductsHeaders" :rows="$bestSellingProductsRows">
                     @scope('cell_name', $row)
