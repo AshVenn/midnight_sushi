@@ -11,8 +11,8 @@
 
         <!-- Discount Price + Promotion Start / End -->
         <x-input wire:model="discount_price" label="Prix Promo" type="number" step="0.01" placeholder="Entrez le prix promotionnel (facultatif)" />
-        <x-datetime-picker wire:model="promotion_start" label="Début de la Promotion (facultatif)" />
-        <x-datetime-picker wire:model="promotion_end" label="Fin de la Promotion (facultatif)" />
+        <x-datepicker wire:model="promotion_start" label="Début de la Promotion (facultatif)" />
+        <x-datepicker wire:model="promotion_end" label="Fin de la Promotion (facultatif)" />
 
         <!-- Description -->
         <x-textarea wire:model="description" label="Description" placeholder="Entrez la description du produit" rows="4" />

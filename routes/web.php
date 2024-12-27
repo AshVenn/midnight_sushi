@@ -6,8 +6,7 @@ use App\Livewire\Home\Home;
 use App\Livewire\About\About;
 use App\Livewire\FAQ\FAQ;
 
-use App\Http\Controllers\Roles\CustomerController;
-use App\Http\Controllers\Roles\ManagerController;
+
 
 
 //Admin Dashboard Controller
@@ -51,7 +50,10 @@ use App\Livewire\DeliveryPerson\Settings as DeliveryPersonSettings;
 use App\Livewire\DeliveryPerson\Components\Deliveries as DeliveryPersonDeliveries;
 use App\Livewire\DeliveryPerson\Components\PastDeliveries as DeliveryPersonPastDeliveries;
 
-
+//Customer Cart Controller
+use App\Livewire\Cart as CartPage;
+use App\Livewire\Checkout;
+use App\Livewire\MenusProductsPage;
 
 //Home View
 Route::get('/', Home::class)->name('home');
@@ -66,6 +68,12 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::get('/about', About::class)->name('about');
 Route::get('/faq', FAQ::class)->name('faq');
+
+Route::get('/cart',CartPage::class)->name('cart');
+Route::get('/checkout', Checkout::class)->name('checkout')->middleware('auth');
+Route::get('/menus-products', MenusProductsPage::class)->name('menus-products');
+
+
 
 // Protected routes
 Route::middleware(['auth'])->group(function () {
@@ -107,12 +115,12 @@ Route::middleware(['auth'])->group(function () {
 
     // Customer routes
     Route::middleware(['role:customer'])->group(function () {
-        Route::get('/customer/dashboard', [CustomerController::class, 'dashboard'])->name('customer.dashboard');
+        
     });
 
     // Manager routes
     Route::middleware(['role:manager'])->group(function () {
-        Route::get('/manager/dashboard', [ManagerController::class, 'dashboard'])->name('manager.dashboard');
+        
     });
 
     // Delivery Person routes

@@ -22,12 +22,17 @@
             <label for="main-drawer" class="lg:hidden mr-3">
                 <x-icon name="o-bars-3" class="cursor-pointer" />
             </label>
-            <div class="text-2xl font-bold text-primary italic">{{config('app.name')}}</div>
+            <img 
+                src="/Needs/Logo midnight sushi2.svg" 
+                alt="Midnight Sushi"
+                class="h-24"
+                />
+                <!-- <div class="text-2xl font-bold text-primary italic">{{config('app.name')}}</div> -->
         </x-slot:brand>
 
         <x-slot:actions>
             <x-theme-toggle class="btn btn-circle" />
-            <x-button class="btn btn-circle" icon="o-shopping-cart"/>
+            @livewire('cart')
             @if(auth()->check())
             <form method="POST" action="{{ route('logout') }}">
                         @csrf
@@ -35,8 +40,6 @@
             </form>
             @else
                 <div class="hidden md:flex space-x-6">
-                    <x-button label="À propos" link="/about" class="btn-ghost font-bold" />
-                    <x-button label="Contact" link="/contact" class="btn-ghost font-bold" />
                     <x-button label="Login" icon="o-user" link="/login" class="btn-primary ml-2" />
                 </div>
 
@@ -85,7 +88,7 @@
                         <x-menu activate-by-route>
                             <x-menu-item title="Profile" icon="o-user" link="/customer/profile" />
                             <x-menu-item title="Orders" icon="o-shopping-cart" link="/customer/orders" />
-                            <x-menu-item title="Support" icon="o-support" link="/customer/support" />
+                            <x-menu-item title="Support" icon="o-information-circle" link="/customer/support" />
                         </x-menu>
                         @break
 
@@ -123,8 +126,11 @@
                 {{-- Default Sidebar for Guests --}}
                 <x-menu activate-by-route>
                     <x-menu-item title="Home" icon="o-home" link="/" />
+                    <x-menu-item title="Menus & Produits" icon="o-swatch" link="{{ route('menus-products') }}" />
                     <x-menu-item title="À propos" icon="o-information-circle" link="/about" />
                     <x-menu-item title="Contact" icon="o-envelope" link="/contact" />
+                    <x-menu-item title="Faq" icon="o-question-mark-circle" link="/faq" />
+
                 </x-menu>
             @endif
         </x-slot:sidebar>

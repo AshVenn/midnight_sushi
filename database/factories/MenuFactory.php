@@ -22,6 +22,7 @@ class MenuFactory extends Factory
             'discount_price' => null,
             'promotion_start' => null,
             'promotion_end' => null,
+            'image' => $this->faker->imageUrl(320, 240, 'food', true),
         ];
     }
 }

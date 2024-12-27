@@ -1,7 +1,14 @@
+@import '@fontsource/figtree';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+
+
+
+body {
+    @apply font-sans;
+}
 
 /* Active page highlight */
 .mary-table-pagination span[aria-current="page"] > span {
