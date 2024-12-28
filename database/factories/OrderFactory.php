@@ -21,6 +21,7 @@ class OrderFactory extends Factory
             'status' => $this->faker->randomElement(['pending', 'confirmed', 'preparing', 'ready', 'out_for_delivery', 'delivered', 'cancelled']),
             'payment_method' => $this->faker->randomElement(['credit_card', 'paypal', 'cash']),
             'payment_status' => $this->faker->randomElement(['paid', 'unpaid']),
+            'notes'=>$this->faker->sentence(),
         ];
     }
 }

@@ -12,11 +12,11 @@
         <div class="flex flex-wrap justify-between gap-4 mb-6">
             <div class="flex-1 min-w-[300px] shadow-lg p-4">
                 <h3 class="text-lg font-semibold mb-2">Revenu Brut</h3>
-                <x-chart :config="$grossRevenueChart" class="h-64" />
+                <x-chart wire:model="grossRevenueChart" class="h-64" />
             </div>
             <div class="flex-1 min-w-[300px] shadow-lg p-4">
                 <h3 class="text-lg font-semibold mb-2">Catégories de Produits</h3>
-                <x-chart :config="$productCategoryChart" class="h-64" />
+                <x-chart wire:model="productCategoryChart" class="h-64" />
             </div>
         </div>
 

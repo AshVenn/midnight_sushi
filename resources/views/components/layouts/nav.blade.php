@@ -19,13 +19,13 @@
         </x-slot:brand>
 
         <x-slot:actions>
-            <x-button label="About" link="/about" class="btn-ghost font-bold" />
+            <x-button label="A propos" link="/about" class="btn-ghost font-bold" />
             <x-button label="Contact" link="/contact" class="btn-ghost font-bold" />
             <x-theme-toggle class="btn btn-circle" />
             @if(auth()->check())
-                <x-button label="Logout" icon="o-power" link="/logout" class="btn-primary" />
+                <x-button label="Déconnexion" icon="o-power" link="/logout" class="btn-primary" />
             @else
-                <x-button label="Login" icon="o-user" link="/login" class="btn-primary" />
+                <x-button label="Se connecter" icon="o-user" link="/login" class="btn-primary" />
             @endif
         </x-slot:actions>
     </x-nav>

@@ -1,41 +1,90 @@
-<div>
-    <x-card title="Paramètres du Livreur">
-        <x-form wire:submit.prevent="save">
-            {{-- Prénom --}}
-            <x-input wire:model="first_name" label="Prénom" placeholder="Entrez votre prénom" />
+<div class="p-4 md:p-6">
+    <x-card title="Paramètres du Livreur" separator>
+        <x-form wire:submit.prevent="save" class="space-y-6">
+            {{-- Row 1: Prénom & Nom --}}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <x-input
+                    wire:model="first_name"
+                    label="Prénom"
+                    placeholder="Entrez votre prénom"
+                />
+                <x-input
+                    wire:model="last_name"
+                    label="Nom"
+                    placeholder="Entrez votre nom"
+                />
+            </div>
 
-            {{-- Nom --}}
-            <x-input wire:model="last_name" label="Nom" placeholder="Entrez votre nom" />
+            {{-- Row 2: Email & Téléphone --}}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <x-input
+                    wire:model="email"
+                    label="Email"
+                    type="email"
+                    placeholder="Entrez votre email"
+                />
+                <x-input
+                    wire:model="phone_number"
+                    label="Numéro de Téléphone"
+                    placeholder="Entrez votre numéro de téléphone"
+                />
+            </div>
 
-            {{-- Email --}}
-            <x-input wire:model="email" label="Email" type="email" placeholder="Entrez votre email" />
+            {{-- Row 3: Password & Confirm Password --}}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <x-input
+                    wire:model="password"
+                    label="Mot de Passe"
+                    type="password"
+                    placeholder="Entrez un nouveau mot de passe (facultatif)"
+                />
+                <x-input
+                    wire:model="confirm_password"
+                    label="Confirmer le Mot de Passe"
+                    type="password"
+                    placeholder="Confirmez votre mot de passe"
+                />
+            </div>
 
-            {{-- Téléphone --}}
-            <x-input wire:model="phone_number" label="Numéro de Téléphone" placeholder="Entrez votre numéro de téléphone" />
+            {{-- Avatar Upload + Preview --}}
+            <div class="space-y-4">
+                <x-file
+                    wire:model="avatar"
+                    label="Photo de Profil"
+                    accept="image/*"
+                />
 
-            {{-- Mot de Passe --}}
-            <x-input wire:model="password" label="Mot de Passe" type="password" placeholder="Entrez un nouveau mot de passe (facultatif)" />
-            <x-input wire:model="confirm_password" label="Confirmer le Mot de Passe" type="password" placeholder="Confirmez votre mot de passe" />
+                {{-- Aperçu de l'Avatar (Ancien) --}}
+                @if ($oldAvatarUrl)
+                    <img
+                        src="{{ $oldAvatarUrl }}"
+                        class="h-40 w-full md:w-1/2 object-cover rounded-lg mt-2"
+                        alt="Avatar Actuel"
+                    />
+                @endif
 
-            {{-- Téléchargement de l'Avatar --}}
-            <x-file wire:model="avatar" label="Photo de Profil" accept="image/*" />
-
-            {{-- Aperçu de l'Avatar --}}
-            @if ($oldAvatarUrl)
-                <img src="{{ $oldAvatarUrl }}" class="h-40 rounded-lg mt-2" alt="Avatar Actuel" />
-            @endif
-
-            @if ($avatar)
-                <img src="{{ $avatar->temporaryUrl() }}" class="h-40 rounded-lg mt-2" alt="Aperçu de l'Avatar" />
-            @endif
+                {{-- Aperçu de l'Avatar (Nouveau) --}}
+                @if ($avatar)
+                    <img
+                        src="{{ $avatar->temporaryUrl() }}"
+                        class="h-40 w-full md:w-1/2 object-cover rounded-lg mt-2"
+                        alt="Aperçu de l'Avatar"
+                    />
+                @endif
+            </div>
 
             {{-- Boutons d'Action --}}
-            <x-slot:actions>
-                <x-button label="Sauvegarder les Modifications" type="submit" class="btn-primary" />
-            </x-slot:actions>
+            <div class="flex flex-col md:flex-row md:justify-end gap-4 mt-6">
+                <x-button
+                    label="Sauvegarder les Modifications"
+                    type="submit"
+                    class="btn-primary w-full md:w-auto"
+                />
+            </div>
         </x-form>
 
         {{-- Toast Message --}}
         <x-toast />
     </x-card>
 </div>
+    

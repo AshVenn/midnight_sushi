@@ -1,6 +1,6 @@
 <x-card title="Gestion des Commandes" separator>
     {{-- Modal des Filtres --}}
-    <x-modal wire:model="showFiltersModal" title="Filtres" right separator with-close-button>
+    <x-modal wire:model="showFiltersModal" title="Filtres" wire:key="orders-filters-modal" right separator with-close-button>
         <div class="space-y-4">
             <p class="text-center font-semibold">Filtrer par divers critères :</p>
 

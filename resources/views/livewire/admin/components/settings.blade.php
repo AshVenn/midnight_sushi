@@ -1,36 +1,75 @@
-<x-card title="Admin Settings">
+<x-card title="Paramètres Administrateur">
     <x-form wire:submit.prevent="save">
-        {{-- First Name --}}
-        <x-input wire:model="first_name" label="First Name" placeholder="Enter your first name" />
+        {{-- Prénom --}}
+        <x-input 
+            wire:model="first_name" 
+            label="Prénom" 
+            placeholder="Entrez votre prénom" 
+        />
 
-        {{-- Last Name --}}
-        <x-input wire:model="last_name" label="Last Name" placeholder="Enter your last name" />
+        {{-- Nom --}}
+        <x-input 
+            wire:model="last_name" 
+            label="Nom" 
+            placeholder="Entrez votre nom" 
+        />
 
-        {{-- Email --}}
-        <x-input wire:model="email" label="Email" type="email" placeholder="Enter your email" />
+        {{-- E-mail --}}
+        <x-input 
+            wire:model="email" 
+            label="E-mail" 
+            type="email" 
+            placeholder="Entrez votre adresse e-mail" 
+        />
 
-        {{-- Password --}}
-        <x-input wire:model="password" label="Password" type="password" placeholder="Enter new password (optional)" />
-        <x-input wire:model="confirm_password" label="Confirm Password" type="password" placeholder="Confirm your password" />
+        {{-- Mot de passe --}}
+        <x-input 
+            wire:model="password" 
+            label="Mot de passe" 
+            type="password" 
+            placeholder="Entrez un nouveau mot de passe (optionnel)" 
+        />
+        <x-input 
+            wire:model="confirm_password" 
+            label="Confirmez le mot de passe" 
+            type="password" 
+            placeholder="Confirmez votre mot de passe" 
+        />
 
-        {{-- Avatar Upload --}}
-        <x-file wire:model="avatar" label="Profile Picture" accept="image/*" />
+        {{-- Photo de Profil --}}
+        <x-file 
+            wire:model="avatar" 
+            label="Photo de Profil" 
+            accept="image/*" 
+        />
 
-        {{-- Avatar Preview --}}
+        {{-- Aperçu de la photo --}}
         @if ($oldAvatarUrl)
-            <img src="{{ $oldAvatarUrl }}" class="h-40 rounded-lg mt-2" alt="Current Avatar" />
+            <img 
+                src="{{ $oldAvatarUrl }}" 
+                class="h-40 rounded-lg mt-2" 
+                alt="Avatar actuel" 
+            />
         @endif
 
         @if ($avatar)
-            <img src="{{ $avatar->temporaryUrl() }}" class="h-40 rounded-lg mt-2" alt="New Avatar Preview" />
+            <img 
+                src="{{ $avatar->temporaryUrl() }}" 
+                class="h-40 rounded-lg mt-2" 
+                alt="Aperçu du nouvel avatar" 
+            />
         @endif
 
-        {{-- Action Buttons --}}
+        {{-- Boutons d'action --}}
         <x-slot:actions>
-            <x-button label="Save Changes" type="submit" class="btn-primary" />
+            <x-button 
+                label="Enregistrer les modifications" 
+                type="submit" 
+                class="btn-primary" 
+            />
         </x-slot:actions>
     </x-form>
 
-    {{-- Toast Message Placeholder --}}
+    {{-- Espace réservé pour le message Toast --}}
     <x-toast />
 </x-card>

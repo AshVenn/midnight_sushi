@@ -40,7 +40,7 @@
             </form>
             @else
                 <div class="hidden md:flex space-x-6">
-                    <x-button label="Login" icon="o-user" link="/login" class="btn-primary ml-2" />
+                    <x-button label="Se Connecter" icon="o-user" link="/login" class="btn-primary ml-2" />
                 </div>
 
 

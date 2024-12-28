@@ -17,9 +17,15 @@ class Deliveries extends Component
     public string $statusFilter = 'all';
     public ?string $startDate = null;
     public ?string $endDate = null;
+
     public array $sortBy = ['column' => 'assigned_at', 'direction' => 'desc'];
+
     public ?int $selectedDeliveryId = null;
     public ?string $selectedAction = null;
+
+    // 1) NEW: For showing delivery details in a modal
+    public bool $showDeliveryDetailsModal = false;
+    public ?Delivery $deliveryToShow = null;
 
     public function mount(): void
     {
@@ -58,7 +64,8 @@ class Deliveries extends Component
         }
 
         if ($this->sortBy['column'] === $column) {
-            $this->sortBy['direction'] = $this->sortBy['direction'] === 'asc' ? 'desc' : 'asc';
+            $this->sortBy['direction'] = 
+                $this->sortBy['direction'] === 'asc' ? 'desc' : 'asc';
         } else {
             $this->sortBy['column'] = $column;
             $this->sortBy['direction'] = 'asc';
@@ -70,13 +77,13 @@ class Deliveries extends Component
     public function headers(): array
     {
         return [
-            ['key' => 'id', 'label' => 'ID Livraison', 'sortable' => true],
-            ['key' => 'order_id', 'label' => 'ID Commande', 'sortable' => true],
-            ['key' => 'customer', 'label' => 'Client', 'sortable' => false],
-            ['key' => 'address_text', 'label' => 'Adresse', 'sortable' => false],
-            ['key' => 'status', 'label' => 'Statut', 'sortable' => true],
-            ['key' => 'assigned_at', 'label' => 'Assignée le', 'sortable' => true],
-            ['key' => 'actions', 'label' => 'Actions', 'sortable' => true],
+            ['key' => 'id',           'label' => 'ID Livraison', 'sortable' => true],
+            ['key' => 'order_id',     'label' => 'ID Commande',  'sortable' => true],
+            ['key' => 'customer',     'label' => 'Client',       'sortable' => false],
+            ['key' => 'address_text', 'label' => 'Adresse',      'sortable' => false],
+            ['key' => 'status',       'label' => 'Statut',       'sortable' => true],
+            ['key' => 'assigned_at',  'label' => 'Assignée le',  'sortable' => true],
+            ['key' => 'actions',      'label' => 'Actions',      'sortable' => false],
         ];
     }
 
@@ -122,16 +129,44 @@ class Deliveries extends Component
         $this->success('Livraison marquée comme livrée.');
     }
 
+    /**
+     * 2) NEW: Show details of a delivery in a modal
+     */
+    public function showDeliveryDetails(int $deliveryId): void
+    {
+        // Make sure we retrieve enough info about the order and customer
+        $delivery = Delivery::with(['order.customer', 'order.orderItems.orderable'])
+            ->where('delivery_person_id', Auth::id()) // Ensure the user can only see their deliveries
+            ->find($deliveryId);
+
+        if (!$delivery) {
+            $this->error('Livraison introuvable.');
+            return;
+        }
+
+        $this->deliveryToShow = $delivery;
+        $this->showDeliveryDetailsModal = true;
+    }
+
+    /**
+     * 3) NEW: Close the details modal
+     */
+    public function closeDeliveryDetailsModal(): void
+    {
+        $this->reset(['deliveryToShow', 'showDeliveryDetailsModal']);
+    }
+
     public function getDeliveriesProperty()
     {
         return Delivery::where('delivery_person_id', Auth::id())
-            ->whereNotIn('status', ['delivered'])
+            ->whereNotIn('status', ['delivered']) // If you want to exclude 'delivered' from the listing
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
                     $q->where('id', 'like', "%{$this->search}%")
                       ->orWhere('order_id', 'like', "%{$this->search}%")
                       ->orWhereHas('order.customer', function ($customerQuery) {
-                          $customerQuery->where('first_name', 'like', "%{$this->search}%")
+                          $customerQuery
+                              ->where('first_name', 'like', "%{$this->search}%")
                               ->orWhere('last_name', 'like', "%{$this->search}%")
                               ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$this->search}%"]);
                       });
@@ -150,13 +185,12 @@ class Deliveries extends Component
             })
             ->paginate(10);
     }
-    
 
     public function render()
     {
         return view('livewire.delivery-person.components.deliveries', [
             'deliveries' => $this->deliveries,
-            'headers' => $this->headers(),
+            'headers'    => $this->headers(),
         ]);
     }
 }

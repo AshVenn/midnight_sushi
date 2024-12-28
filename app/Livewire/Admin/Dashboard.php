@@ -86,24 +86,28 @@ class Dashboard extends Component
                 ['key' => 'price', 'label' => 'Prix'],
                 ['key' => 'sales', 'label' => 'Ventes'],
             ];
+          
     
-            $this->bestSellingProductsRows = Product::with('orderItems.order') // Charge les relations nécessaires
-            ->withCount(['orderItems as total_sales' => function ($query) {
+            $this->bestSellingProductsRows = Product::withCount(['orderItems as total_sales' => function ($query) {
                 $query->whereHas('order', function ($q) {
-                    $q->where('status', '!=', 'cancelled'); // Exclut les commandes annulées
+                    $q->where('status', '!=', 'cancelled');
                 });
             }])
-            ->orderByDesc('total_sales') // Trie par les ventes totales
-            ->limit(5) // Limite aux 5 meilleurs produits
-            ->get()
+            ->orderByDesc('total_sales')
+            ->limit(5)
+            ->get(['id', 'name', 'price', 'total_sales'])
             ->map(function ($product) {
                 return [
-                    'name' => isset($product->name) && is_string($product->name) ? $product->name : 'N/A',
-                    'price' => isset($product->price) ? $product->price : 0,
-                    'sales' => isset($product->total_sales) ? $product->total_sales : 0,
+                    'name' => $product->name ?? 'N/A',
+                    'price' => $product->price ?? 0,
+                    'sales' => $product->total_sales ?? 0,
                 ];
             })
             ->toArray();
+
+           
+
+            
         
             // Commandes récentes (Recent Orders)
             $this->recentOrdersHeaders = [
@@ -116,12 +120,14 @@ class Dashboard extends Component
     
             $this->topCustomersRows = User::where('role', 'customer')
             ->withSum(['orders as orders_sum_total_price' => function ($query) {
-                $query->whereNotIn('status', ['annulé']);
+                $query->whereNotIn('status', ['cancelled']);
             }], 'total_price')
             ->orderByDesc('orders_sum_total_price')
             ->limit(5)
             ->get()
             ->toArray();
+
+            
 
         
     
@@ -135,13 +141,34 @@ class Dashboard extends Component
                         [
                             'label' => 'Produits par catégorie',
                             'data' => $categories->pluck('products_count')->toArray(),
+                            'backgroundColor' => [
+                                'rgba(255, 99, 132, 0.2)',
+                                'rgba(54, 162, 235, 0.2)',
+                                'rgba(255, 206, 86, 0.2)',
+                                'rgba(75, 192, 192, 0.2)',
+                                'rgba(153, 102, 255, 0.2)',
+                                'rgba(255, 159, 64, 0.2)',
+                            ],
+                            'borderColor' => [
+                                'rgba(255, 99, 132, 1)',
+                                'rgba(54, 162, 235, 1)',
+                                'rgba(255, 206, 86, 1)',
+                                'rgba(75, 192, 192, 1)',
+                                'rgba(153, 102, 255, 1)',
+                                'rgba(255, 159, 64, 1)',
+                            ],
+                            'borderWidth' => 1,
                         ]
                     ]
                 ]
             ];
+
+            
+        
+        
     
             // Revenus bruts (Gross Revenue Chart - Line)
-            $grossRevenueData = Order::where('status', '!=', 'cancelled') // Exclut les commandes annulées
+            $grossRevenueData = Order::where('status', '!=', 'cancelled') 
             ->get()
             ->groupBy(function ($order) {
                 // Regroupe les commandes par année et mois
@@ -159,6 +186,10 @@ class Dashboard extends Component
                 // Retourne sous forme de clé-valeur
                 return ["$monthName $year" => floatval($revenue)];
             });
+
+           
+
+            
     
             $this->grossRevenueChart = [
                 'type' => 'line',
@@ -168,10 +199,30 @@ class Dashboard extends Component
                         [
                             'label' => 'Revenus (€)',
                             'data' => $grossRevenueData->values()->toArray(),
+                            'fill' => true,
+                            'backgroundColor' => 'rgba(75, 192, 192, 0.2)',
+                            'borderColor' => 'rgba(75, 192, 192, 1)',
+                            'borderWidth' => 1,
                         ]
                     ]
-                ]
+                ],
+                'options' => [
+                    'responsive' => true,
+                    'scales' => [
+                        'y' => [
+                            'beginAtZero' => true,
+                            'title' => ['display' => true, 'text' => 'Montant (€)'],
+                        ],
+                        'x' => [
+                            'title' => ['display' => true, 'text' => 'Mois'],
+                        ]
+                    ],
+                    'plugins' => [
+                        'legend' => ['position' => 'top'],
+                    ],
+                ],
             ];
+            
         } catch (\Exception $e) {
             // Handle exceptions and optionally show an error toast
             $this->error(
