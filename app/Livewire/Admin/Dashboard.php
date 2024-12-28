@@ -65,7 +65,7 @@ class Dashboard extends Component
     
             $this->topCustomersRows = User::where('role', 'customer')
                 ->withSum(['orders as orders_sum_total_price' => function ($query) {
-                    $query->whereNotIn('status', ['cancelled']); // Updated status
+                    $query->whereNotIn('status', ['cancelled']);
                 }], 'total_price')
                 ->orderByDesc('orders_sum_total_price')
                 ->limit(5)
@@ -78,6 +78,8 @@ class Dashboard extends Component
                     ];
                 })
                 ->toArray();
+
+            // dd($this->topCustomersRows);
                 
     
             // Produits les plus vendus (Best Selling Products)
@@ -118,15 +120,6 @@ class Dashboard extends Component
                 ['key' => 'status', 'label' => 'Statut'],
             ];
     
-            $this->topCustomersRows = User::where('role', 'customer')
-            ->withSum(['orders as orders_sum_total_price' => function ($query) {
-                $query->whereNotIn('status', ['cancelled']);
-            }], 'total_price')
-            ->orderByDesc('orders_sum_total_price')
-            ->limit(5)
-            ->get()
-            ->toArray();
-
             
 
         
