@@ -22,12 +22,12 @@
             <label for="main-drawer" class="lg:hidden mr-3">
                 <x-icon name="o-bars-3" class="cursor-pointer" />
             </label>
-            <img 
+            <!-- <img 
                 src="/Needs/Logo midnight sushi2.svg" 
                 alt="Midnight Sushi"
                 class="h-24"
-                />
-                <!-- <div class="text-2xl font-bold text-primary italic">{{config('app.name')}}</div> -->
+                /> -->
+                <div class="text-4xl font-bold text-primary italic">{{config('app.name')}}</div>
         </x-slot:brand>
 
         <x-slot:actions>

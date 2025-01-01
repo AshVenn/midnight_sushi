@@ -40,7 +40,7 @@
     </div>
 
     <div class="text-center mt-8 opacity-0 translate-y-5 menu-button">
-        <x-button link="/menus" label="Voir le Menu Complet" class="btn-secondary" />
+        <x-button link="/menus-products" label="Voir le Menu Complet" class="btn-secondary" />
     </div>
 </div>
 

@@ -77,6 +77,6 @@ class MenusProducts extends Component
 
         Session::put('cart', $cart);
 
-        $this->dispatch('cartUpdated');
+        $this->dispatch('cartUpdated')->to('cart');
     }
 }

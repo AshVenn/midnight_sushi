@@ -20,7 +20,7 @@
                             <x-menu-item class="flex items-start">
                                 <x-avatar 
                                     image="{{ $item['image'] }}" 
-                                    class="w-12 h-12 object-cover rounded mr-2"
+                                    class="!w-14 !rounded-lg"
                                 >
                                     <x-slot:title class="text-lg font-semibold">
                                         {{ $item['name'] }}
