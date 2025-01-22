@@ -18,7 +18,7 @@
 <body class="font-sans antialiased">
     {{-- Navbar --}}
     <x-nav sticky full-width>
-        <x-slot:brand class="z-12">
+        <x-slot:brand class="z-12" link="/">
             <label for="main-drawer" class="lg:hidden mr-3">
                 <x-icon name="o-bars-3" class="cursor-pointer" />
             </label>

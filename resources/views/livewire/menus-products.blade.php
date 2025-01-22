@@ -22,6 +22,7 @@
                     <x-button
                         label="Ajouter" 
                         wire:click="addToCart('menu', {{ $menu->id }})"
+                        class="btn-secondary"
                     />
 
                     <!-- Button: Details -->
