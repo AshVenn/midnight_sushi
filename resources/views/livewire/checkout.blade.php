@@ -3,7 +3,7 @@
     <!-- IMAGE -->
     <div class="lg:col-span-2 flex items-center justify-center">
         <!-- Adaptez le chemin de l'image à vos besoins -->
-        <img src="/images/checkout.png" width="300" class="mx-auto" alt="Checkout Illustration" />
+        <img src="/images/sushi/checkout.png" width="250" class="mx-auto" alt="Checkout Illustration" />
     </div>
 
     @php

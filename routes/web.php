@@ -50,6 +50,10 @@ use App\Livewire\DeliveryPerson\Settings as DeliveryPersonSettings;
 use App\Livewire\DeliveryPerson\Components\Deliveries as DeliveryPersonDeliveries;
 use App\Livewire\DeliveryPerson\Components\PastDeliveries as DeliveryPersonPastDeliveries;
 
+//Customer Management Controllers
+use App\Livewire\Customer\Orders as CustomerOrdersComponent;
+use App\Livewire\Customer\OrderShow as CustomerOrderShowComponent;
+
 //Customer Cart Controller
 use App\Livewire\Cart as CartPage;
 use App\Livewire\Checkout;
@@ -115,6 +119,8 @@ Route::middleware(['auth'])->group(function () {
 
     // Customer routes
     Route::middleware(['role:customer'])->group(function () {
+        Route::get('/customer/orders', CustomerOrdersComponent::class)->name('customer.orders.index');
+        Route::get('/customer/orders/{order}', CustomerOrderShowComponent::class)->name('customer.orders.show');
         
     });
 
