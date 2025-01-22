@@ -1,67 +1,77 @@
 <div>
-    <x-dropdown no-x-anchor right>
+    <x-dropdown right>
         <x-slot:trigger>
-            <x-button 
-                class="btn btn-circle relative" 
+            <!-- Bouton Panier -->
+            <x-button
                 icon="o-shopping-cart"
+                class="btn-ghost btn-sm relative"
+                :badge="$totalItems" 
+                label="Cart"
             />
-            @if($totalItems > 0)
-                <x-badge :value="$totalItems" class="badge-error absolute -right-2 -top-2" />
-            @endif
         </x-slot:trigger>
 
-        <x-card class="w-80 p-4">
-            @if($totalItems > 0)
-                <h3 class="text-lg font-semibold mb-4">Votre Panier</h3>
-                <!-- Conteneur déroulant pour les articles du panier -->
-                <div class="max-h-60 overflow-y-auto space-y-2">
-                    @foreach($cart as $type => $items)
-                        @foreach($items as $item)
-                            <x-menu-item class="flex items-start">
-                                <x-avatar 
-                                    image="{{ $item['image'] }}" 
-                                    class="!w-14 !rounded-lg"
-                                >
-                                    <x-slot:title class="text-lg font-semibold">
-                                        {{ $item['name'] }}
-                                    </x-slot:title>
-
-                                    <x-slot:subtitle class="text-sm flex flex-col gap-1 mt-1">
-                                        <span>Quantité: {{ $item['quantity'] }}</span>
-                                        <x-badge class="badge-primary" :value="'€' . number_format($item['price'], 2)" />
-                                    </x-slot:subtitle>
-                                </x-avatar>
-                                
-                                <x-button 
-                                    icon="o-trash" 
-                                    class="btn-ghost btn-sm ml-auto mt-1" 
-                                    wire:click="removeItem('{{ $type }}', {{ $item['id'] }})"
-                                    tooltip="SSSupprimer"
+        @if($totalItems > 0)
+            <!-- Liste des Items -->
+            <div class="w-80 lg:w-96 mb-2">
+                @foreach($cart as $type => $items)
+                    @foreach($items as $item)
+                        <x-list-item 
+                            :item="$item" 
+                            value="name"
+                            :sub-value="'€' . number_format($item['price'], 2)" 
+                            avatar="image"
+                        >
+                            <x-slot:actions>
+                                <!-- Affiche la quantité dans un badge neutre -->
+                                <x-badge 
+                                    :value="$item['quantity']" 
+                                    class="badge-neutral" 
                                 />
-                            </x-menu-item>
-                        @endforeach
+
+                                <!-- Bouton pour supprimer l'item -->
+                                <x-button
+                                    icon="o-trash"
+                                    wire:click.stop="removeItem('{{ $type }}', {{ $item['id'] }})"
+                                    spinner="removeItem('{{ $type }}', {{ $item['id'] }})"
+                                    class="btn-sm btn-circle btn-ghost text-error"
+                                />
+                            </x-slot:actions>
+                        </x-list-item>
                     @endforeach
+                @endforeach
+            </div>
+
+            <!-- Totaux -->
+            <div class="flex justify-between items-center p-3">
+                <div>{{ $totalItems }} item(s)</div>
+                <div class="font-bold text-right text-lg">
+                    €{{ number_format($totalPrice, 2) }}
                 </div>
-                <!-- Total du panier -->
-                <div class="mt-4">
-                    <p class="font-bold">Total: €{{ number_format($totalPrice, 2) }}</p>
-                </div>
-                <!-- Actions du panier -->
-                <div class="mt-4 flex justify-between">
-                    <x-button 
-                        label="Vider le panier" 
-                        class="btn-outline btn-sm" 
-                        wire:click="clearCart"
-                    />
-                    <x-button 
-                        label="Passer à la caisse" 
-                        class="btn-primary btn-sm" 
-                        wire:click="proceedToCheckout"
-                    />
-                </div>
-            @else
-                <p class="text-center">Votre panier est vide.</p>
-            @endif
-        </x-card>
+            </div>
+
+            <x-menu-separator />
+
+            <!-- Actions -->
+            <div class="flex justify-between p-3">
+                <x-button
+                    label="Vider le panier"
+                    icon="o-trash"
+                    wire:click.stop="clearCart"
+                    spinner="clearCart"
+                    class="btn-ghost btn-sm text-error"
+                />
+                <x-button
+                    label="Passer à la caisse"
+                    icon-right="o-arrow-right"
+                    wire:click="proceedToCheckout"
+                    class="btn-primary btn-sm"
+                />
+            </div>
+        @else
+            <!-- Panier Vide -->
+            <div class="p-2">
+                <x-icon name="o-ellipsis-horizontal" label="Votre panier est vide" />
+            </div>
+        @endif
     </x-dropdown>
 </div>

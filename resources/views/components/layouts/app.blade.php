@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" >
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
@@ -18,16 +18,24 @@
 <body class="font-sans antialiased">
     {{-- Navbar --}}
     <x-nav sticky full-width>
-        <x-slot:brand>
+        <x-slot:brand class="z-12">
             <label for="main-drawer" class="lg:hidden mr-3">
                 <x-icon name="o-bars-3" class="cursor-pointer" />
             </label>
-            <!-- <img 
-                src="/Needs/Logo midnight sushi2.svg" 
+            <img 
+                src="/Needs/Logo midnight sushi Light.svg" 
                 alt="Midnight Sushi"
-                class="h-24"
-                /> -->
-                <div class="text-4xl font-bold text-primary italic">{{config('app.name')}}</div>
+                class="h-16 dark:hidden"
+            />
+
+            <img 
+                src="/Needs/Logo midnight sushi Dark.svg" 
+                alt="Midnight Sushi"
+                class="h-16 hidden dark:block"
+            />
+
+
+                
         </x-slot:brand>
 
         <x-slot:actions>
@@ -40,7 +48,7 @@
             </form>
             @else
                 <div class="hidden md:flex space-x-6">
-                    <x-button label="Se Connecter" icon="o-user" link="/login" class="btn-primary ml-2" />
+                    <x-button icon="o-user" link="/login" class=" btn-circle btn-ghost ml-2 " />
                 </div>
 
 

@@ -1,27 +1,123 @@
-<div class="container mx-auto p-4">
-    <h2 class="text-2xl font-bold mb-4">Passer à la caisse</h2>
+<!-- resources/views/livewire/checkout.blade.php -->
+<div class="grid lg:grid-cols-8 gap-10">
+    <!-- IMAGE -->
+    <div class="lg:col-span-2 flex items-center justify-center">
+        <!-- Adaptez le chemin de l'image à vos besoins -->
+        <img src="/images/checkout.png" width="300" class="mx-auto" alt="Checkout Illustration" />
+    </div>
 
-    <form wire:submit.prevent="placeOrder" class="max-w-lg mx-auto">
-        <div class="mb-4">
-            <label for="phone_number" class="block y">Numéro de téléphone</label>
-            <input type="text" id="phone_number" wire:model="phone_number" class="w-full px-4 py-2 border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" required>
-            @error('phone_number') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+    @php
+        // Récupération du panier en session
+        $cart = Session::get('cart', []);
+        $totalItems = 0;
+        $totalPrice = 0;
+
+        // Calcul du nombre total d'items et du prix total
+        foreach ($cart as $type => $items) {
+            foreach ($items as $item) {
+                $totalItems += $item['quantity'];
+                $totalPrice += ($item['price'] * $item['quantity']);
+            }
+        }
+    @endphp
+
+    @if($totalItems > 0)
+        <!-- LISTE DES ITEMS DU PANIER -->
+        <div class="lg:col-span-3">
+            <x-card title="Votre Panier" separator>
+                @foreach($cart as $type => $items)
+                    @foreach($items as $item)
+                        <x-list-item
+                            :item="$item"
+                            value="name"
+                            :sub-value="'€' . number_format($item['price'], 2)"
+                            avatar="image"
+                            no-separator
+                        >
+                            <x-slot:actions>
+                                <x-badge :value="$item['quantity']" class="badge-neutral" />
+                            </x-slot:actions>
+                        </x-list-item>
+                    @endforeach
+                @endforeach
+
+                <hr class="my-5" />
+
+                <!-- TOTAL -->
+                <div class="flex justify-between items-center mx-3">
+                    <div>Total</div>
+                    <div class="font-black text-lg">
+                        €{{ number_format($totalPrice, 2) }}
+                    </div>
+                </div>
+            </x-card>
         </div>
 
-        <div class="mb-4">
-            <label for="address_text" class="block y">Adresse</label>
-            <textarea id="address_text" wire:model="address_text" class="w-full px-4 py-2 border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" required></textarea>
-            @error('address_text') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-        </div>
+        <!-- FORMULAIRE 'ADRESSE / INFOS' ET BOUTON 'PASSER LA COMMANDE' -->
+        <div class="lg:col-span-3">
+            <x-card title="Finaliser la commande" separator>
+                <!-- On utilise un formulaire Livewire -->
+                <form wire:submit.prevent="placeOrder" class="space-y-4">
+                    <!-- Téléphone -->
+                    <div>
+                        <label class="block font-medium text-sm mb-1" for="phone_number">Téléphone</label>
+                        <x-input
+                            id="phone_number"
+                            wire:model="phone_number"
+                            placeholder="Votre numéro de téléphone"
+                            class="w-full"
+                        />
+                        @error('phone_number')
+                            <span class="text-error text-sm">{{ $message }}</span>
+                        @enderror
+                    </div>
 
-        <div class="mb-4">
-            <label for="notes" class="block y">Notes (facultatif)</label>
-            <textarea id="notes" wire:model="notes" class="w-full px-4 py-2 border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"></textarea>
-            @error('notes') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-        </div>
+                    <!-- Adresse -->
+                    <div>
+                        <label class="block font-medium text-sm mb-1" for="address_text">Adresse</label>
+                        <x-textarea
+                            id="address_text"
+                            wire:model="address_text"
+                            placeholder="Votre adresse complète"
+                            class="w-full"
+                        />
+                        @error('address_text')
+                            <span class="text-error text-sm">{{ $message }}</span>
+                        @enderror
+                    </div>
 
-        <div class="flex justify-end">
-            <x-button label="Confirmer la commande" type="submit" class="btn-primary" />
+                    <!-- Notes -->
+                    <div>
+                        <label class="block font-medium text-sm mb-1" for="notes">Notes (facultatif)</label>
+                        <x-textarea
+                            id="notes"
+                            wire:model="notes"
+                            placeholder="Notes pour la livraison / autres"
+                            class="w-full"
+                        />
+                        @error('notes')
+                            <span class="text-error text-sm">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <!-- Bouton SUBMIT -->
+                    <div class="flex justify-end mt-5">
+                        <x-button
+                            label="Passer la commande"
+                            icon="o-paper-airplane"
+                            class="btn-primary"
+                            type="submit"
+                            spinner="placeOrder"
+                        />
+                    </div>
+                </form>
+            </x-card>
         </div>
-    </form>
+    @else
+        <!-- PANIER VIDE -->
+        <div class="lg:col-span-6">
+            <div class="font-bold text-3xl mb-8">Le panier est vide</div>
+            <x-button label="Parcourir les produits" icon-right="o-arrow-right" link="/" />
+        </div>
+    @endif
 </div>
