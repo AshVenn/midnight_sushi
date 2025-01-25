@@ -2,7 +2,7 @@
     <h2 class="text-2xl font-bold mb-4">Nos Menus</h2>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 menu-grid">
         @foreach($menus as $menu)
-            <!-- Removed 'opacity-0' and 'translate-y-10' classes -->
+
             <div class="border rounded-lg p-4 menu-item">
             <img
                 src="{{ $menu->image }}"
@@ -65,4 +65,3 @@
     </div>
 </div>
 
-{{-- Removed the entire animation script --}}

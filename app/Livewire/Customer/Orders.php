@@ -17,10 +17,10 @@ class Orders extends Component
     public function getOrdersProperty()
     {
         // If you want the most recent first, orderBy('created_at', 'desc')
-        return Order::with(['orderItems.orderable'])
-            ->where('customer_id', Auth::id())
-            ->orderBy('created_at', 'desc')
-            ->get();
+        return Order::where('customer_id', Auth::id())
+        ->orderBy('created_at', 'asc')
+        ->with('orderItems.orderable')
+        ->get();
     }
 
     public function render()

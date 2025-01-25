@@ -18,9 +18,10 @@
             @foreach ($orders as $order)
                 <div class="border rounded-lg mb-5 p-4 shadow-sm bg-base-100 dark:bg-base-200">
                     <div class="flex flex-col md:flex-row items-center gap-4">
-                        {{-- Order ID --}}
-                        <div class="rounded-lg p-3 font-bold text-center min-w-[60px] bg-primary text-white">
-                            #{{ $order->id }}
+                        {{-- Relative Order Number --}}
+                        <div class="rounded-lg p-3 font-bold text-center min-w-[60px] bg-primary text-base-100">
+                            {{-- Show the sequence number: #1, #2, #3, ... --}}
+                            #{{ $loop->iteration }}
                         </div>
 
                         {{-- Main Info --}}
@@ -39,7 +40,9 @@
                                     @endif
                                 </div>
                             @else
-                                <div class="text-lg font-semibold text-neutral">Aucun article</div>
+                                <div class="text-lg font-semibold text-neutral">
+                                    Aucun article
+                                </div>
                             @endif
 
                             {{-- Order creation date, total price, etc. --}}
@@ -51,9 +54,36 @@
                                     {{ number_format($order->total_price, 2) }} €
                                 </div>
                                 <div>
-                                    Statut: 
+                                    Statut:
                                     <span class="font-semibold capitalize">
-                                        {{ $order->status }}
+                                        @php
+                                            switch ($order->status) {
+                                                case 'pending':
+                                                    echo 'En attente';
+                                                    break;
+                                                case 'confirmed':
+                                                    echo 'Confirmée';
+                                                    break;
+                                                case 'preparing':
+                                                    echo 'En préparation';
+                                                    break;
+                                                case 'ready':
+                                                    echo 'Prête';
+                                                    break;
+                                                case 'out_for_delivery':
+                                                    echo 'En cours de livraison';
+                                                    break;
+                                                case 'delivered':
+                                                    echo 'Livrée';
+                                                    break;
+                                                case 'cancelled':
+                                                    echo 'Annulée';
+                                                    break;
+                                                default:
+                                                    echo 'Inconnu';
+                                                    break;
+                                            }
+                                        @endphp
                                     </span>
                                 </div>
                             </div>
@@ -75,7 +105,11 @@
     @else
         <div class="lg:col-span-6 text-center">
             <div class="font-bold text-3xl mb-4">Aucune commande</div>
-            <x-button label="Parcourir le Menu" icon-right="o-arrow-right" link="/" />
+            <x-button 
+                label="Parcourir le Menu" 
+                icon-right="o-arrow-right" 
+                link="/" 
+            />
         </div>
     @endif
 </div>
