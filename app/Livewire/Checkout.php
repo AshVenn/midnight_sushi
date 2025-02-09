@@ -8,6 +8,8 @@ use App\Models\OrderItem;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OrderConfirmationMail;
 use Mary\Traits\Toast;
 
 class Checkout extends Component
@@ -21,7 +23,7 @@ class Checkout extends Component
     protected $rules = [
         'phone_number' => 'required|string|max:15',
         'address_text' => 'required|string|max:255',
-        'notes' => 'nullable|string|max:500',
+        'notes'        => 'nullable|string|max:500',
     ];
 
     /**
@@ -44,30 +46,37 @@ class Checkout extends Component
         DB::beginTransaction();
 
         try {
-            // Calculer le total
+            // Calculate the total price
             $total_price = 0;
-            foreach($cart as $type => $items){
-                foreach($items as $item){
+            foreach ($cart as $type => $items) {
+                foreach ($items as $item) {
                     $total_price += $item['price'] * $item['quantity'];
                 }
             }
 
-            // Créer la commande
+            // Create the order
             $order = Order::create([
                 'customer_id'  => Auth::id(),
                 'total_price'  => $total_price,
-                'status'       => 'pending', // ou tout autre statut par défaut
+                'status'       => 'pending', // or another default status
                 'phone_number' => $this->phone_number,
                 'address_text' => $this->address_text,
                 'notes'        => $this->notes,
             ]);
 
-            // Ajouter les items de la commande
-            foreach($cart as $type => $items){
-                foreach($items as $item){
+            // Create order items
+            foreach ($cart as $type => $items) {
+                foreach ($items as $item) {
+                    // Map 'menu' => App\Models\Menu, 'product' => App\Models\Product
+                    $orderableType = match ($type) {
+                        'menu'    => \App\Models\Menu::class,
+                        'product' => \App\Models\Product::class,
+                        default   => throw new \Exception("Invalid orderable type: $type"),
+                    };
+
                     OrderItem::create([
                         'order_id'       => $order->id,
-                        'orderable_type' => ucfirst($type),
+                        'orderable_type' => $orderableType,
                         'orderable_id'   => $item['id'],
                         'quantity'       => $item['quantity'],
                         'price'          => $item['price'],
@@ -77,14 +86,17 @@ class Checkout extends Component
 
             DB::commit();
 
-            // Vider le panier
+            // Send order confirmation email
+            Mail::to(Auth::user()->email)->send(new OrderConfirmationMail($order));
+
+            // Empty the cart
             Session::forget('cart');
 
-            // Toast + redirection
+            // Show success message and redirect
             $this->success(
                 title: 'Commande validée !',
                 description: "Votre commande #$order->id a été enregistrée.",
-                redirectTo: route('home') // Ou route('orders.show', $order->id) si vous avez un détail commande
+                redirectTo: route('home')
             );
         } catch (\Exception $e) {
             DB::rollBack();
@@ -96,12 +108,8 @@ class Checkout extends Component
         }
     }
 
-    /**
-     * Affiche la vue du composant.
-     */
     public function render()
     {
         return view('livewire.checkout');
     }
 }
-    

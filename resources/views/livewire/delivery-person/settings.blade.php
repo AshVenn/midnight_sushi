@@ -1,7 +1,7 @@
 <div class="p-4 md:p-6">
     <x-card title="Paramètres du Livreur" separator>
         <x-form wire:submit.prevent="save" class="space-y-6">
-            {{-- Row 1: Prénom & Nom --}}
+            <!-- Row 1: Prénom & Nom -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <x-input
                     wire:model="first_name"
@@ -15,7 +15,7 @@
                 />
             </div>
 
-            {{-- Row 2: Email & Téléphone --}}
+            <!-- Row 2: Email & Téléphone -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <x-input
                     wire:model="email"
@@ -30,7 +30,7 @@
                 />
             </div>
 
-            {{-- Row 3: Password & Confirm Password --}}
+            <!-- Row 3: Password & Confirm Password -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <x-input
                     wire:model="password"
@@ -46,7 +46,7 @@
                 />
             </div>
 
-            {{-- Avatar Upload + Preview --}}
+            <!-- Avatar Upload + Preview -->
             <div class="space-y-4">
                 <x-file
                     wire:model="avatar"
@@ -54,26 +54,28 @@
                     accept="image/*"
                 />
 
-                {{-- Aperçu de l'Avatar (Ancien) --}}
-                @if ($oldAvatarUrl)
-                    <img
-                        src="{{ $oldAvatarUrl }}"
-                        class="h-40 w-full md:w-1/2 object-cover rounded-lg mt-2"
-                        alt="Avatar Actuel"
-                    />
-                @endif
+                <div class="flex flex-col md:flex-row gap-4">
+                    <!-- Aperçu de l'Avatar (Ancien) -->
+                    @if ($oldAvatarUrl)
+                        <img
+                            src="{{ $oldAvatarUrl }}"
+                            class="h-40 w-full md:w-1/2 object-cover rounded-lg"
+                            alt="Avatar Actuel"
+                        />
+                    @endif
 
-                {{-- Aperçu de l'Avatar (Nouveau) --}}
-                @if ($avatar)
-                    <img
-                        src="{{ $avatar->temporaryUrl() }}"
-                        class="h-40 w-full md:w-1/2 object-cover rounded-lg mt-2"
-                        alt="Aperçu de l'Avatar"
-                    />
-                @endif
+                    <!-- Aperçu de l'Avatar (Nouveau) -->
+                    @if ($avatar)
+                        <img
+                            src="{{ $avatar->temporaryUrl() }}"
+                            class="h-40 w-full md:w-1/2 object-cover rounded-lg"
+                            alt="Aperçu de l'Avatar"
+                        />
+                    @endif
+                </div>
             </div>
 
-            {{-- Boutons d'Action --}}
+            <!-- Boutons d'Action -->
             <div class="flex flex-col md:flex-row md:justify-end gap-4 mt-6">
                 <x-button
                     label="Sauvegarder les Modifications"
@@ -83,8 +85,7 @@
             </div>
         </x-form>
 
-        {{-- Toast Message --}}
+        <!-- Toast Message -->
         <x-toast />
     </x-card>
 </div>
-    
