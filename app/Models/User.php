@@ -60,4 +60,15 @@ class User extends Authenticatable
     {
         return "{$this->first_name} {$this->last_name}";
     }
+
+    public function deliveries()
+        {
+            return $this->hasManyThrough(Delivery::class, Order::class, 'customer_id', 'order_id');
+        }
+
+        public function pendingReviews()
+        {
+            return $this->hasManyThrough(OrderItem::class, Order::class, 'customer_id')
+                ->whereDoesntHave('review');
+        }
 }

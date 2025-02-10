@@ -2,22 +2,57 @@
     <x-card title="Détails de la Commande #{{ $relativeOrderNumber }}" separator>
         {{-- Status --}}
         <div class="mb-4 text-sm">
-            <span class="font-semibold">Statut:</span> 
+            <span class="font-semibold">Statut:</span>
             <span class="uppercase">
-                @php
-                    switch ($order->status) {
-                        case 'pending':          echo 'En attente';          break;
-                        case 'confirmed':        echo 'Confirmée';           break;
-                        case 'preparing':        echo 'En préparation';      break;
-                        case 'ready':            echo 'Prête';               break;
-                        case 'out_for_delivery': echo 'En cours de livraison'; break;
-                        case 'delivered':        echo 'Livrée';              break;
-                        case 'cancelled':        echo 'Annulée';             break;
-                        default:                 echo 'Inconnu';             break;
-                    }
-                @endphp
+                @switch($order->status)
+                    @case('pending')
+                        En attente
+                        @break
+                    @case('confirmed')
+                        Confirmée
+                        @break
+                    @case('preparing')
+                        En préparation
+                        @break
+                    @case('ready')
+                        Prête
+                        @break
+                    @case('out_for_delivery')
+                        En cours de livraison
+                        @break
+                    @case('delivered')
+                        Livrée
+                        @break
+                    @case('cancelled')
+                        Annulée
+                        @break
+                    @default
+                        Inconnu
+                @endswitch
             </span>
         </div>
+
+        {{-- Possible improvements: phone number, payment method, etc. --}}
+        @if($order->phone_number)
+            <div class="mb-4 text-sm">
+                <span class="font-semibold">Téléphone:</span>
+                {{ $order->phone_number }}
+            </div>
+        @endif
+
+        @if($order->payment_method)
+            <div class="mb-4 text-sm">
+                <span class="font-semibold">Mode de paiement:</span>
+                {{ $order->payment_method }}
+            </div>
+        @endif
+
+        @if($order->payment_status && $order->payment_status !== 'unpaid')
+            <div class="mb-4 text-sm">
+                <span class="font-semibold">Statut du paiement:</span>
+                {{ $order->payment_status }}
+            </div>
+        @endif
 
         {{-- Order Date --}}
         <div class="mb-4 text-sm">
@@ -36,7 +71,10 @@
                         <span class="ml-2">(x{{ $item->quantity }})</span>
                     </div>
                     <div class="font-semibold">
-                        {{ number_format($item->price, 2) }} €
+                        {{ number_format($item->price, 2) }} € 
+                        <span class="text-sm text-neutral ml-2">
+                            /unité
+                        </span>
                     </div>
                 </div>
             @endforeach
@@ -44,14 +82,14 @@
 
         {{-- Notes --}}
         @if($order->notes)
-            <div class="mt-4 p-3 rounded text-sm">
+            <div class="mt-4 p-3 rounded text-sm bg-base-200">
                 <strong>Notes:</strong> {{ $order->notes }}
             </div>
         @endif
 
         {{-- Address --}}
         @if($order->address_text)
-            <div class="mt-4 p-3 rounded text-sm">
+            <div class="mt-4 p-3 rounded text-sm bg-base-200">
                 <strong>Adresse:</strong> {{ $order->address_text }}
             </div>
         @endif
@@ -60,24 +98,56 @@
         <div class="mt-6 text-right text-lg font-bold">
             Total: {{ number_format($order->total_price, 2) }} €
         </div>
+
+        {{-- Cancel Button if allowed --}}
+        @if($order->can_be_cancelled)
+            <div class="mt-4 text-right">
+                <x-button
+                    label="Annuler la commande"
+                    icon="o-x-circle"
+                    wire:click="cancelOrder"
+                    class="btn-primary"
+                />
+            </div>
+        @endif
     </x-card>
 
     {{-- TIMELINE EXAMPLE --}}
     <x-card title="Progression de la Commande" separator class="mt-6">
         <div class="px-4 py-5 space-y-4">
-            @foreach ($statusTimeline as $index => $step)
+            @foreach ($statusTimeline as $step)
                 <x-timeline-item
                     :title="$step['title']"
                     :subtitle="$step['date'] 
-                                ? 'Le '.$step['date']->format('d/m/Y H:i') 
-                                : ''"
+                        ? 'Le '.$step['date']->format('d/m/Y H:i') 
+                        : ''"
                     :description="$step['description']"
                     :icon="$step['icon']"
-                    :first="$loop->first"
-                    :last="$loop->last"
                     :pending="!$step['is_done'] && !$step['is_current']"
+                    :current="$step['is_current']"
                 />
             @endforeach
         </div>
     </x-card>
+
+    {{-- Example modal for cancellation confirmation (if you want) --}}
+    @if($confirmingCancellation)
+        <x-modal title="Confirmer l'annulation" separator wire:model="confirmingCancellation">
+            <div class="space-y-4">
+                <p>Êtes-vous sûr de vouloir annuler cette commande ?</p>
+                {{-- etc... --}}
+            </div>
+
+            <x-slot:actions>
+                <x-button label="Non" class="btn-ghost" @click="$wire.confirmingCancellation = false" />
+                <x-button
+                    label="Oui, annuler"
+                    icon="o-check"
+                    wire:click="cancelOrder"
+                    class="btn-error"
+                    spinner
+                />
+            </x-slot:actions>
+        </x-modal>
+    @endif
 </div>

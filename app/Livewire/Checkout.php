@@ -33,6 +33,7 @@ class Checkout extends Component
     {
         $this->validate();
 
+        // Retrieve the cart from the session
         $cart = Session::get('cart', []);
 
         if (empty($cart)) {
@@ -58,7 +59,7 @@ class Checkout extends Component
             $order = Order::create([
                 'customer_id'  => Auth::id(),
                 'total_price'  => $total_price,
-                'status'       => 'pending', // or another default status
+                'status'       => 'pending',
                 'phone_number' => $this->phone_number,
                 'address_text' => $this->address_text,
                 'notes'        => $this->notes,
@@ -67,16 +68,10 @@ class Checkout extends Component
             // Create order items
             foreach ($cart as $type => $items) {
                 foreach ($items as $item) {
-                    // Map 'menu' => App\Models\Menu, 'product' => App\Models\Product
-                    $orderableType = match ($type) {
-                        'menu'    => \App\Models\Menu::class,
-                        'product' => \App\Models\Product::class,
-                        default   => throw new \Exception("Invalid orderable type: $type"),
-                    };
-
                     OrderItem::create([
                         'order_id'       => $order->id,
-                        'orderable_type' => $orderableType,
+                        // Use the morph map keys: 'menu' or 'product'
+                        'orderable_type' => $type === 'menu' ? 'menu' : 'product',
                         'orderable_id'   => $item['id'],
                         'quantity'       => $item['quantity'],
                         'price'          => $item['price'],
@@ -95,9 +90,10 @@ class Checkout extends Component
             // Show success message and redirect
             $this->success(
                 title: 'Commande validée !',
-                description: "Votre commande #$order->id a été enregistrée.",
+                description: "Votre commande #{$order->id} a été enregistrée.",
                 redirectTo: route('home')
             );
+
         } catch (\Exception $e) {
             DB::rollBack();
             $this->error(

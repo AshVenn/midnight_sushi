@@ -3,30 +3,37 @@
 namespace App\Livewire\Customer;
 
 use Livewire\Component;
+use Livewire\WithPagination;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Order;
 
 class Orders extends Component
 {
+    use WithPagination; // Enable pagination
+
+    public $filterStatus = ''; // Stores the selected status
+
     /**
-     * Retrieve the current user's orders.
-     * 
-     * We load orderItems->orderable if needed 
-     * (like a product, menu, etc.)
+     * Grab the current user's orders, optionally filtered by status.
      */
     public function getOrdersProperty()
     {
-        // If you want the most recent first, orderBy('created_at', 'desc')
-        return Order::where('customer_id', Auth::id())
-        ->orderBy('created_at', 'asc')
-        ->with('orderItems.orderable')
-        ->get();
+        $query = Order::where('customer_id', Auth::id())
+            ->with(['orderItems.orderable', 'deliveries'])
+            ->orderBy('created_at', 'desc');
+
+      
+        if ($this->filterStatus !== '') {
+            $query->where('status', $this->filterStatus);
+        }
+
+        return $query->paginate(5); 
     }
 
     public function render()
     {
         return view('livewire.customer.orders', [
-            'orders' => $this->orders // using the getOrdersProperty() "magic" accessor
+            'orders' => $this->orders, 
         ]);
     }
 }

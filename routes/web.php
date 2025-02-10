@@ -51,6 +51,7 @@ use App\Livewire\DeliveryPerson\Components\Deliveries as DeliveryPersonDeliverie
 use App\Livewire\DeliveryPerson\Components\PastDeliveries as DeliveryPersonPastDeliveries;
 
 //Customer Management Controllers
+use App\Livewire\Customer\Dashboard as CustomerDashboardComponent;
 use App\Livewire\Customer\Orders as CustomerOrdersComponent;
 use App\Livewire\Customer\OrderShow as CustomerOrderShowComponent;
 
@@ -119,6 +120,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Customer routes
     Route::middleware(['role:customer'])->group(function () {
+        Route::get('/customer/dashboard',CustomerDashboardComponent::class)->name('customer.dashboard');
         Route::get('/customer/orders', CustomerOrdersComponent::class)->name('customer.orders.index');
         Route::get('/customer/orders/{order}', CustomerOrderShowComponent::class)->name('customer.orders.show');
         

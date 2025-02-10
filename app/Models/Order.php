@@ -45,4 +45,28 @@ class Order extends Model
                     ->orderByDesc('id')
                     ->first();
     }
+
+    public function getStatusTextAttribute(): string
+    {
+        return match($this->status) {
+            'pending' => 'En attente',
+            'confirmed' => 'Confirmée',
+            'preparing' => 'En préparation',
+            'ready' => 'Prête',
+            'out_for_delivery' => 'En livraison',
+            'delivered' => 'Livrée',
+            'cancelled' => 'Annulée',
+            default => 'Inconnu',
+        };
+    }
+    
+    public function getCanBeCancelledAttribute(): bool
+    {
+        return in_array($this->status, ['pending', 'confirmed']);
+    }
+    
+    public function getHasStartedPreparationAttribute(): bool
+    {
+        return !in_array($this->status, ['pending', 'confirmed']);
+    }
 }

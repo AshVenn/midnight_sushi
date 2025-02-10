@@ -109,6 +109,7 @@
 
                     @case('customer')
                         <x-menu activate-by-route>
+                            <x-menu-item title="Tableau de Bord" icon="o-home" link="/customer/dashboard" />
                             <x-menu-item title="Profile" icon="o-user" link="/customer/profile" />
                             <x-menu-item title="Orders" icon="o-shopping-cart" link="/customer/orders" />
                             <x-menu-item title="Support" icon="o-information-circle" link="/customer/support" />

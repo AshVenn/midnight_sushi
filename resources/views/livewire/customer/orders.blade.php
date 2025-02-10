@@ -1,5 +1,5 @@
 <div class="grid lg:grid-cols-8 gap-10 px-4 lg:px-0">
-    {{-- IMAGE --}}
+    {{-- IMAGE / Left Column --}}
     <div class="lg:col-span-2 flex justify-center items-start">
         <img 
             src="/images/sushi/orders.png" 
@@ -9,27 +9,52 @@
         />
     </div>
 
-    @if ($orders->count())
-        <div class="lg:col-span-6">
-            {{-- Title / Header --}}
-            <h1 class="text-2xl font-bold mb-6 text-center lg:text-left">Mes Commandes</h1>
+    {{-- Right Column: Orders List --}}
+    <div class="lg:col-span-6">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
+            <h1 class="text-2xl font-bold mb-2 lg:mb-0 text-center lg:text-left">
+                Mes Commandes
+            </h1>
 
+            {{-- Simple Status Filter --}}
+            <div>
+                <select 
+                    wire:model="filterStatus"
+                    class="select select-bordered w-full max-w-xs"
+                >
+                    <option value="">Toutes les commandes</option>
+                    <option value="pending">En attente</option>
+                    <option value="confirmed">Confirmée</option>
+                    <option value="preparing">En préparation</option>
+                    <option value="ready">Prête</option>
+                    <option value="out_for_delivery">En livraison</option>
+                    <option value="delivered">Livrée</option>
+                    <option value="cancelled">Annulée</option>
+                </select>
+            </div>
+        </div>
+
+        @if ($orders->count())
             {{-- ORDERS LIST --}}
-            @foreach ($orders as $order)
+            @foreach ($orders as $index => $order)
                 <div class="border rounded-lg mb-5 p-4 shadow-sm bg-base-100 dark:bg-base-200">
                     <div class="flex flex-col md:flex-row items-center gap-4">
-                        {{-- Relative Order Number --}}
+                        {{-- Relative # e.g. #1, #2, etc. --}}
                         <div class="rounded-lg p-3 font-bold text-center min-w-[60px] bg-primary text-base-100">
-                            {{-- Show the sequence number: #1, #2, #3, ... --}}
-                            #{{ $loop->iteration }}
+                            #{{ $orders->firstItem() + $index }}
+                            {{-- 
+                                Explanation:
+                                $orders->firstItem() is the numeric index of the 
+                                first item on this page, so first iteration is that + 0. 
+                            --}}
                         </div>
 
                         {{-- Main Info --}}
                         <div class="flex-grow">
-                            {{-- Show the first item name, plus count of remaining items --}}
                             @if ($order->orderItems->count())
                                 @php
-                                    $firstItemName = optional($order->orderItems->first()->orderable)->name;
+                                    $firstItem = $order->orderItems->first();
+                                    $firstItemName = optional($firstItem->orderable)->name;
                                 @endphp
                                 <div class="text-lg font-semibold">
                                     {{ $firstItemName ?? 'Article' }}
@@ -56,60 +81,73 @@
                                 <div>
                                     Statut:
                                     <span class="font-semibold capitalize">
-                                        @php
-                                            switch ($order->status) {
-                                                case 'pending':
-                                                    echo 'En attente';
-                                                    break;
-                                                case 'confirmed':
-                                                    echo 'Confirmée';
-                                                    break;
-                                                case 'preparing':
-                                                    echo 'En préparation';
-                                                    break;
-                                                case 'ready':
-                                                    echo 'Prête';
-                                                    break;
-                                                case 'out_for_delivery':
-                                                    echo 'En cours de livraison';
-                                                    break;
-                                                case 'delivered':
-                                                    echo 'Livrée';
-                                                    break;
-                                                case 'cancelled':
-                                                    echo 'Annulée';
-                                                    break;
-                                                default:
-                                                    echo 'Inconnu';
-                                                    break;
-                                            }
-                                        @endphp
+                                        @switch($order->status)
+                                            @case('pending')
+                                                En attente
+                                                @break
+                                            @case('confirmed')
+                                                Confirmée
+                                                @break
+                                            @case('preparing')
+                                                En préparation
+                                                @break
+                                            @case('ready')
+                                                Prête
+                                                @break
+                                            @case('out_for_delivery')
+                                                En cours de livraison
+                                                @break
+                                            @case('delivered')
+                                                Livrée
+                                                @break
+                                            @case('cancelled')
+                                                Annulée
+                                                @break
+                                            @default
+                                                Inconnu
+                                        @endswitch
                                     </span>
                                 </div>
                             </div>
                         </div>
 
                         {{-- Actions --}}
-                        <div>
+                        <div class="flex items-center gap-2">
+                            {{-- Show "Annuler" if possible (for demonstration) --}}
+                            @if($order->canBeCancelled())
+                                <x-button
+                                    label="Annuler"
+                                    icon="o-x-circle"
+                                    wire:click="$emit('openCancelModal', {{ $order->id }})"
+                                    class="btn-error btn-sm"
+                                />
+                            @endif
+
                             <x-button 
                                 label="Détails" 
                                 icon="o-chevron-right" 
                                 link="{{ route('customer.orders.show', $order->id) }}" 
-                                class="btn-secondary"
+                                class="btn-secondary btn-sm"
                             />
                         </div>
                     </div>
                 </div>
             @endforeach
-        </div>
-    @else
-        <div class="lg:col-span-6 text-center">
-            <div class="font-bold text-3xl mb-4">Aucune commande</div>
-            <x-button 
-                label="Parcourir le Menu" 
-                icon-right="o-arrow-right" 
-                link="/" 
-            />
-        </div>
-    @endif
+
+            {{-- Pagination Links --}}
+            <div class="mt-6">
+                {{ $orders->links() }}
+            </div>
+        @else
+            {{-- No Orders --}}
+            <div class="text-center">
+                <div class="font-bold text-3xl mb-4">Aucune commande</div>
+                <x-button 
+                    label="Parcourir le Menu" 
+                    icon-right="o-arrow-right" 
+                    link="/" 
+                />
+            </div>
+        @endif
+    </div>
 </div>

@@ -22,25 +22,14 @@ class OrderItem extends Model
         return $this->belongsTo(Order::class);
     }
 
-    // Polymorphic relation: product or menu
     public function orderable()
     {
         return $this->morphTo();
     }
 
-    /**
-     * Optional convenience relationships
-     * (let's you do $orderItem->product or $orderItem->menu)
-     */
-    public function product()
+    // Add this method to handle the morph map
+    public function getOrderableTypeAttribute($value)
     {
-        return $this->belongsTo(Product::class, 'orderable_id')
-                    ->where('orderable_type', \App\Models\Product::class);
-    }
-
-    public function menu()
-    {
-        return $this->belongsTo(Menu::class, 'orderable_id')
-                    ->where('orderable_type', \App\Models\Menu::class);
+        return class_basename($value);
     }
 }

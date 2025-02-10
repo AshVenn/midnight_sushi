@@ -5,10 +5,11 @@ namespace App\Livewire\Customer;
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Order;
-
+use Mary\Traits\Toast;
 class OrderShow extends Component
 {
     public Order $order;
+    public bool $confirmingCancellation = false;
 
     /**
      * Holds the "relative" order number,
@@ -31,6 +32,22 @@ class OrderShow extends Component
 
         // Compute the "relative" order number (i.e., 1-based index)
         $this->relativeOrderNumber = $this->computeRelativeOrderNumber($order);
+    }
+
+    
+
+    public function cancelOrder()
+    {
+        if ($this->order->can_be_cancelled) {
+            $this->order->update(['status' => 'cancelled']);
+            $this->success(
+                title: 'Commande annulée avec succès',
+                redirectTo: route('customer.orders')
+            );
+            
+        }
+        
+        $this->confirmingCancellation = false;
     }
 
     /**
