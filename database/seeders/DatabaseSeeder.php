@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             OrdersSeeder::class,          // Seed orders (depends on users)
             OrderItemsSeeder::class,      // Seed order items (depends on orders and products)
             DeliveriesSeeder::class,      // Seed deliveries (depends on orders and addresses)
+            ContactInquiriesSeeder::class, // Seed contactinquiries
         ]);
     }
 }

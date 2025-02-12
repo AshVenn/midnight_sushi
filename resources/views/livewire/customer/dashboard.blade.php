@@ -28,7 +28,7 @@
         @endif
 
         <x-slot:menu>
-            <x-button label="Voir toutes les commandes" link="/commandes" icon-right="o-arrow-right" class="btn-ghost" />
+            <x-button label="Voir toutes les commandes" link="/orders" icon-right="o-arrow-right" class="btn-ghost" />
         </x-slot:menu>
     </x-card>
 
@@ -77,8 +77,8 @@
     {{-- Actions rapides --}}
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
         <x-button icon="o-plus" label="Nouvelle commande" link="/menu" class="btn-primary" />
-        <x-button icon="o-envelope" label="Support" link="/contact" class="btn-secondary" />
-        <x-button icon="o-user" label="Profil" link="/profil" class="btn-accent" />
+        <x-button icon="o-envelope" label="Support" link="/support" class="btn-secondary" />
+        <x-button icon="o-user" label="Profil" link="/profile" class="btn-accent" />
         <x-button icon="o-star" label="Avis" link="/avis" class="btn-neutral" />
     </div>
 

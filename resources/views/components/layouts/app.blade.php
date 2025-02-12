@@ -102,6 +102,7 @@
                             <x-menu-item title="Livraisons" icon="o-truck" link="/admin/deliveries" />
                         </x-menu-sub>
                         <x-menu-item title="Rapports" icon="o-chart-bar" link="/admin/reports" />
+                        <x-menu-item title="Demandes de contact" icon="o-information-circle" link="/admin/contactinquiries" />
                         <x-menu-item title="Paramètres" icon="o-cog-6-tooth" link="/admin/settings" />
                     </x-menu>
 

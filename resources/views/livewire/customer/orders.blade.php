@@ -42,11 +42,6 @@
                         {{-- Relative # e.g. #1, #2, etc. --}}
                         <div class="rounded-lg p-3 font-bold text-center min-w-[60px] bg-primary text-base-100">
                             #{{ $orders->firstItem() + $index }}
-                            {{-- 
-                                Explanation:
-                                $orders->firstItem() is the numeric index of the 
-                                first item on this page, so first iteration is that + 0. 
-                            --}}
                         </div>
 
                         {{-- Main Info --}}
@@ -113,13 +108,13 @@
 
                         {{-- Actions --}}
                         <div class="flex items-center gap-2">
-                            {{-- Show "Annuler" if possible (for demonstration) --}}
-                            @if($order->canBeCancelled())
+                            {{-- Show "Annuler" if possible --}}
+                            @if($order->can_be_cancelled)
                                 <x-button
                                     label="Annuler"
                                     icon="o-x-circle"
-                                    wire:click="$emit('openCancelModal', {{ $order->id }})"
-                                    class="btn-error btn-sm"
+                                    wire:click="$dispatch('open-cancel-modal', { orderId: {{ $order->id }} })"
+                                    class="btn-primary btn-sm"
                                 />
                             @endif
 

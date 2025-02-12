@@ -32,7 +32,7 @@
             </span>
         </div>
 
-        {{-- Possible improvements: phone number, payment method, etc. --}}
+        {{-- Additional Details --}}
         @if($order->phone_number)
             <div class="mb-4 text-sm">
                 <span class="font-semibold">Téléphone:</span>
@@ -63,7 +63,7 @@
         <div class="space-y-3 mb-4">
             @foreach($order->orderItems as $item)
                 @php
-                    $orderable = $item->orderable; // e.g. Product or Menu
+                    $orderable = $item->orderable;
                 @endphp
                 <div class="p-3 border rounded flex justify-between items-center">
                     <div>
@@ -72,9 +72,7 @@
                     </div>
                     <div class="font-semibold">
                         {{ number_format($item->price, 2) }} € 
-                        <span class="text-sm text-neutral ml-2">
-                            /unité
-                        </span>
+                        <span class="text-sm text-neutral ml-2">/unité</span>
                     </div>
                 </div>
             @endforeach
@@ -118,9 +116,7 @@
             @foreach ($statusTimeline as $step)
                 <x-timeline-item
                     :title="$step['title']"
-                    :subtitle="$step['date'] 
-                        ? 'Le '.$step['date']->format('d/m/Y H:i') 
-                        : ''"
+                    :subtitle="$step['date'] ? 'Le '.$step['date']->format('d/m/Y H:i') : ''"
                     :description="$step['description']"
                     :icon="$step['icon']"
                     :pending="!$step['is_done'] && !$step['is_current']"
@@ -130,12 +126,11 @@
         </div>
     </x-card>
 
-    {{-- Example modal for cancellation confirmation (if you want) --}}
+    {{-- Modal for cancellation confirmation --}}
     @if($confirmingCancellation)
         <x-modal title="Confirmer l'annulation" separator wire:model="confirmingCancellation">
             <div class="space-y-4">
                 <p>Êtes-vous sûr de vouloir annuler cette commande ?</p>
-                {{-- etc... --}}
             </div>
 
             <x-slot:actions>

@@ -22,18 +22,17 @@ class Orders extends Component
             ->with(['orderItems.orderable', 'deliveries'])
             ->orderBy('created_at', 'desc');
 
-      
         if ($this->filterStatus !== '') {
             $query->where('status', $this->filterStatus);
         }
 
-        return $query->paginate(5); 
+        return $query->paginate(5);
     }
 
     public function render()
     {
         return view('livewire.customer.orders', [
-            'orders' => $this->orders, 
+            'orders' => $this->orders,
         ]);
     }
 }

@@ -2,16 +2,13 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\ContactInquiry;
 
 class ContactInquiriesSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        \App\Models\ContactInquiry::factory(15)->create();
+        ContactInquiry::factory(15)->create();
     }
 }

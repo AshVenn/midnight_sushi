@@ -5,10 +5,14 @@ namespace App\Livewire\Admin\Components\Deliveries;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Carbon\Carbon;
-use Mary\Traits\Toast; // Assuming this is a custom trait
+use Mary\Traits\Toast; 
 use App\Models\Delivery;
 use App\Models\User;
 use App\Models\Order;
+
+use App\Mail\DeliveryPickedUpMail;
+use App\Mail\DeliveryDeliveredMail;
+use Illuminate\Support\Facades\Mail;
 
 class Index extends Component
 {
@@ -170,13 +174,13 @@ class Index extends Component
                     'assigned_at'        => now(),
                     'status'             => 'assigned', // reassign sets it back to assigned
                 ]);
-                $this->success('Delivery person reassigned successfully.');
+                $this->success('Livreur réassigné avec succès.');
                 $this->reset(['showReassignModal', 'selectedDeliveryPerson', 'selectedDeliveryId']);
             } else {
-                $this->error('Delivery not found.');
+                $this->error('Livraison non trouvée.');
             }
         } else {
-            $this->error('Please select a delivery person.');
+            $this->error('Veuillez sélectionner un livreur.');
         }
     }
 
@@ -198,39 +202,52 @@ class Index extends Component
     public function confirmAction(): void
     {
         if (!$this->selectedDeliveryId || !$this->selectedAction) {
-            $this->error('No action selected or no delivery selected.');
+            $this->error('Aucune action sélectionnée ou aucune livraison sélectionnée.');
             return;
         }
-
+    
         $delivery = Delivery::find($this->selectedDeliveryId);
-
+    
         if (!$delivery) {
-            $this->error('Delivery not found.');
+            $this->error('Livraison non trouvée.');
             return;
         }
-
-        if ($this->selectedAction === 'mark_picked_up') {
-            if ($delivery->status !== 'assigned') {
-                $this->error('Cannot mark this delivery as picked up.');
-                return;
+    
+        try {
+            if ($this->selectedAction === 'mark_picked_up') {
+                if ($delivery->status !== 'assigned') {
+                    $this->error('Impossible de marquer cette livraison comme ramassée.');
+                    return;
+                }
+                $delivery->update([
+                    'status'       => 'picked_up',
+                    'picked_up_at' => now(),
+                ]);
+    
+                // Envoyer l'e-mail "Marqué comme ramassé"
+                Mail::to($delivery->order->customer->email)->send(new DeliveryPickedUpMail($delivery));
+    
+                $this->success('Livraison marquée comme ramassée.');
+            } elseif ($this->selectedAction === 'mark_delivered') {
+                if ($delivery->status !== 'picked_up') {
+                    $this->error('Impossible de marquer cette livraison comme livrée.');
+                    return;
+                }
+                $delivery->update([
+                    'status'       => 'delivered',
+                    'delivered_at' => now(),
+                ]);
+    
+                // Envoyer l'e-mail "Marqué comme livré"
+                Mail::to($delivery->order->customer->email)->send(new DeliveryDeliveredMail($delivery));
+    
+                $this->success('Livraison marquée comme livrée.');
             }
-            $delivery->update([
-                'status'       => 'picked_up',
-                'picked_up_at' => now(),
-            ]);
-            $this->success('Delivery marked as picked up.');
-        } elseif ($this->selectedAction === 'mark_delivered') {
-            if ($delivery->status !== 'picked_up') {
-                $this->error('Cannot mark this delivery as delivered.');
-                return;
-            }
-            $delivery->update([
-                'status'       => 'delivered',
-                'delivered_at' => now(),
-            ]);
-            $this->success('Delivery marked as delivered.');
+        } catch (\Exception $e) {
+            Log::error("Erreur lors de l'envoi de l'email pour la livraison {$delivery->id}: " . $e->getMessage());
+            $this->error("Une erreur est survenue lors de l'envoi de l'email.");
         }
-
+    
         $this->reset(['showActionModal', 'selectedAction', 'selectedDeliveryId']);
     }
 
@@ -252,7 +269,7 @@ class Index extends Component
             ->find($deliveryId);
 
         if (!$delivery) {
-            $this->error('Delivery not found.');
+            $this->error('Livraison non trouvée.');
             return;
         }
 

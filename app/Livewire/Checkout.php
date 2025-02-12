@@ -59,7 +59,7 @@ class Checkout extends Component
             $order = Order::create([
                 'customer_id'  => Auth::id(),
                 'total_price'  => $total_price,
-                'status'       => 'pending',
+                'status'       => 'preparing',
                 'phone_number' => $this->phone_number,
                 'address_text' => $this->address_text,
                 'notes'        => $this->notes,
@@ -70,8 +70,8 @@ class Checkout extends Component
                 foreach ($items as $item) {
                     OrderItem::create([
                         'order_id'       => $order->id,
-                        // Use the morph map keys: 'menu' or 'product'
-                        'orderable_type' => $type === 'menu' ? 'menu' : 'product',
+                        // Use the morph map keys: 'Menu' or 'Product'
+                        'orderable_type' => $type === 'menu' ? 'Menu' : 'Product',
                         'orderable_id'   => $item['id'],
                         'quantity'       => $item['quantity'],
                         'price'          => $item['price'],
@@ -93,7 +93,6 @@ class Checkout extends Component
                 description: "Votre commande #{$order->id} a été enregistrée.",
                 redirectTo: route('home')
             );
-
         } catch (\Exception $e) {
             DB::rollBack();
             $this->error(

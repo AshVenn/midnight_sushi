@@ -6,8 +6,10 @@ use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Order;
 use Mary\Traits\Toast;
+
 class OrderShow extends Component
 {
+    use Toast;
     public Order $order;
     public bool $confirmingCancellation = false;
 
@@ -34,19 +36,15 @@ class OrderShow extends Component
         $this->relativeOrderNumber = $this->computeRelativeOrderNumber($order);
     }
 
-    
-
     public function cancelOrder()
     {
         if ($this->order->can_be_cancelled) {
             $this->order->update(['status' => 'cancelled']);
             $this->success(
                 title: 'Commande annulée avec succès',
-                redirectTo: route('customer.orders')
+                redirectTo: route('customer.orders.index')
             );
-            
         }
-        
         $this->confirmingCancellation = false;
     }
 
@@ -61,7 +59,7 @@ class OrderShow extends Component
             ->orderBy('created_at', 'asc')
             ->pluck('id');
 
-        // zero-based index of the current order within the collection
+        // Zero-based index of the current order within the collection
         $index = $allOrderIds->search($order->id);
 
         // Convert to 1-based. If not found, default to 1
@@ -93,38 +91,38 @@ class OrderShow extends Component
             // Check if it's the current order status
             if ($currentKey === $key) {
                 $timeline[] = [
-                    'key'        => $key,
-                    'title'      => $displayName,
-                    'date'       => $this->order->updated_at,
-                    'description'=> null,
-                    'icon'       => 'o-check-circle',
-                    'is_current' => true,
-                    'is_done'    => in_array($key, ['delivered', 'cancelled']),
+                    'key'         => $key,
+                    'title'       => $displayName,
+                    'date'        => $this->order->updated_at,
+                    'description' => null,
+                    'icon'        => 'o-check-circle',
+                    'is_current'  => true,
+                    'is_done'     => in_array($key, ['delivered', 'cancelled']),
                 ];
                 $foundCurrent = true;
             }
             // If we haven't found current yet, these are "past" statuses
             elseif (!$foundCurrent) {
                 $timeline[] = [
-                    'key'        => $key,
-                    'title'      => $displayName,
-                    'date'       => null,
-                    'description'=> null,
-                    'icon'       => 'o-check-circle',
-                    'is_current' => false,
-                    'is_done'    => true,
+                    'key'         => $key,
+                    'title'       => $displayName,
+                    'date'        => null,
+                    'description' => null,
+                    'icon'        => 'o-check-circle',
+                    'is_current'  => false,
+                    'is_done'     => true,
                 ];
             }
             // Else it's "future" (pending)
             else {
                 $timeline[] = [
-                    'key'        => $key,
-                    'title'      => $displayName,
-                    'date'       => null,
-                    'description'=> null,
-                    'icon'       => 'o-clock',
-                    'is_current' => false,
-                    'is_done'    => false,
+                    'key'         => $key,
+                    'title'       => $displayName,
+                    'date'        => null,
+                    'description' => null,
+                    'icon'        => 'o-clock',
+                    'is_current'  => false,
+                    'is_done'     => false,
                 ];
             }
         }

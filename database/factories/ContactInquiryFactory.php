@@ -3,24 +3,20 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Models\ContactInquiry;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Model>
- */
 class ContactInquiryFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    protected $model = ContactInquiry::class;
+
     public function definition(): array
     {
         return [
-            'name' => $this->faker->name(),
-            'email' => $this->faker->safeEmail(),
+            'name'    => $this->faker->name(),
+            'email'   => $this->faker->safeEmail(),
             'subject' => $this->faker->sentence(3),
             'message' => $this->faker->paragraph(),
+            'status'  => $this->faker->randomElement(['open', 'resolved']),
         ];
     }
 }
