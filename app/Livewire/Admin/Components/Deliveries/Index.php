@@ -219,12 +219,18 @@ class Index extends Component
                     $this->error('Impossible de marquer cette livraison comme ramassée.');
                     return;
                 }
+                // Update the Delivery
                 $delivery->update([
                     'status'       => 'picked_up',
                     'picked_up_at' => now(),
                 ]);
     
-                // Envoyer l'e-mail "Marqué comme ramassé"
+                // Update the Order status to "out_for_delivery"
+                $delivery->order->update([
+                    'status' => 'out_for_delivery'
+                ]);
+    
+                // Envoi l'email "Marqué comme ramassé"
                 Mail::to($delivery->order->customer->email)->send(new DeliveryPickedUpMail($delivery));
     
                 $this->success('Livraison marquée comme ramassée.');
@@ -233,12 +239,18 @@ class Index extends Component
                     $this->error('Impossible de marquer cette livraison comme livrée.');
                     return;
                 }
+                // Update the Delivery
                 $delivery->update([
                     'status'       => 'delivered',
                     'delivered_at' => now(),
                 ]);
     
-                // Envoyer l'e-mail "Marqué comme livré"
+                // Update the Order status to "delivered"
+                $delivery->order->update([
+                    'status' => 'delivered'
+                ]);
+    
+                // Envoi l'email "Marqué comme livré"
                 Mail::to($delivery->order->customer->email)->send(new DeliveryDeliveredMail($delivery));
     
                 $this->success('Livraison marquée comme livrée.');
@@ -250,7 +262,7 @@ class Index extends Component
     
         $this->reset(['showActionModal', 'selectedAction', 'selectedDeliveryId']);
     }
-
+    
     public function cancelAction(): void
     {
         $this->reset(['showActionModal', 'selectedAction', 'selectedDeliveryId']);
