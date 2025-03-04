@@ -129,7 +129,35 @@ Route::middleware(['auth'])->group(function () {
 
     // Manager routes
     Route::middleware(['role:manager'])->group(function () {
-        // Manager routes can be defined here
+        Route::get('/manager/dashboard', \App\Livewire\Manager\Dashboard::class)->name('manager.dashboard');
+        Route::get('/manager/settings', \App\Livewire\Manager\Components\Settings::class)->name('manager.settings');
+
+        Route::get('/manager/users', \App\Livewire\Manager\Components\Users\Index::class)->name('manager.users.index');
+        Route::get('/manager/users/create', \App\Livewire\Manager\Components\Users\Create::class)->name('manager.users.create');
+        Route::get('/manager/users/{user}/edit', \App\Livewire\Manager\Components\Users\Edit::class)->name('manager.users.edit');
+        // Route::get('/users/{user}/show', \App\Livewire\Manager\Components\Users\Show::class)->name('manager.users.show');
+
+        // Categories
+        Route::get('/manager/categories', \App\Livewire\Manager\Components\Categories\Index::class)->name('manager.categories.index');
+        Route::get('/manager/categories/create', \App\Livewire\Manager\Components\Categories\Create::class)->name('manager.categories.create');
+        Route::get('/manager/categories/{category}/edit', \App\Livewire\Manager\Components\Categories\Edit::class)->name('manager.categories.edit');
+
+        // Products
+        Route::get('/manager/products', \App\Livewire\Manager\Components\Products\Index::class)->name('manager.products.index');
+        Route::get('/manager/products/create', \App\Livewire\Manager\Components\Products\Create::class)->name('manager.products.create');
+        Route::get('/manager/products/{product}/edit', \App\Livewire\Manager\Components\Products\Edit::class)->name('manager.products.edit');
+
+        // Menus
+        Route::get('/manager/menus', \App\Livewire\Manager\Components\Menus\Index::class)->name('manager.menus.index');
+        Route::get('/manager/menus/create', \App\Livewire\Manager\Components\Menus\Create::class)->name('manager.menus.create');
+        Route::get('/manager/menus/{menu}/edit', \App\Livewire\Manager\Components\Menus\Edit::class)->name('manager.menus.edit');
+        Route::get('/manager/menus/{menu}', \App\Livewire\Manager\Components\Menus\Show::class)->name('manager.menus.show');
+
+        // Orders
+        Route::get('/manager/orders', \App\Livewire\Manager\Components\Orders\Index::class)->name('manager.orders.index');
+
+        // Deliveries
+        Route::get('/manager/deliveries', \App\Livewire\Manager\Components\Deliveries\Index::class)->name('manager.deliveries.index');
     });
 
     // Delivery Person routes

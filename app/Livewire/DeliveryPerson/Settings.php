@@ -41,7 +41,6 @@ class Settings extends Component
         $this->last_name     = $user->last_name;
         $this->email         = $user->email;
 
-        // If the user's phone_number is null, our ?string will accept it
         $this->phone_number  = $user->phone_number;
 
         $this->oldAvatarUrl  = $user->avatar;
