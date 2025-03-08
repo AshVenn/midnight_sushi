@@ -138,7 +138,7 @@
                             $itemPrice = number_format($item->price, 2);
                         @endphp
                         <li>
-                            {{ $itemName }} (x{{ $item->quantity }}) - {{ $itemPrice }} €
+                            {{ $itemName }} (x{{ $item->quantity }}) - {{ $itemPrice }} CHF
                         </li>
                     @empty
                         <li>Aucun article.</li>
@@ -149,7 +149,7 @@
 
                 <p>
                     <strong>Prix Total:</strong> 
-                    {{ number_format($deliveryToShow->order->total_price, 2) }} €
+                    {{ number_format($deliveryToShow->order->total_price, 2) }} CHF
                 </p>
 
             </div>

@@ -26,7 +26,7 @@ class DeliveryPickedUpMail extends Mailable
      */
     public function build()
     {
-        return $this->subject('Votre commande a été ramassée')
+        return $this->subject("Votre commande {$this->delivery->order->order_number} a été ramassée")
                     ->markdown('emails.delivery_picked_up', ['delivery' => $this->delivery]);
     }
 }

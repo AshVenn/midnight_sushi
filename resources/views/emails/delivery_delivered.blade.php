@@ -3,7 +3,7 @@
 
 Bonjour {{ $delivery->order->customer->first_name }},
 
-Votre commande **#{{ $delivery->order_id }}** a été livrée avec succès.
+Votre commande **{{ $delivery->order->order_number }}** a été livrée avec succès.
 
 **Détails de la livraison :**
 - **Numéro de livraison :** {{ $delivery->id }}

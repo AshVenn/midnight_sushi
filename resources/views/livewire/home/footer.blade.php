@@ -1,9 +1,22 @@
-<div class="py-8  text-center">
-    <div class="space-y-2">
-        <p class="text-sm">Livraison disponible de 23h à 5h.</p>
-        <p class="text-sm">Contact : 078 326 25 92</p>
-    </div>
-    <div class="mt-4">
-        <a href="https://instagram.com/midnight_sushi_geneva" target="_blank" class="underline text-gray-400">Instagram</a>
+<!-- footer.blade.php -->
+<div class="py-2 text-xs">
+    <div class="max-w-6xl mx-auto px-4 text-center">
+        <div class="flex flex-wrap justify-center items-center gap-2 text-gray-500">
+            <p>Livraison de 23h à 5h</p>
+            <span class="hidden md:inline">•</span>
+            <p>Contact : 078 326 25 92</p>
+            <span class="hidden md:inline">•</span>
+            <a href="https://instagram.com/midnight_sushi_geneva" 
+               class="underline hover:text-primary">
+                @midnight_sushi_geneva
+            </a>
+        </div>
+
+        <div class="flex justify-center items-center gap-2">
+            <span>Créé par</span>
+            <a href="https://skylinkagency.ch" target="_blank" class="w-20 hover:opacity-75">
+                <img src="/images/midnight_sushi/Skylink Agency.svg" alt="Skylink Agency" class="w-full">
+            </a>
+        </div>
     </div>
 </div>

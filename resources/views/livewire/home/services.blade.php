@@ -1,5 +1,5 @@
 <div class="py-16 text-center">
-    <h2 class="text-3xl md:text-5xl font-bold mb-8">Pourquoi choisir Midnight Sushi ?</h2>
+    <h2 class="text-3xl md:text-5xl font-bold mb-8 text-primary">Pourquoi choisir Midnight Sushi ?</h2>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div>
             <x-button icon="o-truck" class="btn-circle btn-outline" />

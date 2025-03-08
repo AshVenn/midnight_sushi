@@ -2,7 +2,7 @@
     {{-- IMAGE / Left Column --}}
     <div class="lg:col-span-2 flex justify-center items-start">
         <img 
-            src="/images/sushi/orders.png" 
+            src="/images/midnight_sushi/orders.png" 
             width="250" 
             class="mx-auto lg:mx-0" 
             alt="Orders" 
@@ -41,9 +41,8 @@
                     <div class="flex flex-col md:flex-row items-center gap-4">
                         {{-- Relative # e.g. #1, #2, etc. --}}
                         <div class="rounded-lg p-3 font-bold text-center min-w-[60px] bg-primary text-base-100">
-                            #{{ $orders->firstItem() + $index }}
+                            {{ $order->order_number }}
                         </div>
-
                         {{-- Main Info --}}
                         <div class="flex-grow">
                             @if ($order->orderItems->count())
@@ -71,7 +70,7 @@
                                     {{ $order->created_at->format('Y-m-d') }}
                                 </div>
                                 <div class="font-bold">
-                                    {{ number_format($order->total_price, 2) }} €
+                                    {{ number_format($order->total_price, 2) }} CHF
                                 </div>
                                 <div>
                                     Statut:

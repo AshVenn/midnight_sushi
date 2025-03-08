@@ -17,26 +17,27 @@
 </head>
 <body class="font-sans antialiased">
     {{-- Navbar --}}
-    <x-nav sticky full-width>
-        <x-slot:brand class="z-12" link="/">
+    <x-nav sticky full-width class="sticky top-0 z-50">
+    <x-slot:brand class="z-50">
             <label for="main-drawer" class="lg:hidden mr-3">
                 <x-icon name="o-bars-3" class="cursor-pointer" />
             </label>
-            <img 
-                src="/Needs/Logo midnight sushi Light.svg" 
-                alt="Midnight Sushi"
-                class="h-16 dark:hidden"
-            />
 
-            <img 
-                src="/Needs/Logo midnight sushi Dark.svg" 
-                alt="Midnight Sushi"
-                class="h-16 hidden dark:block"
-            />
+            <a href="/">
+                <img 
+                    src="/Needs/Logo midnight sushi Light.svg" 
+                    alt="Midnight Sushi"
+                    class="h-16 dark:hidden"
+                />
 
-
-                
+                <img 
+                    src="/Needs/Logo midnight sushi Dark.svg" 
+                    alt="Midnight Sushi"
+                    class="h-16 hidden dark:block"
+                />
+            </a>
         </x-slot:brand>
+
 
         <x-slot:actions>
             <x-theme-toggle class="btn btn-circle" />

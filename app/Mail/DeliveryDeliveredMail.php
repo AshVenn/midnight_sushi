@@ -26,7 +26,7 @@ class DeliveryDeliveredMail extends Mailable
      */
     public function build()
     {
-        return $this->subject('Votre commande a été livrée')
+        return $this->subject("Votre commande {$this->delivery->order->order_number} a été livrée")
                     ->markdown('emails.delivery_delivered', ['delivery' => $this->delivery]);
     }
 }

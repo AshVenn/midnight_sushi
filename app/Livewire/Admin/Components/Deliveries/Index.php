@@ -5,14 +5,15 @@ namespace App\Livewire\Admin\Components\Deliveries;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Carbon\Carbon;
-use Mary\Traits\Toast; 
+use Mary\Traits\Toast;
 use App\Models\Delivery;
 use App\Models\User;
 use App\Models\Order;
-
 use App\Mail\DeliveryPickedUpMail;
 use App\Mail\DeliveryDeliveredMail;
+use App\Mail\DeliveryReturnedMail;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class Index extends Component
 {
@@ -22,24 +23,31 @@ class Index extends Component
     public bool $showFiltersModal = false;
     public bool $showReassignModal = false;
     public bool $showActionModal = false;
-
-    // NEW: For showing delivery details in a modal
+    public bool $showReturnReasonModal = false;
     public bool $showDeliveryDetailsModal = false;
+    
     public ?Delivery $deliveryToShow = null;
-
     public ?int $selectedDeliveryId = null;
     public ?int $selectedDeliveryPerson = null;
+    
     public string $selectedAction = '';
+    public string $selectedReturnReason = '';
+    public string $customReturnReason = '';
 
     public array $deliveryPeople = [];
     public array $deliveryStatusOptions = [];
     public array $actionsOptions = [];
+    public array $returnReasons = [
+        'Client absent',
+        'Adresse incorrecte',
+        'Problème de paiement',
+        'Autre raison'
+    ];
 
     public string $statusFilter = 'all';
     public ?string $deliveryPersonFilter = null;
     public ?string $startDate = null;
     public ?string $endDate = null;
-
     public array $sortBy = ['column' => 'id', 'direction' => 'asc'];
 
     public function mount(): void
@@ -54,11 +62,13 @@ class Index extends Component
             ['id' => 'assigned',  'name' => 'Attribué'],
             ['id' => 'picked_up', 'name' => 'Ramassé'],
             ['id' => 'delivered', 'name' => 'Livré'],
+            ['id' => 'returned',  'name' => 'Retourné'],
         ];
 
         $this->actionsOptions = [
             ['id' => 'mark_picked_up', 'name' => 'Marquer comme Ramassé'],
             ['id' => 'mark_delivered', 'name' => 'Marquer comme Livré'],
+            ['id' => 'mark_returned',  'name' => 'Marquer comme Retourné'],
         ];
     }
 
@@ -153,10 +163,6 @@ class Index extends Component
         $this->showFiltersModal = true;
     }
 
-    // ======================
-    //  REASSIGN DELIVERY
-    // ======================
-
     public function reassignDelivery(int $deliveryId): void
     {
         $this->selectedDeliveryId    = $deliveryId;
@@ -172,7 +178,7 @@ class Index extends Component
                 $delivery->update([
                     'delivery_person_id' => $this->selectedDeliveryPerson,
                     'assigned_at'        => now(),
-                    'status'             => 'assigned', // reassign sets it back to assigned
+                    'status'             => 'assigned',
                 ]);
                 $this->success('Livreur réassigné avec succès.');
                 $this->reset(['showReassignModal', 'selectedDeliveryPerson', 'selectedDeliveryId']);
@@ -189,14 +195,22 @@ class Index extends Component
         $this->reset(['showReassignModal', 'selectedDeliveryPerson', 'selectedDeliveryId']);
     }
 
-    // ======================
-    //  ACTIONS ON DELIVERY
-    // ======================
     public function performAction(int $deliveryId): void
     {
         $this->selectedDeliveryId = $deliveryId;
         $this->selectedAction     = '';
         $this->showActionModal    = true;
+    }
+
+    public function requestReturnReason(): void
+    {
+        $this->validate(['selectedAction' => 'required']);
+        
+        if ($this->selectedAction === 'mark_returned') {
+            $this->showReturnReasonModal = true;
+        } else {
+            $this->confirmAction();
+        }
     }
 
     public function confirmAction(): void
@@ -214,67 +228,104 @@ class Index extends Component
         }
     
         try {
-            if ($this->selectedAction === 'mark_picked_up') {
-                if ($delivery->status !== 'assigned') {
-                    $this->error('Impossible de marquer cette livraison comme ramassée.');
-                    return;
-                }
-                // Update the Delivery
-                $delivery->update([
-                    'status'       => 'picked_up',
-                    'picked_up_at' => now(),
-                ]);
-    
-                // Update the Order status to "out_for_delivery"
-                $delivery->order->update([
-                    'status' => 'out_for_delivery'
-                ]);
-    
-                // Envoi l'email "Marqué comme ramassé"
-                Mail::to($delivery->order->customer->email)->send(new DeliveryPickedUpMail($delivery));
-    
-                $this->success('Livraison marquée comme ramassée.');
-            } elseif ($this->selectedAction === 'mark_delivered') {
-                if ($delivery->status !== 'picked_up') {
-                    $this->error('Impossible de marquer cette livraison comme livrée.');
-                    return;
-                }
-                // Update the Delivery
-                $delivery->update([
-                    'status'       => 'delivered',
-                    'delivered_at' => now(),
-                ]);
-    
-                // Update the Order status to "delivered"
-                $delivery->order->update([
-                    'status' => 'delivered'
-                ]);
-    
-                // Envoi l'email "Marqué comme livré"
-                Mail::to($delivery->order->customer->email)->send(new DeliveryDeliveredMail($delivery));
-    
-                $this->success('Livraison marquée comme livrée.');
+            switch ($this->selectedAction) {
+                case 'mark_picked_up':
+                    $this->handlePickUp($delivery);
+                    break;
+                
+                case 'mark_delivered':
+                    $this->handleDelivery($delivery);
+                    break;
+                
+                case 'mark_returned':
+                    $this->handleReturn($delivery);
+                    break;
             }
         } catch (\Exception $e) {
-            Log::error("Erreur lors de l'envoi de l'email pour la livraison {$delivery->id}: " . $e->getMessage());
-            $this->error("Une erreur est survenue lors de l'envoi de l'email.");
+            Log::error("Delivery error: {$e->getMessage()}");
+            $this->error("Erreur: {$e->getMessage()}");
         }
     
-        $this->reset(['showActionModal', 'selectedAction', 'selectedDeliveryId']);
-    }
-    
-    public function cancelAction(): void
-    {
-        $this->reset(['showActionModal', 'selectedAction', 'selectedDeliveryId']);
+        $this->resetModals();
     }
 
-    // ======================
-    //  NEW: SHOW DETAILS
-    // ======================
-    /**
-     * Show detailed info about the delivery,
-     * including the order, items, customer, phone, notes, etc.
-     */
+    protected function handlePickUp(Delivery $delivery): void
+    {
+        if ($delivery->status !== 'assigned') {
+            throw new \Exception('Impossible de marquer cette livraison comme ramassée.');
+        }
+
+        $delivery->update([
+            'status' => 'picked_up',
+            'picked_up_at' => now(),
+        ]);
+
+        $delivery->order->update(['status' => 'out_for_delivery']);
+        Mail::to($delivery->order->customer->email)->send(new DeliveryPickedUpMail($delivery));
+        $this->success('Livraison marquée comme ramassée.');
+    }
+
+    protected function handleDelivery(Delivery $delivery): void
+    {
+        if ($delivery->status !== 'picked_up') {
+            throw new \Exception('Impossible de marquer cette livraison comme livrée.');
+        }
+
+        $delivery->update([
+            'status' => 'delivered',
+            'delivered_at' => now(),
+        ]);
+
+        $delivery->order->update(['status' => 'delivered']);
+        Mail::to($delivery->order->customer->email)->send(new DeliveryDeliveredMail($delivery));
+        $this->success('Livraison marquée comme livrée.');
+    }
+
+    protected function handleReturn(Delivery $delivery): void
+    {
+        if ($delivery->status !== 'picked_up') {
+            throw new \Exception('Impossible de marquer cette livraison comme retournée.');
+        }
+
+        $this->validate([
+            'selectedReturnReason' => 'required',
+            'customReturnReason' => $this->selectedReturnReason === 'Autre raison' ? 'required' : ''
+        ]);
+
+        $reason = $this->selectedReturnReason === 'Autre raison' 
+            ? $this->customReturnReason
+            : $this->selectedReturnReason;
+
+        $delivery->update([
+            'status' => 'returned',
+            'return_reason' => $reason,
+            'returned_at' => now(),
+        ]);
+
+        $delivery->order->update(['status' => 'returned']);
+        Mail::to($delivery->order->customer->email)
+            ->send(new DeliveryReturnedMail($delivery, $reason));
+        
+        $this->success('Livraison marquée comme retournée.');
+    }
+
+    protected function resetModals(): void
+    {
+        $this->reset([
+            'showActionModal',
+            'showReturnReasonModal',
+            'selectedAction',
+            'selectedDeliveryId',
+            'selectedReturnReason',
+            'customReturnReason'
+        ]);
+    }
+
+    public function cancelAction(): void
+    {
+        $this->resetModals();
+    }
+
     public function showDeliveryDetails(int $deliveryId): void
     {
         $delivery = Delivery::with(['order.customer', 'order.orderItems.orderable', 'deliveryPerson'])
@@ -285,7 +336,7 @@ class Index extends Component
             return;
         }
 
-        $this->deliveryToShow           = $delivery;
+        $this->deliveryToShow = $delivery;
         $this->showDeliveryDetailsModal = true;
     }
 

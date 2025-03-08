@@ -5,7 +5,7 @@ Bonjour {{ $order->customer->first_name }},
 
 Merci pour votre commande ! Nous sommes en train de la traiter. Voici les détails de votre commande :
 
-**Numéro de commande :** {{ $order->id }}  
+**Numéro de commande :** {{ $order->order_number }}  <!-- Changed from id to order_number -->
 **Total :** {{ number_format($order->total_price, 2) }} CHF
 
 | Produit                                    | Quantité | Prix         |

@@ -13,13 +13,15 @@ class CreateDeliveriesTable extends Migration
             $table->foreignId('order_id')->constrained()->cascadeOnDelete();
             $table->foreignId('delivery_person_id')->constrained('users')->cascadeOnDelete();
 
-            $table->enum('status', ['assigned', 'picked_up', 'delivered'])->default('assigned');
+            $table->enum('status', ['assigned', 'picked_up', 'delivered','returned'])->default('assigned');
             $table->timestamp('assigned_at')->nullable();
             $table->timestamp('picked_up_at')->nullable();
             $table->timestamp('delivered_at')->nullable();
+            $table->timestamp('returned_at')->nullable();
             $table->text('address_text');
-
             $table->string('phone_number')->nullable();
+            $table->text('return_reason')->nullable();
+            
             $table->text('notes')->nullable();
             $table->decimal('delivery_fee', 8, 2)->default(0);
 

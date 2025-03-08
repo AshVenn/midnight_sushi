@@ -19,6 +19,7 @@ class UsersSeeder extends Seeder
                 'last_name' => 'User',
                 'email' => 'admin1@example.com',
                 'password' => Hash::make('admin1@example.com'),
+                'avatar' => '/images/midnight_sushi/midnight_sushi_user.jpg',
                 'role' => 'admin',
             ],
             [
@@ -26,6 +27,7 @@ class UsersSeeder extends Seeder
                 'last_name' => 'User',
                 'email' => 'manager1@example.com',
                 'password' => Hash::make('manager1@example.com'),
+                'avatar' => '/images/midnight_sushi/midnight_sushi_user.jpg',
                 'role' => 'manager',
             ],
             [
@@ -33,6 +35,7 @@ class UsersSeeder extends Seeder
                 'last_name' => 'User',
                 'email' => 'customer1@example.com',
                 'password' => Hash::make('customer1@example.com'),
+                'avatar' => '/images/midnight_sushi/midnight_sushi_user.jpg',
                 'role' => 'customer',
             ],
             [
@@ -40,6 +43,7 @@ class UsersSeeder extends Seeder
                 'last_name' => 'Person',
                 'email' => 'delivery1@example.com',
                 'password' => Hash::make('delivery1@example.com'),
+                'avatar' => '/images/midnight_sushi/midnight_sushi_user.jpg',
                 'role' => 'delivery_person',
             ],
         ];
@@ -51,20 +55,12 @@ class UsersSeeder extends Seeder
             );
         }
 
-        User::create([
-            'first_name' => 'Admin',
-            'last_name' => 'User',
-            'email' => 'admin@example.com',
-            'password' => Hash::make('password'),
-            'role' => 'admin',
-        ]);
-
-        // Delivery Persons
+        
         User::factory()->count(3)->state([
             'role' => 'delivery_person',
         ])->create();
 
-        // Customers
+       
         User::factory()->count(10)->state([
             'role' => 'customer',
         ])->create();

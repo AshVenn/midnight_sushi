@@ -86,4 +86,10 @@ class Product extends Model
     {
         return $this->isOnPromotion() ? $this->discount_price : $this->price;
     }
+    public function reviews()
+    {
+        return $this->morphMany(\App\Models\Review::class, 'reviewable');
+    }
+    
+
 }

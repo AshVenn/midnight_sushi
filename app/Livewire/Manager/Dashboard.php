@@ -190,7 +190,7 @@ class Dashboard extends Component
                     'labels' => $grossRevenueData->keys()->toArray(),
                     'datasets' => [
                         [
-                            'label' => 'Revenus (€)',
+                            'label' => 'Revenus (CHF)',
                             'data' => $grossRevenueData->values()->toArray(),
                             'fill' => true,
                             'backgroundColor' => 'rgba(75, 192, 192, 0.2)',
@@ -204,7 +204,7 @@ class Dashboard extends Component
                     'scales' => [
                         'y' => [
                             'beginAtZero' => true,
-                            'title' => ['display' => true, 'text' => 'Montant (€)'],
+                            'title' => ['display' => true, 'text' => 'Montant (CHF)'],
                         ],
                         'x' => [
                             'title' => ['display' => true, 'text' => 'Mois'],

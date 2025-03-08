@@ -1,5 +1,5 @@
 <div>
-    <x-card title="Détails de la Commande #{{ $relativeOrderNumber }}" separator>
+    <x-card title="Détails de la Commande {{ $order->order_number }}" separator>
         {{-- Status --}}
         <div class="mb-4 text-sm">
             <span class="font-semibold">Statut:</span>
@@ -71,7 +71,7 @@
                         <span class="ml-2">(x{{ $item->quantity }})</span>
                     </div>
                     <div class="font-semibold">
-                        {{ number_format($item->price, 2) }} € 
+                        {{ number_format($item->price, 2) }} CHF 
                         <span class="text-sm text-neutral ml-2">/unité</span>
                     </div>
                 </div>
@@ -94,7 +94,7 @@
 
         {{-- Total --}}
         <div class="mt-6 text-right text-lg font-bold">
-            Total: {{ number_format($order->total_price, 2) }} €
+            Total: {{ number_format($order->total_price, 2) }} CHF
         </div>
 
         {{-- Cancel Button if allowed --}}

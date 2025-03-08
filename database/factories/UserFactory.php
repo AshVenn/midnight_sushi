@@ -27,10 +27,10 @@ class UserFactory extends Factory
             'first_name' => $this->faker->firstName,
             'last_name' => $this->faker->lastName,
             'email' => $this->faker->unique()->safeEmail,
-            'password' => Hash::make('password'), // Default password for testing
+            'password' => Hash::make('password'),
             'role' => $this->faker->randomElement(['admin', 'customer', 'manager', 'delivery_person']),
             'phone_number' => $this->faker->unique()->phoneNumber,
-            'avatar' => $this->faker->imageUrl(),
+            'avatar' => '/images/midnight_sushi/midnight_sushi_user.jpg',
             'status' => $this->faker->randomElement(['active', 'inactive', 'banned']),
         ];
     }

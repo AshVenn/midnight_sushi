@@ -2,7 +2,7 @@
     <x-card title="Tableau de Bord Administrateur" subtitle="Vue d'ensemble des activités de l'administrateur" shadow separator>
         {{-- Statistiques Principales --}}
         <div class="flex flex-wrap justify-between gap-4 mb-6">
-            <x-stat title="Revenu Brut" value="€{{ number_format($totalRevenue ?? 0, 2) }}" icon="s-currency-euro" class="flex-1 min-w-[200px] drop-shadow-lg" />
+            <x-stat title="Revenu Brut" value="CHF{{ number_format($totalRevenue ?? 0, 2) }}" icon="s-currency-euro" class="flex-1 min-w-[200px] drop-shadow-lg" />
             <x-stat title="Commandes" value="{{ $totalOrders ?? 0 }}" icon="s-gift" class="flex-1 min-w-[200px] drop-shadow-lg" />
             <x-stat title="Nouveaux Clients" value="{{ $newCustomers ?? 0 }}" icon="o-user-plus" class="flex-1 min-w-[200px] drop-shadow-lg" />
             <x-stat title="Produits Actifs" value="{{ $activeProducts ?? 0 }}" icon="m-archive-box-arrow-down" class="flex-1 min-w-[200px] drop-shadow-lg" />
@@ -38,7 +38,7 @@
                     @endscope
 
                     @scope('cell_revenue', $row)
-                        €{{ number_format($row['revenue'] ?? 0, 2) }}
+                        CHF{{ number_format($row['revenue'] ?? 0, 2) }}
                     @endscope
                 </x-table>
             </div>
@@ -55,7 +55,7 @@
                     @endscope
 
                     @scope('cell_price', $row)
-                        €{{ number_format($row['price'] ?? 0, 2) }}
+                        CHF{{ number_format($row['price'] ?? 0, 2) }}
                     @endscope
 
                     @scope('cell_sales', $row)

@@ -46,14 +46,14 @@
 
         {{-- Price --}}
         @scope('cell_price', $menu)
-            <div>{{ number_format($menu->price, 2) }} €</div>
+            <div>{{ number_format($menu->price, 2) }} CHF</div>
         @endscope
 
         {{-- Discount Price --}}
         @scope('cell_discount_price', $menu)
             @if($menu->discount_price)
                 <div>
-                    Promo : {{ number_format($menu->discount_price, 2) }} €
+                    Promo : {{ number_format($menu->discount_price, 2) }} CHF
                     @if($menu->isOnPromotion())
                         <span class="text-green-600 text-sm">(En cours)</span>
                     @else

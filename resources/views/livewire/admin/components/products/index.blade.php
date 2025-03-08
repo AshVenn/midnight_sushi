@@ -59,11 +59,11 @@
                 $actualPrice = $product->price; // Using getPriceAttribute
             @endphp
             <div>
-                {{ number_format($actualPrice, 2) }} €
+                {{ number_format($actualPrice, 2) }} CHF
             </div>
             @if ($product->discount_price)
                 <div class="text-sm text-green-600">
-                    Promo: {{ number_format($product->discount_price, 2) }} €
+                    Promo: {{ number_format($product->discount_price, 2) }} CHF
                 </div>
             @endif
         @endscope

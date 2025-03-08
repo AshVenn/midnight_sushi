@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Models;
+use Illuminate\Support\Str;
+
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -10,6 +12,7 @@ class Order extends Model
     use HasFactory;
 
     protected $fillable = [
+        'order_number',
         'customer_id',
         'total_price',
         'status',
@@ -17,12 +20,33 @@ class Order extends Model
         'payment_status',
         'phone_number',
         'address_text',
-        'notes', // new notes field
+        'notes',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($order) {
+            $order->order_number = static::generateOrderNumber();
+        });
+    }
+
+    public static function generateOrderNumber()
+    {
+        $prefix = 'MS-' . date('Ymd') . '-';
+        $latest = static::where('order_number', 'like', $prefix . '%')
+            ->latest('id')
+            ->first();
+
+        $sequence = $latest ? (int) str_replace($prefix, '', $latest->order_number) + 1 : 1;
+        
+        return $prefix . strtoupper(Str::random(4)) . $sequence;
+    }
+    
 
     public function customer()
     {
-        // Assumes you have a User model (App\Models\User)
         return $this->belongsTo(User::class, 'customer_id');
     }
 

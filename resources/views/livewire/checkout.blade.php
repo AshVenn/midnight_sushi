@@ -3,7 +3,7 @@
     <!-- IMAGE -->
     <div class="lg:col-span-2 flex items-center justify-center">
         <!-- Adaptez le chemin de l'image à vos besoins -->
-        <img src="/images/sushi/checkout.png" width="250" class="mx-auto" alt="Checkout Illustration" />
+        <img src="/images/midnight_sushi/checkout.png" width="250" class="mx-auto" alt="Checkout Illustration" />
     </div>
 
     @php
@@ -30,7 +30,7 @@
                         <x-list-item
                             :item="$item"
                             value="name"
-                            :sub-value="'€' . number_format($item['price'], 2)"
+                            :sub-value="'CHF' . number_format($item['price'], 2)"
                             avatar="image"
                             no-separator
                         >
@@ -47,7 +47,7 @@
                 <div class="flex justify-between items-center mx-3">
                     <div>Total</div>
                     <div class="font-black text-lg">
-                        €{{ number_format($totalPrice, 2) }}
+                        CHF{{ number_format($totalPrice, 2) }}
                     </div>
                 </div>
             </x-card>

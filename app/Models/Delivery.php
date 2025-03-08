@@ -18,8 +18,10 @@ class Delivery extends Model
         'delivered_at',
         'address_text',
         'phone_number',
-        'notes',        // new notes field for delivery
+        'notes',
         'delivery_fee',
+        'return_reason',
+        'returned_at'
     ];
 
     protected $casts = [
@@ -38,4 +40,10 @@ class Delivery extends Model
     {
         return $this->belongsTo(User::class, 'delivery_person_id');
     }
+    
+        public function isReturnable(): bool
+    {
+        return in_array($this->status, ['picked_up']);
+    }
+
 }

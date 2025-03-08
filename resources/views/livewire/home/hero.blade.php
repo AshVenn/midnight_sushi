@@ -1,15 +1,15 @@
-<div class="relative md:h-screen flex flex-col items-center text-neutral dark:text-accent">
+<div class="mt-16 relative md:h-screen flex flex-col items-center text-neutral dark:text-accent">
     <!-- Background Decorations (hidden on small) -->
     <div class="hidden md:block absolute top-0 left-0 w-full">
         <!-- Left Fish -->
         <img 
-            src="/images/sushi/sushiFish.svg" 
+            src="/images/midnight_sushi/sushiFish.svg" 
             alt="Fish Decoration Left" 
             class="absolute top-0 left-6 w-12 md:w-20 lg:w-28"
         />
         <!-- Right Fish -->
         <img 
-            src="/images/sushi/sushiFish.svg" 
+            src="/images/midnight_sushi/sushiFish.svg" 
             alt="Fish Decoration Right" 
             class="absolute top-0 right-6 w-12 md:w-20 lg:w-28 transform rotate-180"
         />
@@ -59,34 +59,54 @@
     <!-- Sushi Plates with Scroll Effect -->
     <div id="plate-left" class="fixed bottom-0 left-0">
         <img 
-            src="/images/sushi/sushiPlate.png" 
+            src="/images/midnight_sushi/sushiPlate.png" 
             alt="Sushi Plate Left" 
-            class="w-40 md:w-56 lg:w-64 transform scale-x-[-1]"
+            class="plate-img transform scale-x-[-1]"
         />
     </div>
     <div id="plate-right" class="fixed bottom-0 right-0">
         <img 
-            src="/images/sushi/sushiPlate.png" 
+            src="/images/midnight_sushi/sushiPlate.png" 
             alt="Sushi Plate Right" 
-            class="w-40 md:w-56 lg:w-64"
+            class="plate-img"
         />
     </div>
 </div>
 
 <script>
-    document.addEventListener('scroll', () => {
+    function updatePlateSize() {
+        const screenWidth = window.innerWidth;
+        const plates = document.querySelectorAll('.plate-img');
+
+        plates.forEach(plate => {
+            if (screenWidth < 640) {
+                plate.style.width = '80px';  // Smallest size for mobile
+            } else if (screenWidth < 768) {
+                plate.style.width = '120px'; // Slightly larger for tablets
+            } else if (screenWidth < 1024) {
+                plate.style.width = '180px'; // Medium size for smaller desktops
+            } else {
+                plate.style.width = '250px'; // Full size for large desktops
+            }
+        });
+    }
+
+    function handleScrollEffect() {
         const scrollY = window.scrollY;
-
-        // Left plate moves further left
         const leftPlate = document.getElementById('plate-left');
-        if (leftPlate) {
-            leftPlate.style.transform = `translateX(${-scrollY}px)`;
-        }
-
-        // Right plate moves further right
         const rightPlate = document.getElementById('plate-right');
-        if (rightPlate) {
-            rightPlate.style.transform = `translateX(${scrollY}px)`;
+
+        if (leftPlate) {
+            leftPlate.style.transform = `translateX(${-scrollY / 2}px) scale(${1 - scrollY / 1000})`;
         }
+        if (rightPlate) {
+            rightPlate.style.transform = `translateX(${scrollY / 2}px) scale(${1 - scrollY / 1000})`;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        updatePlateSize();
+        window.addEventListener('resize', updatePlateSize);
+        window.addEventListener('scroll', handleScrollEffect);
     });
 </script>

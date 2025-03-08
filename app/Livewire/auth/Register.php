@@ -5,17 +5,34 @@ namespace App\Livewire\Auth;
 use Livewire\Component;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Mary\Traits\Toast; 
 
 class Register extends Component
 {
+    use Toast; 
+
     public string $first_name = '';
     public string $last_name = '';
     public string $email = '';
     public string $password = '';
+    public string $honeypot = '';
 
     public function register()
     {
-        // Validate input fields
+        // Protection anti-spam : si le champ honeypot est rempli, bloquer l'inscription
+        if (!empty($this->honeypot)) {
+            Log::warning('Bot détecté lors de l\'inscription.', ['email' => $this->email]);
+
+            $this->error(
+                title: 'Tentative bloquée',
+                description: 'Votre inscription a échoué. Veuillez réessayer.'
+            );
+
+            return;
+        }
+
+
         $this->validate([
             'first_name' => 'required|string|max:255',
             'last_name'  => 'required|string|max:255',
@@ -23,7 +40,7 @@ class Register extends Component
             'password'   => 'required|min:8',
         ]);
 
-        // Create a new user with the 'customer' role by default
+        
         User::create([
             'first_name' => $this->first_name,
             'last_name'  => $this->last_name,
@@ -32,7 +49,12 @@ class Register extends Component
             'role'       => 'customer',
         ]);
 
-        session()->flash('success', 'Account successfully created!');
+       
+        $this->success(
+            title: 'Inscription réussie',
+            description: 'Votre compte a été créé avec succès !'
+        );
+
         return redirect('/login');
     }
 

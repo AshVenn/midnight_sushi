@@ -3,7 +3,7 @@
 
 Bonjour {{ $delivery->order->customer->first_name }},
 
-Votre commande **#{{ $delivery->order_id }}** a été ramassée par notre livreur et est en route pour la livraison.
+Votre commande **{{ $delivery->order->order_number }}** a été ramassée par notre livreur et est en route pour la livraison.
 
 **Détails de la livraison :**
 - **Numéro de livraison :** {{ $delivery->id }}

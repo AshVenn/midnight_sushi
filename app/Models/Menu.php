@@ -52,4 +52,11 @@ class Menu extends Model
             && $this->promotion_start <= now()
             && $this->promotion_end >= now();
     }
+
+    public function reviews()
+    {
+        return $this->morphMany(\App\Models\Review::class, 'reviewable');
+    }
+    
 }
+

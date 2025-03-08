@@ -13,12 +13,6 @@ class OrderShow extends Component
     public Order $order;
     public bool $confirmingCancellation = false;
 
-    /**
-     * Holds the "relative" order number,
-     * e.g. #1 for earliest, #2 for second, etc.
-     */
-    public int $relativeOrderNumber = 0;
-
     public function mount(Order $order)
     {
         // Ensure this order belongs to the logged in user
@@ -31,9 +25,6 @@ class OrderShow extends Component
 
         // Assign the loaded model to our public property
         $this->order = $order;
-
-        // Compute the "relative" order number (i.e., 1-based index)
-        $this->relativeOrderNumber = $this->computeRelativeOrderNumber($order);
     }
 
     public function cancelOrder()
@@ -46,24 +37,6 @@ class OrderShow extends Component
             );
         }
         $this->confirmingCancellation = false;
-    }
-
-    /**
-     * Helper method to get the "relative" order number
-     * for the current user. The earliest (by created_at) is #1, etc.
-     */
-    private function computeRelativeOrderNumber(Order $order): int
-    {
-        // Get all orders of this user in ascending order by creation date
-        $allOrderIds = Order::where('customer_id', Auth::id())
-            ->orderBy('created_at', 'asc')
-            ->pluck('id');
-
-        // Zero-based index of the current order within the collection
-        $index = $allOrderIds->search($order->id);
-
-        // Convert to 1-based. If not found, default to 1
-        return $index !== false ? ($index + 1) : 1;
     }
 
     /**

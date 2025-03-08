@@ -3,80 +3,86 @@
 namespace App\Livewire;
 
 use Livewire\Component;
-use Illuminate\Support\Facades\Session;
+use Livewire\WithPagination;
 use App\Models\Menu;
 use App\Models\Product;
+use Illuminate\Support\Facades\Session;
 
 class MenusProducts extends Component
 {
-    public $menus = [];
-    public $products = [];
+    use WithPagination;
 
-    /**
-     * Load menus and products on mount.
-     */
-    public function mount()
+    public $searchTerm = '';
+    public $selectedAllergen = '';
+    protected $queryString = ['searchTerm', 'selectedAllergen'];
+
+    public function updatingSearchTerm()
     {
-        $this->menus = Menu::with('products')->get();
-        $this->products = Product::with('category')->where('is_available', true)->get();
+        $this->resetPage();
+    }
+
+    public function updatingSelectedAllergen()
+    {
+        $this->resetPage();
+    }
+
+    public function showMenuDetails($menuId)
+    {
+        $this->dispatch('openMenuModal', $menuId);
+    }
+
+    public function addToCart($type, $id)
+    {
+        $cart = Session::get('cart', []);
+        $key = $type === 'menu' ? Menu::find($id) : Product::find($id);
+    
+        if (!$key) return;
+    
+        // Initialize type array if not exists
+        if (!isset($cart[$type])) {
+            $cart[$type] = [];
+        }
+    
+        // Check if item already exists in cart
+        if (isset($cart[$type][$id])) {
+            $cart[$type][$id]['quantity']++;
+        } else {
+            $cart[$type][$id] = [
+                'id' => $key->id,
+                'name' => $key->name,
+                'price' => $type === 'menu' ? $key->price : $key->final_price,
+                'image' => $key->image,
+                'quantity' => 1 // Add quantity field
+            ];
+        }
+    
+        Session::put('cart', $cart);
+        $this->dispatch('cartUpdated');
     }
 
     public function render()
     {
-        return view('livewire.menus-products');
-    }
+        $menus = Menu::with(['products.category', 'reviews'])
+            ->when($this->searchTerm, function ($query) {
+                $query->where('name', 'like', "%{$this->searchTerm}%")
+                      ->orWhere('description', 'like', "%{$this->searchTerm}%");
+            })
+            ->paginate(6, ['*'], 'menuPage');
 
-    /**
-     * 1) "Détails": dispatch event to open the menu modal in the other component.
-     */
-    public function showMenuDetails($menuId)
-    {
-        // Émet l'événement avec le nom attendu par MenuDetailsModal
-        $this->dispatch('openMenuModal', $menuId);
-    }
+        $products = Product::with(['category', 'reviews'])
+            ->when($this->searchTerm, function ($query) {
+                $query->where('name', 'like', "%{$this->searchTerm}%")
+                      ->orWhere('description', 'like', "%{$this->searchTerm}%");
+            })
+            ->when($this->selectedAllergen, function ($query) {
+                $query->whereJsonContains('allergens', $this->selectedAllergen);
+            })
+            ->where('is_available', true)
+            ->paginate(8, ['*'], 'productPage');
 
-    /**
-     * 2) "Ajouter": add either a menu or product to the cart (example).
-     */
-    public function addToCart($type, $id)
-    {
-        // Example cart logic (not mandatory; adapt to your app)
-        $cart = Session::get('cart', []);
-
-        if ($type === 'menu') {
-            $item = Menu::find($id);
-            if ($item) {
-                if (isset($cart[$type][$id])) {
-                    $cart[$type][$id]['quantity']++;
-                } else {
-                    $cart[$type][$id] = [
-                        'id'       => $item->id,
-                        'name'     => $item->name,
-                        'price'    => $item->price,
-                        'quantity' => 1,
-                        'image'    => $item->image,
-                    ];
-                }
-            }
-        } elseif ($type === 'product') {
-            $item = Product::find($id);
-            if ($item) {
-                if (isset($cart[$type][$id])) {
-                    $cart[$type][$id]['quantity']++;
-                } else {
-                    $cart[$type][$id] = [
-                        'id'       => $item->id,
-                        'name'     => $item->name,
-                        'price'    => $item->final_price,
-                        'quantity' => 1,
-                        'image'    => $item->image,
-                    ];
-                }
-            }
-        }
-
-        Session::put('cart', $cart);
-
-        $this->dispatch('cartUpdated')->to('cart');
+        return view('livewire.menus-products', [
+            'menus' => $menus,
+            'products' => $products
+        ]);
     }
 }

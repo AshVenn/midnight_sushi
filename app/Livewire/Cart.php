@@ -9,6 +9,7 @@ use Livewire\Attributes\On;
 
 class Cart extends Component
 {
+    
     use Toast;
 
     public $cart = [];

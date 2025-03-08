@@ -26,7 +26,7 @@ class OrderConfirmationMail extends Mailable
      */
     public function build()
     {
-        return $this->subject('Votre confirmation de commande')
-                    ->markdown('emails.order_confirmation', ['order' => $this->order]);
+        return $this->subject("Confirmation de commande {$this->order->order_number}")
+                ->view('emails.order-confirmation', ['order' => $this->order]);
     }
 }

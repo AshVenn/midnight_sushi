@@ -53,7 +53,6 @@
         </x-slot:actions>
     </x-modal>
 
-
     <div class="mb-4 sm:space-x-2 space-y-4 lg:flex lg:space-y-0 lg:items-center lg:justify-between">
         {{-- Bouton Filtres --}}
         <div class="lg:flex-shrink-0">
@@ -96,17 +95,19 @@
                     'assigned'  => 'Attribuée',
                     'picked_up' => 'Ramassée',
                     'delivered' => 'Livrée',
+                    'returned'  => 'Retournée'
                 ];
                 $badgeColors = [
                     'assigned'  => 'bg-blue-500 text-white',
                     'picked_up' => 'bg-yellow-500 text-white',
                     'delivered' => 'bg-green-500 text-white',
+                    'returned'  => 'bg-red-500 text-white',
                     'default'   => 'bg-gray-500 text-white',
                 ];
                 $translatedStatus = $statusLabels[$delivery->status] ?? ucfirst($delivery->status);
                 $badgeClass       = $badgeColors[$delivery->status] ?? $badgeColors['default'];
             @endphp
-            <x-badge :value="$translatedStatus" class="{{ $badgeClass }}" />
+            <x-badge :value="$translatedStatus" :class="$badgeClass" />
         @endscope
 
         @scope('cell_assigned_at', $delivery)
@@ -127,21 +128,17 @@
                     label="Voir" 
                 />
 
-                @if ($delivery->status === 'delivered')
-                    <x-badge value="-" class="badge-secondary" />
-                @else
+                @if(!in_array($delivery->status, ['delivered', 'returned']))
                     <x-button 
                         wire:click="reassignDelivery({{ $delivery->id }})" 
                         class="btn-warning" 
                         label="Réassigner" 
                     />
-                    @if ($delivery->status === 'assigned' || $delivery->status === 'picked_up')
-                        <x-button 
-                            wire:click="performAction({{ $delivery->id }})" 
-                            class="btn-primary" 
-                            label="Actions" 
-                        />
-                    @endif
+                    <x-button 
+                        wire:click="performAction({{ $delivery->id }})" 
+                        class="btn-primary" 
+                        label="Actions" 
+                    />
                 @endif
             </div>
         @endscope
@@ -154,7 +151,6 @@
                       :options="$deliveryPeople" 
                       placeholder="Sélectionnez un Livreur" />
         </div>
-
         <x-slot:actions>
             <x-button label="Annuler" wire:click="cancelReassign" />
             <x-button label="Réassigner" class="btn-warning" wire:click="confirmReassign" />
@@ -164,27 +160,40 @@
     {{-- Modal Actions --}}
     <x-modal wire:model="showActionModal" title="Effectuer une Action" separator>
         <div class="text-center">
-            <x-select 
-                wire:model="selectedAction" 
-                :options="$actionsOptions" 
-                placeholder="Sélectionnez une Action" 
-            />
+            <x-select wire:model="selectedAction" :options="$actionsOptions" placeholder="Sélectionnez une Action" />
         </div>
-
         <x-slot:actions>
             <x-button label="Annuler" wire:click="cancelAction" />
+            <x-button label="Confirmer" class="btn-primary" wire:click="requestReturnReason" />
+        </x-slot:actions>
+    </x-modal>
+
+    {{-- Return Reason Modal --}}
+    <x-modal wire:model="showReturnReasonModal" title="Raison du Retour" separator>
+        <div class="space-y-4">
+            <x-select wire:model="selectedReturnReason" label="Raison du retour" :options="[
+                ['id' => 'Client absent', 'name' => 'Client absent'],
+                ['id' => 'Adresse incorrecte', 'name' => 'Adresse incorrecte'],
+                ['id' => 'Problème de paiement', 'name' => 'Problème de paiement'],
+                ['id' => 'Autre raison', 'name' => 'Autre raison'],
+            ]" />
+            @if($selectedReturnReason === 'Autre raison')
+                <x-textarea wire:model="customReturnReason" label="Détails du retour" placeholder="Décrivez la raison du retour..." />
+            @endif
+        </div>
+        <x-slot:actions>
+            <x-button label="Annuler" wire:click="$set('showReturnReasonModal', false)" />
             <x-button label="Confirmer" class="btn-primary" wire:click="confirmAction" />
         </x-slot:actions>
     </x-modal>
 
-    {{-- NEW: Modal to show Delivery/Order details --}}
+    {{-- Delivery Details Modal --}}
     <x-modal wire:model="showDeliveryDetailsModal" title="Détails de la Livraison" separator>
         @if($deliveryToShow)
             <div class="space-y-4 p-2">
                 <h3 class="font-bold text-lg">
                     Livraison #{{ $deliveryToShow->id }} pour la Commande #{{ $deliveryToShow->order_id }}
                 </h3>
-                
                 <p>
                     <strong>Statut:</strong> 
                     @php
@@ -193,45 +202,46 @@
                             'assigned'  => 'Attribuée',
                             'picked_up' => 'Ramassée',
                             'delivered' => 'Livrée',
+                            'returned'  => 'Retournée',
                             default     => $status
                         };
                     @endphp
                     {{ $label }}
                 </p>
-
                 <p><strong>Livreur:</strong> {{ $deliveryToShow->deliveryPerson->full_name ?? 'Non Assigné' }}</p>
-
                 <hr />
-
                 <h4 class="font-semibold">Détails de la Commande</h4>
                 <p><strong>Client:</strong> {{ $deliveryToShow->order->customer->full_name ?? 'N/A' }}</p>
                 <p><strong>Téléphone:</strong> {{ $deliveryToShow->order->phone_number }}</p>
                 <p><strong>Adresse:</strong> {{ $deliveryToShow->order->address_text }}</p>
                 <p><strong>Notes:</strong> {{ $deliveryToShow->order->notes }}</p>
-                <p><strong>Prix Total:</strong> {{ number_format($deliveryToShow->order->total_price, 2) }} €</p>
-
+                <p><strong>Prix Total:</strong> {{ number_format($deliveryToShow->order->total_price, 2) }} CHF</p>
                 <hr />
-
                 <h4 class="font-semibold">Articles de la Commande:</h4>
                 <ul class="list-disc list-inside">
                     @forelse($deliveryToShow->order->orderItems as $item)
                         @php
-                            // Each $item->orderable might be a Product or Menu
                             $itemName  = method_exists($item->orderable, 'name') 
                                 ? $item->orderable->name 
                                 : ($item->orderable->name ?? 'Item');
                             $itemPrice = number_format($item->price, 2);
                         @endphp
                         <li>
-                            {{ $itemName }} (x{{ $item->quantity }}) - {{ $itemPrice }} €
+                            {{ $itemName }} (x{{ $item->quantity }}) - {{ $itemPrice }} CHF
                         </li>
                     @empty
                         <li>Aucun article.</li>
                     @endforelse
                 </ul>
+                @if($deliveryToShow->status === 'returned')
+                    <div class="bg-red-50 p-4 rounded">
+                        <p class="font-semibold text-red-600">Raison du retour:</p>
+                        <p>{{ $deliveryToShow->return_reason }}</p>
+                        <p class="mt-2 text-sm">Retourné le: {{ $deliveryToShow->returned_at->format('d/m/Y H:i') }}</p>
+                    </div>
+                @endif
             </div>
         @endif
-
         <x-slot:actions>
             <x-button label="Fermer" wire:click="closeDeliveryDetailsModal" />
         </x-slot:actions>

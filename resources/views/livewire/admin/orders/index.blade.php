@@ -86,7 +86,7 @@
         @endscope
 
         @scope('cell_total_price', $order)
-            <div>{{ number_format($order->total_price, 2) }} €</div>
+            <div>{{ number_format($order->total_price, 2) }} CHF</div>
         @endscope
 
         @scope('cell_status', $order)
@@ -213,9 +213,9 @@
                                 <tr>
                                     <td class="px-4 py-2">{{ $name }}</td>
                                     <td class="px-4 py-2 text-center">{{ $qty }}</td>
-                                    <td class="px-4 py-2">{{ number_format($price, 2) }} €</td>
+                                    <td class="px-4 py-2">{{ number_format($price, 2) }} CHF</td>
                                     <td class="px-4 py-2">
-                                        {{ number_format($price * $qty, 2) }} €
+                                        {{ number_format($price * $qty, 2) }} CHF
                                     </td>
                                 </tr>
                             @endforeach
@@ -226,7 +226,7 @@
                 <hr>
 
                 <div>
-                    <strong>Total:</strong> {{ number_format($orderDetails->total_price, 2) }} €
+                    <strong>Total:</strong> {{ number_format($orderDetails->total_price, 2) }} CHF
                 </div>
             </div>
         @endif

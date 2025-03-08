@@ -13,12 +13,12 @@ class Index extends Component
 {
     use WithPagination, Toast;
 
-    public string $search = ''; // Recherche
-    public string $roleFilter = 'all'; // Filtre par rôle avec valeur par défaut
-    public array $sortBy = ['column' => 'first_name', 'direction' => 'asc']; // Tri par défaut
-    public bool $showDeleteModal = false; // Contrôle de la visibilité du modal
-    public ?int $deletingUserId = null; // ID de l'utilisateur à supprimer
-    public ?string $deletingUserName = null; // Nom de l'utilisateur à supprimer
+    public string $search = ''; 
+    public string $roleFilter = 'all'; 
+    public array $sortBy = ['column' => 'first_name', 'direction' => 'asc']; 
+    public bool $showDeleteModal = false; 
+    public ?int $deletingUserId = null; 
+    public ?string $deletingUserName = null; 
 
     /**
      * Réinitialise la pagination lorsque la recherche ou le filtre change.

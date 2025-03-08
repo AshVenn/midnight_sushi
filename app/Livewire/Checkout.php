@@ -57,6 +57,7 @@ class Checkout extends Component
 
             // Create the order
             $order = Order::create([
+                'order_number' => Order::generateOrderNumber(),
                 'customer_id'  => Auth::id(),
                 'total_price'  => $total_price,
                 'status'       => 'preparing',
@@ -65,12 +66,11 @@ class Checkout extends Component
                 'notes'        => $this->notes,
             ]);
 
-            // Create order items
+        
             foreach ($cart as $type => $items) {
                 foreach ($items as $item) {
                     OrderItem::create([
                         'order_id'       => $order->id,
-                        // Use the morph map keys: 'Menu' or 'Product'
                         'orderable_type' => $type === 'menu' ? 'Menu' : 'Product',
                         'orderable_id'   => $item['id'],
                         'quantity'       => $item['quantity'],
@@ -81,18 +81,19 @@ class Checkout extends Component
 
             DB::commit();
 
-            // Send order confirmation email
+         
             Mail::to(Auth::user()->email)->send(new OrderConfirmationMail($order));
 
-            // Empty the cart
+          
             Session::forget('cart');
 
-            // Show success message and redirect
+           
             $this->success(
                 title: 'Commande validée !',
-                description: "Votre commande #{$order->id} a été enregistrée.",
+                description: "Votre commande {$order->order_number} a été enregistrée.",
                 redirectTo: route('home')
             );
+            
         } catch (\Exception $e) {
             DB::rollBack();
             $this->error(

@@ -12,12 +12,12 @@
         </div>
         <div>
             <strong>Prix :</strong>
-            {{ number_format($menu->price, 2) }} €
+            {{ number_format($menu->price, 2) }} CHF
         </div>
         <div>
             <strong>Prix Promo :</strong>
             @if($menu->discount_price)
-                {{ number_format($menu->discount_price, 2) }} €
+                {{ number_format($menu->discount_price, 2) }} CHF
                 @if($menu->isOnPromotion())
                     <span class="text-green-600 text-sm">(En Promotion Maintenant)</span>
                 @else
