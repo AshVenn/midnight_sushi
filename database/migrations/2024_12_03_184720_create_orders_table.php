@@ -20,7 +20,8 @@ class CreateOrdersTable extends Migration
                 'ready',
                 'out_for_delivery',
                 'delivered',
-                'cancelled'
+                'cancelled',
+                'returned'
             ])->default('pending');
             $table->string('payment_method')->nullable();
             $table->string('payment_status')->default('unpaid');

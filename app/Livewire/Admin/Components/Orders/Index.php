@@ -4,7 +4,7 @@ namespace App\Livewire\Admin\Components\Orders;
 
 use Livewire\Component;
 use Livewire\WithPagination;
-use Mary\Traits\Toast; // Or your custom Toast trait
+use Mary\Traits\Toast; 
 use App\Models\Order;
 use App\Models\User;
 use App\Models\Delivery;
@@ -74,6 +74,7 @@ class Index extends Component
     {
         return [
             ['key' => 'id', 'label' => 'ID', 'sortable' => true],
+            ['key' => 'order_number', 'label' => 'Num Commande', 'sortable' => true],
             ['key' => 'customer', 'label' => 'Client', 'sortable' => false],
             ['key' => 'address_text', 'label' => 'Adresse de livraison', 'sortable' => true],
             ['key' => 'total_price', 'label' => 'Prix total', 'sortable' => true],
@@ -230,6 +231,7 @@ class Index extends Component
         return Order::with(['customer', 'deliveries.deliveryPerson'])
             ->when($this->search, function ($query) {
                 $query->where('id', 'like', "%{$this->search}%")
+                ->orWhere('order_number', 'like', "%{$this->search}%")
                     ->orWhereHas('customer', function ($q) {
                         $q->where('first_name', 'like', "%{$this->search}%")
                           ->orWhere('last_name', 'like', "%{$this->search}%")

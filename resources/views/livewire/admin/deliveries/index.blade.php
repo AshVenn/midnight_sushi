@@ -129,10 +129,9 @@
                     />
 
                 </div>
-                <div>
-                    <p class="font-semibold">Livreur:</p>
-                    <p>{{ $deliveryToShow->deliveryPerson->full_name ?? 'Non assigné' }}</p>
-                </div>
+                @scope('cell_delivery_person', $delivery)
+                    <p>{{ $delivery->deliveryPerson->full_name ?? 'Non assigné' }}</p>
+                @endscope
             </div>
 
             <div class="bg-base-200 p-4 rounded-lg">

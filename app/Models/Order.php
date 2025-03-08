@@ -80,6 +80,7 @@ class Order extends Model
             'out_for_delivery' => 'En livraison',
             'delivered' => 'Livrée',
             'cancelled' => 'Annulée',
+            'returned'=>'Retournée',
             default => 'Inconnu',
         };
     }

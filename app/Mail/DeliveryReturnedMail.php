@@ -19,6 +19,9 @@ class DeliveryReturnedMail extends Mailable
     public function build()
     {
         return $this->subject("Retour de votre commande #{$this->delivery->order->order_number}")
-            ->markdown('emails.deliveries.returned');
+            ->markdown('emails.deliveries_returned', [
+                'delivery' => $this->delivery,
+                'reason'   => $this->reason,
+            ]);
     }
 }
