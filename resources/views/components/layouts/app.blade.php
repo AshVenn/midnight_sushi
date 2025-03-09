@@ -63,20 +63,6 @@
         <x-slot:sidebar drawer="main-drawer" collapsible class="bg-base-200">
             @if($user = auth()->user())
                 {{-- User Info --}}
-                @if($user->avatar)
-            <x-list-item :item="$user" value="first_name" sub-value="email" avatar="other_avatar" no-separator no-hover class="pt-2">
-            <x-slot:avatar class="flex items-center justify-center w-12 h-12 rounded-full bg-primary/10">
-                <x-icon name="o-user" class="text-xl text-primary" />
-            </x-slot:avatar>
-
-                <x-slot:actions>
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <x-button icon="o-power" type="submit" class="btn-circle btn-ghost btn-xs" tooltip-left="Déconnexion" no-wire-navigate />
-                    </form>
-                </x-slot:actions>
-            </x-list-item>
-        @else
             <x-list-item :item="$user" value="first_name" sub-value="email" no-separator no-hover class="pt-2">
                 <x-slot:actions>
                     <form method="POST" action="{{ route('logout') }}">
@@ -85,7 +71,7 @@
                     </form>
                 </x-slot:actions>
             </x-list-item>
-        @endif
+            
 
                 <x-menu-separator />
 

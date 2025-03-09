@@ -24,7 +24,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // If needed for older MySQL versions
+       
         Schema::defaultStringLength(191);
 
         Relation::enforceMorphMap([

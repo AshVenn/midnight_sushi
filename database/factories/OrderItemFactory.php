@@ -5,6 +5,7 @@ namespace Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\Menu;
 use App\Models\OrderItem;
 
 /**
@@ -21,15 +22,24 @@ class OrderItemFactory extends Factory
      */
     public function definition(): array
     {
-        // Ensure we have an Order and a Product to associate
+        // Ensure we have an Order, a Product, and a Menu to associate
         $order = Order::inRandomOrder()->first() ?? Order::factory()->create();
-        $product = Product::inRandomOrder()->first() ?? Product::factory()->create();
+        $isProduct = rand(0, 1) === 1;
+        
+        if ($isProduct) {
+            $orderable = Product::inRandomOrder()->first() ?? Product::factory()->create();
+            $orderableType = 'Product'; 
+        } else {
+            $orderable = Menu::inRandomOrder()->first() ?? Menu::factory()->create();
+            $orderableType = 'Menu'; 
+        }
 
         return [
-            'order_id' => $order->id,
-            'product_id' => $product->id,
-            'quantity' => $this->faker->numberBetween(1, 10),
-            'price' => $this->faker->randomFloat(2, 5, 100),
+            'order_id'       => $order->id,
+            'orderable_type' => $orderableType,
+            'orderable_id'   => $orderable->id,
+            'quantity'       => $this->faker->numberBetween(1, 10),
+            'price'          => $orderable->price,
         ];
     }
 }

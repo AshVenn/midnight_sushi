@@ -33,6 +33,7 @@ class Index extends Component
     public string $selectedAction = '';
     public string $selectedReturnReason = '';
     public string $customReturnReason = '';
+    public bool $showCustomReason = false;
 
     public array $deliveryPeople = [];
     public array $deliveryStatusOptions = [];
@@ -52,10 +53,13 @@ class Index extends Component
 
     public function mount(): void
     {
-        $this->deliveryPeople = User::where('role', 'delivery_person')
-            ->get()
-            ->map(fn($user) => ['id' => $user->id, 'name' => $user->full_name])
-            ->toArray();
+        // Prepend an option for "Tous" to the delivery person options
+        $this->deliveryPeople = collect([['id' => 'all', 'name' => 'Tous']])
+            ->merge(
+                User::where('role', 'delivery_person')
+                    ->get()
+                    ->map(fn($user) => ['id' => $user->id, 'name' => $user->full_name])
+            )->toArray();
 
         $this->deliveryStatusOptions = [
             ['id' => 'all',       'name' => 'Tous'],
@@ -105,8 +109,9 @@ class Index extends Component
             ['key' => 'customer',       'label' => 'Client',          'sortable' => false],
             ['key' => 'delivery_person','label' => 'Livreur',         'sortable' => false],
             ['key' => 'status',         'label' => 'Statut',          'sortable' => true],
-            ['key' => 'assigned_at',    'label' => 'Assigné à',       'sortable' => true],
-            ['key' => 'delivered_at',   'label' => 'Livré à',         'sortable' => true],
+            ['key' => 'assigned_at',    'label' => 'Assignée à',      'sortable' => true],
+            ['key' => 'delivered_at',   'label' => 'Livrée à',        'sortable' => true],
+            ['key' => 'returned_at',    'label' => 'Retournée',       'sortable' => true],
             ['key' => 'actions',        'label' => 'Actions',         'sortable' => false],
         ];
     }
@@ -125,7 +130,6 @@ class Index extends Component
             $this->sortBy['column']    = $column;
             $this->sortBy['direction'] = 'asc';
         }
-
         $this->resetPage();
     }
 
@@ -144,13 +148,18 @@ class Index extends Component
             ->when($this->statusFilter !== 'all', function ($query) {
                 $query->where('status', $this->statusFilter);
             })
-            ->when($this->deliveryPersonFilter, function ($query) {
+            ->when($this->deliveryPersonFilter && $this->deliveryPersonFilter !== 'all', function ($query) {
                 $query->where('delivery_person_id', $this->deliveryPersonFilter);
             })
             ->when($this->startDate && $this->endDate, function ($query) {
                 $start = Carbon::parse($this->startDate)->startOfDay();
                 $end   = Carbon::parse($this->endDate)->endOfDay();
-                $query->whereBetween('assigned_at', [$start, $end]);
+                // Apply date filter on all three date fields
+                $query->where(function ($q) use ($start, $end) {
+                    $q->whereBetween('assigned_at', [$start, $end])
+                      ->orWhereBetween('delivered_at', [$start, $end])
+                      ->orWhereBetween('returned_at', [$start, $end]);
+                });
             })
             ->when($this->isSortable($this->sortBy['column']), function ($query) {
                 $query->orderBy($this->sortBy['column'], $this->sortBy['direction']);
@@ -202,6 +211,14 @@ class Index extends Component
         $this->showActionModal    = true;
     }
 
+    public function updatedSelectedReturnReason($value): void
+    {
+        $this->showCustomReason = ($value === 'Autre raison');
+        if ($value !== 'Autre raison') {
+            $this->customReturnReason = '';
+        }
+    }
+
     public function requestReturnReason(): void
     {
         $this->validate(['selectedAction' => 'required']);
@@ -232,14 +249,14 @@ class Index extends Component
                 case 'mark_picked_up':
                     $this->handlePickUp($delivery);
                     break;
-                
                 case 'mark_delivered':
                     $this->handleDelivery($delivery);
                     break;
-                
                 case 'mark_returned':
                     $this->handleReturn($delivery);
                     break;
+                default:
+                    throw new \Exception('Action inconnue.');
             }
         } catch (\Exception $e) {
             Log::error("Delivery error: {$e->getMessage()}");
@@ -289,10 +306,10 @@ class Index extends Component
 
         $this->validate([
             'selectedReturnReason' => 'required',
-            'customReturnReason' => $this->selectedReturnReason === 'Autre raison' ? 'required' : ''
+            'customReturnReason'   => $this->selectedReturnReason === 'Autre raison' ? 'required' : ''
         ]);
 
-        $reason = $this->selectedReturnReason === 'Autre raison' 
+        $reason = $this->selectedReturnReason === 'Autre raison'
             ? $this->customReturnReason
             : $this->selectedReturnReason;
 
@@ -353,3 +370,4 @@ class Index extends Component
         ]);
     }
 }
+    

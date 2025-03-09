@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\StripeWebhookController;
 
 // Public routes
 Route::get('/', \App\Livewire\Home\Home::class)->name('home');
@@ -21,13 +22,25 @@ Route::middleware('guest')->group(function () {
     Route::post('/reset-password', [\App\Http\Controllers\Auth\NewPasswordController::class, 'store'])->name('password.update');
 });
 
-
 Route::get('/about', \App\Livewire\About\About::class)->name('about');
 Route::get('/faq', \App\Livewire\FAQ\FAQ::class)->name('faq');
 
 Route::get('/cart', \App\Livewire\Cart::class)->name('cart');
-Route::get('/checkout', \App\Livewire\Checkout::class)->name('checkout')->middleware('auth');
+Route::get('/checkout', \App\Livewire\Checkout::class)
+    ->name('checkout')
+    ->middleware('auth');
+
 Route::get('/menus-products', \App\Livewire\MenusProductsPage::class)->name('menus-products');
+
+// NEW: Payment success / cancel routes
+Route::get('/checkout/success/{order}', \App\Livewire\Checkout\Success::class)
+    ->name('checkout.success');
+Route::get('/checkout/cancel', \App\Livewire\Checkout\Cancel::class)
+    ->name('checkout.cancel');
+
+// NEW: Stripe Webhook route
+Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle'])
+    ->name('stripe.webhook');
 
 // Protected routes
 Route::middleware(['auth'])->group(function () {
@@ -107,6 +120,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/manager/deliveries', \App\Livewire\Manager\Components\Deliveries\Index::class)->name('manager.deliveries.index');
     });
 
+    // Delivery Person routes
     Route::middleware(['role:delivery_person'])->group(function () {
         Route::get('/deliveryperson/dashboard', \App\Livewire\DeliveryPerson\Dashboard::class)->name('delivery-person.dashboard');
         Route::get('/deliveryperson/deliveries', \App\Livewire\DeliveryPerson\Components\Deliveries::class)->name('delivery-person.deliveries.index');

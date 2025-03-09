@@ -9,7 +9,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\OrderConfirmationMail;
+use Stripe\Stripe;
+use Stripe\Checkout\Session as StripeSession;
 use Mary\Traits\Toast;
 
 class Checkout extends Component
@@ -26,9 +27,6 @@ class Checkout extends Component
         'notes'        => 'nullable|string|max:500',
     ];
 
-    /**
-     * Place the order by reading data from the session cart.
-     */
     public function placeOrder()
     {
         $this->validate();
@@ -37,17 +35,14 @@ class Checkout extends Component
         $cart = Session::get('cart', []);
 
         if (empty($cart)) {
-            $this->error(
-                title: 'Erreur',
-                description: 'Votre panier est vide.'
-            );
+            $this->error('Erreur', 'Votre panier est vide.');
             return;
         }
 
         DB::beginTransaction();
 
         try {
-            // Calculate the total price
+            // 1) Calculate the total price
             $total_price = 0;
             foreach ($cart as $type => $items) {
                 foreach ($items as $item) {
@@ -55,23 +50,25 @@ class Checkout extends Component
                 }
             }
 
-            // Create the order
+            // 2) Create the order (unpaid & pending)
             $order = Order::create([
-                'order_number' => Order::generateOrderNumber(),
-                'customer_id'  => Auth::id(),
-                'total_price'  => $total_price,
-                'status'       => 'preparing',
-                'phone_number' => $this->phone_number,
-                'address_text' => $this->address_text,
-                'notes'        => $this->notes,
+                'order_number'  => Order::generateOrderNumber(),
+                'customer_id'   => Auth::id(),
+                'total_price'   => $total_price,
+                'status'        => 'pending',   // or 'preparing', your choice
+                'payment_status'=> 'unpaid',
+                'phone_number'  => $this->phone_number,
+                'address_text'  => $this->address_text,
+                'notes'         => $this->notes,
             ]);
 
-        
+            // 3) Add Order Items
             foreach ($cart as $type => $items) {
                 foreach ($items as $item) {
+                    // Use your correct morph type for Product or Menu
                     OrderItem::create([
                         'order_id'       => $order->id,
-                        'orderable_type' => $type === 'menu' ? 'Menu' : 'Product',
+                        'orderable_type' => $type === 'menu' ? 'App\Models\Menu' : 'App\Models\Product',
                         'orderable_id'   => $item['id'],
                         'quantity'       => $item['quantity'],
                         'price'          => $item['price'],
@@ -81,31 +78,54 @@ class Checkout extends Component
 
             DB::commit();
 
-         
-            Mail::to(Auth::user()->email)->send(new OrderConfirmationMail($order));
-
-          
-            Session::forget('cart');
-
-           
-            $this->success(
-                title: 'Commande validée !',
-                description: "Votre commande {$order->order_number} a été enregistrée.",
-                redirectTo: route('home')
-            );
+            // 4) Generate Stripe Checkout Session
+            Stripe::setApiKey(config('services.stripe.secret'));
             
+            // Build line items for Stripe
+            $lineItems = [];
+            foreach ($cart as $type => $items) {
+                foreach ($items as $item) {
+                    $lineItems[] = [
+                        'price_data' => [
+                            'currency'     => 'chf',  // or your currency
+                            'product_data' => [
+                                'name' => $item['name'], // or "T-Shirt" etc.
+                            ],
+                            // Stripe amounts are in cents
+                            'unit_amount' => (int) ($item['price'] * 100),
+                        ],
+                        'quantity' => $item['quantity'],
+                    ];
+                }
+            }
+
+            // Create the session
+            $session = StripeSession::create([
+                'payment_method_types' => ['card'],
+                'line_items'           => $lineItems,
+                'mode'                 => 'payment',
+                // On success, we'll redirect to a route that checks payment status
+                'success_url' => route('checkout.success', ['order' => $order->id]) . '?session_id={CHECKOUT_SESSION_ID}',
+                'cancel_url'  => route('checkout.cancel'),
+                // This metadata links the Stripe session back to the Order
+                'metadata' => [
+                    'order_id' => $order->id,
+                ],
+            ]);
+
+            // 5) Redirect the user to Stripe Checkout
+            return redirect()->away($session->url);
+
         } catch (\Exception $e) {
             DB::rollBack();
-            $this->error(
-                title: 'Erreur',
-                description: 'Une erreur est survenue lors de la commande. Veuillez réessayer.'
-            );
             \Log::error('Checkout Error: ' . $e->getMessage());
+            $this->error('Erreur', 'Une erreur est survenue lors de la commande: ' . $e->getMessage());
+            return;
         }
     }
 
     public function render()
     {
-        return view('livewire.checkout');
+        return view('livewire.checkout.checkout');
     }
 }

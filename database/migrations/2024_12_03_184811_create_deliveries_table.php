@@ -19,7 +19,7 @@ class CreateDeliveriesTable extends Migration
             $table->timestamp('delivered_at')->nullable();
             $table->timestamp('returned_at')->nullable();
             $table->text('address_text');
-            $table->string('phone_number')->nullable();
+            $table->string('phone_number');
             $table->text('return_reason')->nullable();
             
             $table->text('notes')->nullable();

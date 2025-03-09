@@ -27,7 +27,7 @@ class OrderItem extends Model
         return $this->morphTo();
     }
 
-    // Add this method to handle the morph map
+
     public function getOrderableTypeAttribute($value)
     {
         return class_basename($value);

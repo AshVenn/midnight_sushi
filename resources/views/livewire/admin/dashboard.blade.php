@@ -63,6 +63,27 @@
                     @endscope
                 </x-table>
             </div>
+
+            {{-- NEW: Tableau des Menus les Plus Vendus --}}
+            <div class="flex-1 min-w-[300px] shadow-lg p-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold">Menus les Plus Vendus</h3>
+                    <x-button icon="o-arrow-long-right" link="{{ route('admin.menus.index') }}" label="Voir Tout" class="btn-ghost btn-sm" />
+                </div>
+                <x-table :headers="$bestSellingMenusHeaders" :rows="$bestSellingMenusRows">
+                    @scope('cell_name', $row)
+                        {{ $row['name'] ?? 'N/A' }}
+                    @endscope
+
+                    @scope('cell_price', $row)
+                        CHF{{ number_format($row['price'] ?? 0, 2) }}
+                    @endscope
+
+                    @scope('cell_sales', $row)
+                        {{ $row['sales'] ?? 0 }}
+                    @endscope
+                </x-table>
+            </div>
         </div>
     </x-card>
 </div>
