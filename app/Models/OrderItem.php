@@ -32,4 +32,14 @@ class OrderItem extends Model
     {
         return class_basename($value);
     }
+
+    public function hasReview(): bool
+    {
+        return Review::where([
+            'user_id'        => $this->order->customer_id,
+            'reviewable_id'  => $this->orderable_id,
+            'reviewable_type'=> $this->orderable_type,
+        ])->exists();
+    }
+    
 }

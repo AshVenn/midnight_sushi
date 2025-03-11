@@ -6,24 +6,32 @@ use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Order;
 use Mary\Traits\Toast;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 class OrderShow extends Component
 {
     use Toast;
+
     public Order $order;
     public bool $confirmingCancellation = false;
 
     public function mount(Order $order)
     {
-        // Ensure this order belongs to the logged in user
+        // Ensure user owns this order
         if ($order->customer_id !== Auth::id()) {
             abort(403, 'Unauthorized access to this order.');
         }
 
-        // Eager load the order with items
-        $order->load(['orderItems.orderable']);
+        
+        $morphMap = Relation::morphMap();
+        $order->load([
+            'orderItems' => function ($q) use ($morphMap) {
+                $q->whereIn('orderable_type', array_keys($morphMap)); 
+                
+            },
+            'orderItems.orderable', 
+        ]);
 
-        // Assign the loaded model to our public property
         $this->order = $order;
     }
 
@@ -39,10 +47,6 @@ class OrderShow extends Component
         $this->confirmingCancellation = false;
     }
 
-    /**
-     * Build a timeline array for the status progression.
-     * Each step includes keys like 'title', 'icon', 'is_current', etc.
-     */
     public function getStatusTimelineProperty(): array
     {
         // The possible statuses in chronological order
@@ -53,6 +57,7 @@ class OrderShow extends Component
             'ready'            => 'Prête',
             'out_for_delivery' => 'En cours de livraison',
             'delivered'        => 'Livrée',
+            'returned'         => 'Retournée',
             'cancelled'        => 'Annulée',
         ];
 
@@ -70,11 +75,11 @@ class OrderShow extends Component
                     'description' => null,
                     'icon'        => 'o-check-circle',
                     'is_current'  => true,
-                    'is_done'     => in_array($key, ['delivered', 'cancelled']),
+                    'is_done'     => in_array($key, ['delivered', 'returned', 'cancelled']),
                 ];
                 $foundCurrent = true;
             }
-            // If we haven't found current yet, these are "past" statuses
+            // If we haven't found current yet, it's a "past" status
             elseif (!$foundCurrent) {
                 $timeline[] = [
                     'key'         => $key,
@@ -86,7 +91,7 @@ class OrderShow extends Component
                     'is_done'     => true,
                 ];
             }
-            // Else it's "future" (pending)
+            // Otherwise it’s a "future" (pending)
             else {
                 $timeline[] = [
                     'key'         => $key,
@@ -110,4 +115,5 @@ class OrderShow extends Component
             'statusTimeline' => $this->statusTimeline,
         ]);
     }
+
 }

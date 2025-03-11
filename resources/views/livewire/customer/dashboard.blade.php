@@ -20,15 +20,15 @@
                 Aucune commande récente. Parcourez notre menu !
             </x-alert>
         @else
-            <x-table :headers="$headers" :rows="$recentOrders" link="/commandes/{id}">
+            <x-table :headers="$headers" :rows="$recentOrders" link="{{ route('customer.orders.index') }}">
                 @scope('cell_status', $order)
-                    <x-badge :value="$order->status" class="{{ $statusColors[$order->status] ?? 'badge-neutral' }}" />
+                    <x-badge :value="$order->status_text" class="{{ $statusColors[$order->status_text] ?? 'badge-neutral' }}" />
                 @endscope
             </x-table>
         @endif
 
         <x-slot:menu>
-            <x-button label="Voir toutes les commandes" link="/orders" icon-right="o-arrow-right" class="btn-ghost" />
+            <x-button label="Voir toutes les commandes" link="{{ route('customer.orders.index') }}" icon-right="o-arrow-right" class="btn-ghost" />
         </x-slot:menu>
     </x-card>
 
@@ -54,7 +54,7 @@
             @endforelse
         </x-card>
 
-        {{-- Adresses favorites --}}
+        {{-- Vos adresses --}}
         <x-card title="Vos adresses" shadow>
             @forelse($recentAddresses as $address)
                 <x-list-item :item="$address" sub-value="full_address" no-separator>
@@ -69,40 +69,17 @@
             @endforelse
             
             <x-slot:menu>
-                <x-button label="Gérer les adresses" link="/adresses" icon="o-plus" class="btn-ghost" />
+                <x-button label="Gérer les adresses" link="{{ route('customer.addresses') }}" icon="o-plus" class="btn-ghost" />
             </x-slot:menu>
         </x-card>
     </div>
 
     {{-- Actions rapides --}}
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-        <x-button icon="o-plus" label="Nouvelle commande" link="/menu" class="btn-primary" />
-        <x-button icon="o-envelope" label="Support" link="/support" class="btn-secondary" />
-        <x-button icon="o-user" label="Profil" link="/profile" class="btn-accent" />
-        <x-button icon="o-star" label="Avis" link="/avis" class="btn-neutral" />
+        <x-button icon="o-plus" label="Nouvelle commande" link="{{ route('menus-products') }}" class="btn-primary" />
+        <x-button icon="o-envelope" label="Support" link="{{ route('customer.support') }}" class="btn-secondary" />
+        <x-button icon="o-user" label="Profil" link="{{ route('customer.profile') }}" class="btn-accent" />
+        <x-button icon="s-shopping-cart" label="Commandes" link="{{ route('customer.orders.index') }}" class="btn-neutral" />
     </div>
 
-    {{-- Section avis --}}
-    @if($pendingReviews->isNotEmpty())
-        <x-card title="Donnez votre avis ⭐" shadow>
-            <div class="carousel gap-4">
-                @foreach($pendingReviews as $item)
-                    <div class="carousel-item">
-                        <x-card class="bg-base-200 w-64">
-                            <x-avatar :image="$item->orderable->image ?? null" class="!w-24 !h-24 mx-auto">
-                                <x-slot:fallback class="text-3xl">
-                                    <x-icon name="o-photo" />
-                                </x-slot:fallback>
-                            </x-avatar>
-                            
-                            <div class="text-center mt-4">
-                                <div class="font-bold">{{ $item->orderable->name }}</div>
-                                <x-button label="Noter" link="/avis/{{ $item->id }}" icon="o-star" class="btn-xs mt-2" />
-                            </div>
-                        </x-card>
-                    </div>
-                @endforeach
-            </div>
-        </x-card>
-    @endif
 </div>

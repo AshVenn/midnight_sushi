@@ -1,22 +1,20 @@
+<div>
 <div class="grid lg:grid-cols-8 gap-10 px-4 lg:px-0">
-    {{-- IMAGE / Left Column --}}
     <div class="lg:col-span-2 flex justify-center items-start">
         <img 
             src="/images/midnight_sushi/orders.png" 
             width="250" 
             class="mx-auto lg:mx-0" 
-            alt="Orders" 
+            alt="Orders"
         />
     </div>
 
-    {{-- Right Column: Orders List --}}
     <div class="lg:col-span-6">
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
             <h1 class="text-2xl font-bold mb-2 lg:mb-0 text-center lg:text-left">
                 Mes Commandes
             </h1>
 
-            {{-- Simple Status Filter --}}
             <div>
                 <select 
                     wire:model="filterStatus"
@@ -30,43 +28,41 @@
                     <option value="out_for_delivery">En livraison</option>
                     <option value="delivered">Livrée</option>
                     <option value="cancelled">Annulée</option>
+                    <option value="returned">Retournée</option>
                 </select>
             </div>
         </div>
 
         @if ($orders->count())
-            {{-- ORDERS LIST --}}
             @foreach ($orders as $index => $order)
-                <div class="border rounded-lg mb-5 p-4 shadow-sm bg-base-100 dark:bg-base-200">
+                <div class="border rounded-lg mb-5 p-4 shadow-sm bg-base-100">
                     <div class="flex flex-col md:flex-row items-center gap-4">
-                        {{-- Relative # e.g. #1, #2, etc. --}}
                         <div class="rounded-lg p-3 font-bold text-center min-w-[60px] bg-primary text-base-100">
                             {{ $order->order_number }}
                         </div>
-                        {{-- Main Info --}}
+
                         <div class="flex-grow">
                             @if ($order->orderItems->count())
                                 @php
-                                    $firstItem = $order->orderItems->first();
+                                    $firstItem     = $order->orderItems->first();
                                     $firstItemName = optional($firstItem->orderable)->name;
                                 @endphp
                                 <div class="text-lg font-semibold">
                                     {{ $firstItemName ?? 'Article' }}
                                     @if ($order->orderItems->count() > 1)
-                                        <span class="text-sm text-neutral">
+                                        <span class="text-sm">
                                             +{{ $order->orderItems->count() - 1 }} autres
                                         </span>
                                     @endif
                                 </div>
                             @else
-                                <div class="text-lg font-semibold text-neutral">
+                                <div class="text-lg font-semibold">
                                     Aucun article
                                 </div>
                             @endif
 
-                            {{-- Order creation date, total price, etc. --}}
                             <div class="mt-1 flex flex-wrap gap-4 text-sm">
-                                <div class="text-neutral">
+                                <div>
                                     {{ $order->created_at->format('Y-m-d') }}
                                 </div>
                                 <div class="font-bold">
@@ -97,6 +93,9 @@
                                             @case('cancelled')
                                                 Annulée
                                                 @break
+                                            @case('returned')
+                                                Retournée
+                                                @break
                                             @default
                                                 Inconnu
                                         @endswitch
@@ -105,9 +104,7 @@
                             </div>
                         </div>
 
-                        {{-- Actions --}}
                         <div class="flex items-center gap-2">
-                            {{-- Show "Annuler" if possible --}}
                             @if($order->can_be_cancelled)
                                 <x-button
                                     label="Annuler"
@@ -123,25 +120,83 @@
                                 link="{{ route('customer.orders.show', $order->id) }}" 
                                 class="btn-secondary btn-sm"
                             />
+
+                            @if($order->status === 'delivered')
+                                <x-button
+                                    label="Noter"
+                                    icon="o-pencil"
+                                    wire:click="openReviewDrawer({{ $order->id }})"
+                                    class="btn-primary btn-sm"
+                                />
+                            @endif
                         </div>
                     </div>
                 </div>
             @endforeach
 
-            {{-- Pagination Links --}}
             <div class="mt-6">
                 {{ $orders->links() }}
             </div>
         @else
-            {{-- No Orders --}}
             <div class="text-center">
                 <div class="font-bold text-3xl mb-4">Aucune commande</div>
                 <x-button 
                     label="Parcourir le Menu" 
                     icon-right="o-arrow-right" 
-                    link="/" 
+                    link="/"
                 />
             </div>
         @endif
     </div>
+</div>
+
+<x-drawer
+    wire:model="showReviewDrawer"
+    title="Laisser un avis"
+    subtitle="Partagez votre opinion"
+    separator
+    with-close-button
+    close-on-escape
+    class="w-11/12 lg:w-1/3"
+>
+    <div class="space-y-4">
+        @if(count($reviewData))
+            @foreach($reviewData as $index => $item)
+                <div class="rounded p-3 border bg-base-100">
+                    <div class="font-bold mb-2">{{ $item['name'] }}</div>
+
+                    <label class="block text-sm font-medium mb-1">Note (1 à 5)</label>
+                    <input 
+                        type="number" 
+                        min="1" 
+                        max="5" 
+                        placeholder="1 à 5" 
+                        class="input input-bordered w-full mb-3"
+                        wire:model.defer="reviewData.{{ $index }}.rating"
+                    />
+
+                    <label class="block text-sm font-medium mb-1">Commentaire</label>
+                    <textarea 
+                        class="textarea textarea-bordered w-full"
+                        placeholder="Vos impressions..."
+                        wire:model.defer="reviewData.{{ $index }}.comment"
+                    ></textarea>
+                </div>
+            @endforeach
+        @else
+            <p>Aucun article restant à noter.</p>
+        @endif
+    </div>
+
+    <x-slot:actions>
+        <x-button label="Fermer" @click="$wire.showReviewDrawer = false" />
+        <x-button 
+            label="Enregistrer" 
+            class="btn-primary" 
+            icon="o-check" 
+            wire:click="saveReviews" 
+            spinner
+        />
+    </x-slot:actions>
+</x-drawer>
 </div>

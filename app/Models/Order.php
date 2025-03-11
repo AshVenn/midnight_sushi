@@ -84,6 +84,22 @@ class Order extends Model
             default => 'Inconnu',
         };
     }
+
+    // app/Models/Order.php
+        public function getStatusColorAttribute(): string
+        {
+            return match($this->status) {
+                'pending' => 'badge-neutral',
+                'confirmed' => 'badge-info',
+                'preparing' => 'badge-warning',
+                'ready' => 'badge-success',
+                'out_for_delivery' => 'badge-primary',
+                'delivered' => 'badge-success',
+                'cancelled' => 'badge-error',
+                'returned' => 'badge-error',
+                default => 'badge-neutral'
+            };
+        }
     
     public function getCanBeCancelledAttribute(): bool
     {

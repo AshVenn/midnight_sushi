@@ -26,9 +26,9 @@ class AppServiceProvider extends ServiceProvider
     {
        
         Schema::defaultStringLength(191);
-
+        
         Relation::enforceMorphMap([
-            'Menu'    => Menu::class,
+            'Menu' => Menu::class,
             'Product' => Product::class,
         ]);
         

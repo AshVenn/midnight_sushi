@@ -43,7 +43,7 @@ class ReviewsSeeder extends Seeder
             Review::create([
                 'user_id' => $user->id,
                 'reviewable_id' => $reviewable->id,
-                'reviewable_type' => get_class($reviewable),
+               'reviewable_type' => $reviewable instanceof Product ? 'App\\Models\\Product' : 'App\\Models\\Menu',
                 'rating' => rand(1, 5),
                 'comment' => fake()->sentence(),
             ]);

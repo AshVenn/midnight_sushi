@@ -39,7 +39,7 @@ class ReviewFactory extends Factory
         return [
             'user_id' => $user->id,
             'reviewable_id' => $reviewable->id,
-            'reviewable_type' => get_class($reviewable),
+            'reviewable_type' => $reviewable instanceof Product ? 'App\\Models\\Product' : 'App\\Models\\Menu',
             'rating' => $this->faker->numberBetween(1, 5),
             'comment' => $this->faker->sentence(),
         ];

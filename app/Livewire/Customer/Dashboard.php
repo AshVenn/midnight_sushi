@@ -41,14 +41,6 @@ class Dashboard extends Component
                 ->latest()
                 ->take(3)
                 ->get(),
-            'pendingReviews' => $user->orders()
-                ->whereHas('orderItems')
-                ->with(['orderItems.orderable'])
-                ->where('status', 'delivered')
-                ->get()
-                ->pluck('orderItems')
-                ->flatten()
-                ->unique('orderable_id'),
             'headers' => [
                 ['key' => 'id', 'label' => 'Commande'],
                 ['key' => 'created_at', 'label' => 'Date'],

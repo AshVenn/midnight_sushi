@@ -39,7 +39,7 @@
                         <h3 class="text-xl font-semibold">{{ $menu->name }}</h3>
                         
                         <div class="flex items-center gap-2">
-                            <x-rating :value="$menu->reviews->avg('rating') ?? 0" class="text-warning" />
+                        <x-rating wire:model="{{ (int) round($menu->reviews_avg_rating ?? 0) }}" class="text-warning" />
                             <span class="text-sm text-gray-600">
                                 ({{ $menu->reviews->count() }} avis)
                             </span>
@@ -90,7 +90,7 @@
                         <h3 class="text-xl font-semibold">{{ $product->name }}</h3>
                         
                         <div class="flex items-center gap-2">
-                            <x-rating :value="$product->reviews->avg('rating') ?? 0" class="text-accent" />
+                        <x-rating wire:model="{{ (int) round($product->reviews_avg_rating ?? 0) }}" class="text-accent" />
                             <span class="text-sm text-gray-600">
                                 ({{ $product->reviews->count() }} avis)
                             </span>
@@ -103,11 +103,18 @@
                                 :value="number_format($product->final_price, 2).' CHF'" 
                                 :class="'badge-'.($product->isOnPromotion() ? 'warning' : 'secondary')" 
                             />
-                            <x-button 
-                                icon="o-plus" 
-                                class="btn-secondary" 
-                                wire:click="addToCart('product', {{ $product->id }})"
-                            />
+                            <div class="flex gap-2">
+                                <x-button 
+                                    icon="o-eye" 
+                                    class="btn-ghost" 
+                                    wire:click="showProductDetails({{ $product->id }})"
+                                />
+                                <x-button 
+                                    icon="o-plus" 
+                                    class="btn-secondary" 
+                                    wire:click="addToCart('product', {{ $product->id }})"
+                                />
+                            </div>
                         </div>
                     </div>
                 </x-card>
@@ -120,6 +127,125 @@
         {{ $products->links() }}
     </section>
 
-    <!-- Menu Details Modal -->
-    @livewire('menu-details-modal')
+
+<!-- Menu Details Drawer -->
+<x-drawer 
+    wire:model="showMenuDrawer" 
+    class="w-11/12 lg:w-1/3" 
+    title="Détails du menu" 
+    separator
+    with-close-button
+>
+    @if($selectedMenu)
+        <div class="space-y-6">
+            <x-badge :value="number_format($selectedMenu->price, 2).' CHF'" class="badge-primary" />
+            <img 
+                src="{{ $selectedMenu->image }}" 
+                alt="{{ $selectedMenu->name }}"
+                class="w-full h-48 object-cover rounded-lg"
+                onerror="this.src='{{ asset('images/placeholder.jpg') }}'"
+            />
+
+            <div>
+                <h3 class="font-bold">Description</h3>
+                <p>{{ $selectedMenu->description }}</p>
+            </div>
+
+            <div>
+                <h3 class="font-bold">Contenu du menu</h3>
+                <ul class="space-y-2">
+                    @foreach($selectedMenu->products as $product)
+                        <li class="flex justify-between items-center p-2 bg-base-200 rounded">
+                            <span>{{ $product->name }}</span>
+                            <span class="text-sm text-gray-600">
+                                {{ number_format($product->price, 2) }} CHF
+                            </span>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+
+            <div>
+                <h3 class="font-bold">Avis</h3>
+                <div class="flex items-center gap-2">
+                <x-rating wire:model="{{round($selectedMenu->reviews->avg('rating') ?? 0)}}" class="text-warning text-lg" />
+                    <span class="text-gray-600">
+                        ({{ $selectedMenu->reviews->count() }} avis)
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <x-slot:actions>
+            <x-button label="Fermer" @click="$wire.showMenuDrawer = false" class="btn-ghost" />
+            <x-button 
+                label="Ajouter au panier" 
+                icon="o-shopping-cart" 
+                wire:click="addToCart('Menu', {{ $selectedMenu->id }})" 
+                class="btn-primary" 
+            />
+        </x-slot:actions>
+    @endif
+</x-drawer>
+
+<!-- Product Details Drawer -->
+<x-drawer 
+    wire:model="showProductDrawer" 
+    class="w-11/12 lg:w-1/3" 
+    title="Détails du produit" 
+    separator
+    right
+    with-close-button
+>
+    @if($selectedProduct)
+        <div class="space-y-6">
+            <img 
+                src="{{ $selectedProduct->image }}" 
+                alt="{{ $selectedProduct->name }}"
+                class="w-full h-48 object-cover rounded-lg"
+                onerror="this.src='{{ asset('images/placeholder.jpg') }}'"
+            />
+
+            <div>
+                <h3 class="font-bold">Prix</h3>
+                <x-badge 
+                    :value="number_format($selectedProduct->final_price, 2).' CHF'" 
+                    :class="'badge-'.($selectedProduct->isOnPromotion() ? 'warning' : 'secondary')" 
+                />
+            </div>
+
+            <div>
+                <h3 class="font-bold">Allergènes</h3>
+                <div class="flex flex-wrap gap-2">
+                    @forelse($selectedProduct->allergens ?? [] as $allergen)
+                        <x-badge :value="$allergen" class="badge-outline badge-sm" />
+                    @empty
+                        <span class="text-sm text-gray-500">Aucun allergène déclaré</span>
+                    @endforelse
+                </div>
+            </div>
+
+            <div>
+                <h3 class="font-bold">Avis</h3>
+                <div class="flex items-center gap-2">
+                    <x-rating wire:model="{{ (int) round($selectedProduct->reviews_avg_rating ?? 0) }}" class="text-accent text-lg" />
+                    <span class="text-gray-600">
+                        ({{ $selectedProduct->reviews->count() }} avis)
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <x-slot:actions>
+            <x-button label="Fermer" @click="$wire.showProductDrawer = false" class="btn-ghost" />
+            <x-button 
+                label="Ajouter au panier" 
+                icon="o-shopping-cart" 
+                wire:click="addToCart('Product', {{ $selectedProduct->id }})" 
+                class="btn-secondary" 
+            />
+        </x-slot:actions>
+    @endif
+</x-drawer>
+
 </div>

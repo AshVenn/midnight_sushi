@@ -68,7 +68,7 @@ class Checkout extends Component
                     // Use your correct morph type for Product or Menu
                     OrderItem::create([
                         'order_id'       => $order->id,
-                        'orderable_type' => $type === 'menu' ? 'App\Models\Menu' : 'App\Models\Product',
+                        'orderable_type' => $type === 'menu' ? 'App\\Models\\Menu' : 'App\\Models\\Product',
                         'orderable_id'   => $item['id'],
                         'quantity'       => $item['quantity'],
                         'price'          => $item['price'],

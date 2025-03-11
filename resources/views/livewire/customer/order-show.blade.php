@@ -1,5 +1,14 @@
 <div>
+    <div class="mb-4">
+            <x-button 
+                label="Retour" 
+                icon="o-arrow-left" 
+                link="{{ route('customer.orders.index') }}" 
+                class="btn-secondary"
+            />
+        </div>
     <x-card title="Détails de la Commande {{ $order->order_number }}" separator>
+
         {{-- Status --}}
         <div class="mb-4 text-sm">
             <span class="font-semibold">Statut:</span>
@@ -112,7 +121,7 @@
 
     {{-- TIMELINE EXAMPLE --}}
     <x-card title="Progression de la Commande" separator class="mt-6">
-        <div class="px-4 py-5 space-y-4">
+    <div class="px-4 py-5 space-y-4">
             @foreach ($statusTimeline as $step)
                 <x-timeline-item
                     :title="$step['title']"
@@ -125,6 +134,7 @@
             @endforeach
         </div>
     </x-card>
+
 
     {{-- Modal for cancellation confirmation --}}
     @if($confirmingCancellation)

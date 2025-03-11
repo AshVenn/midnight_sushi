@@ -30,7 +30,7 @@ Route::get('/checkout', \App\Livewire\Checkout::class)
     ->name('checkout')
     ->middleware('auth');
 
-Route::get('/menus-products', \App\Livewire\MenusProductsPage::class)->name('menus-products');
+Route::get('/menus-products', \App\Livewire\MenusProducts::class)->name('menus-products');
 
 // NEW: Payment success / cancel routes
 Route::get('/checkout/success/{order}', \App\Livewire\Checkout\Success::class)
@@ -84,9 +84,13 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/customer/profile', \App\Livewire\Customer\Profile::class)->name('customer.profile');
         Route::get('/customer/support', \App\Livewire\Customer\Support::class)->name('customer.support');
         Route::get('/customer/dashboard', \App\Livewire\Customer\Dashboard::class)->name('customer.dashboard');
+        
+        Route::get('/customer/adresses', \App\Livewire\Customer\Addresses::class)->name('customer.addresses');
+
         Route::get('/customer/orders', \App\Livewire\Customer\Orders::class)->name('customer.orders.index');
         Route::get('/customer/orders/{order}', \App\Livewire\Customer\OrderShow::class)->name('customer.orders.show');
     });
+    
 
     // Manager routes
     Route::middleware(['role:manager'])->group(function () {

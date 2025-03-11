@@ -32,10 +32,10 @@ class OrderItemsSeeder extends Seeder
                 
                 if ($isProduct && !$products->isEmpty()) {
                     $orderable = $products->random();
-                    $orderableType = 'Product'; // ✅ Matches MorphMap
+                    $orderableType = 'App\\Models\\Product';
                 } elseif (!$menus->isEmpty()) {
                     $orderable = $menus->random();
-                    $orderableType = 'Menu'; // ✅ Matches MorphMap
+                    $orderableType = 'App\\Models\\Menu'; // ✅ Matches MorphMap
                 } else {
                     continue; // Skip if no valid items exist
                 }

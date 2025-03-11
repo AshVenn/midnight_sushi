@@ -14,6 +14,10 @@ class MenusProducts extends Component
 
     public $searchTerm = '';
     public $selectedAllergen = '';
+    public $showMenuDrawer = false;
+    public $showProductDrawer = false;
+    public $selectedMenu;
+    public $selectedProduct;
     protected $queryString = ['searchTerm', 'selectedAllergen'];
 
     public function updatingSearchTerm()
@@ -28,7 +32,14 @@ class MenusProducts extends Component
 
     public function showMenuDetails($menuId)
     {
-        $this->dispatch('openMenuModal', $menuId);
+        $this->selectedMenu = Menu::with(['products.category', 'reviews'])->find($menuId);
+        $this->showMenuDrawer = true;
+    }
+    
+    public function showProductDetails($productId)
+    {
+        $this->selectedProduct = Product::with(['category', 'reviews'])->find($productId);
+        $this->showProductDrawer = true;
     }
 
     public function addToCart($type, $id)
@@ -61,28 +72,31 @@ class MenusProducts extends Component
     }
 
     public function render()
-    {
-        $menus = Menu::with(['products.category', 'reviews'])
-            ->when($this->searchTerm, function ($query) {
-                $query->where('name', 'like', "%{$this->searchTerm}%")
-                      ->orWhere('description', 'like', "%{$this->searchTerm}%");
-            })
-            ->paginate(6, ['*'], 'menuPage');
+        {
+            $menus = Menu::with(['products.category'])
+                ->withAvg('reviews', 'rating') // Efficient SQL-level calculation
+                ->when($this->searchTerm, function ($query) {
+                    $query->where('name', 'like', "%{$this->searchTerm}%")
+                        ->orWhere('description', 'like', "%{$this->searchTerm}%");
+                })
+                ->paginate(6, ['*'], 'menuPage');
 
-        $products = Product::with(['category', 'reviews'])
-            ->when($this->searchTerm, function ($query) {
-                $query->where('name', 'like', "%{$this->searchTerm}%")
-                      ->orWhere('description', 'like', "%{$this->searchTerm}%");
-            })
-            ->when($this->selectedAllergen, function ($query) {
-                $query->whereJsonContains('allergens', $this->selectedAllergen);
-            })
-            ->where('is_available', true)
-            ->paginate(8, ['*'], 'productPage');
+            $products = Product::with(['category'])
+                ->withAvg('reviews', 'rating') // Efficient SQL-level calculation
+                ->when($this->searchTerm, function ($query) {
+                    $query->where('name', 'like', "%{$this->searchTerm}%")
+                        ->orWhere('description', 'like', "%{$this->searchTerm}%");
+                })
+                ->when($this->selectedAllergen, function ($query) {
+                    $query->whereJsonContains('allergens', $this->selectedAllergen);
+                })
+                ->where('is_available', true)
+                ->paginate(8, ['*'], 'productPage');
 
-        return view('livewire.menus-products', [
-            'menus' => $menus,
-            'products' => $products
-        ]);
-    }
+            return view('livewire.menus-products', [
+                'menus' => $menus,
+                'products' => $products
+            ]);
+        }
+
 }
