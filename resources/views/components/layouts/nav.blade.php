@@ -16,6 +16,17 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="font-sans antialiased">
+        @if(session('success'))
+        <div class="alert alert-success">
+            {{ session('success') }}
+        </div>
+        @endif
+
+        @if(session('error'))
+        <div class="alert alert-error">
+            {{ session('error') }}
+        </div>
+        @endif
     {{-- Navbar --}}
     <x-nav sticky full-width>
         <x-slot:brand>

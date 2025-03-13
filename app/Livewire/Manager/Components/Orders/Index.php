@@ -74,6 +74,7 @@ class Index extends Component
     {
         return [
             ['key' => 'id', 'label' => 'ID', 'sortable' => true],
+            ['key' => 'order_number', 'label' => 'Num Commande', 'sortable' => true],
             ['key' => 'customer', 'label' => 'Client', 'sortable' => false],
             ['key' => 'address_text', 'label' => 'Adresse de livraison', 'sortable' => true],
             ['key' => 'total_price', 'label' => 'Prix total', 'sortable' => true],
@@ -230,6 +231,7 @@ class Index extends Component
         return Order::with(['customer', 'deliveries.deliveryPerson'])
             ->when($this->search, function ($query) {
                 $query->where('id', 'like', "%{$this->search}%")
+                ->orWhere('order_number', 'like', "%{$this->search}%")
                     ->orWhereHas('customer', function ($q) {
                         $q->where('first_name', 'like', "%{$this->search}%")
                           ->orWhere('last_name', 'like', "%{$this->search}%")
@@ -275,7 +277,7 @@ class Index extends Component
 
     public function render()
     {
-        return view('livewire.manager.components.orders.index', [
+        return view('livewire.admin.orders.index', [
             'orders'  => $this->orders(),
             'headers' => $this->headers(),
         ]);

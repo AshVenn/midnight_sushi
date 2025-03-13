@@ -1,4 +1,3 @@
-<!-- resources/views/livewire/customer/addresses.blade.php -->
 <div class="p-4 md:p-6">
     <x-header title="Vos adresses" separator>
         <x-slot:actions>
@@ -7,7 +6,7 @@
                 icon="o-plus" 
                 class="btn-primary" 
                 wire:click="create"
-                :disabled="$addresses->total() >= 3"
+                :disabled="$addressCount >= 3"
             />
         </x-slot:actions>
     </x-header>
@@ -21,7 +20,9 @@
                     <x-input wire:model="city" label="Ville" />
                     <x-input wire:model="postal_code" label="Code postal" />
                 </div>
-                <x-select wire:model="country" label="Pays" :options="['Suisse' => 'Suisse']" disabled />
+                <x-select wire:model="country" label="Pays" :options="[['id' => 'Suisse',
+                    'name'=>'Suisse'
+                ]]" disabled />
 
                 <x-slot:actions>
                     <x-button label="Annuler" @click="cancel()" class="btn-ghost" />
@@ -36,8 +37,7 @@
             <x-card class="relative">
                 <x-icon name="o-trash" 
                     class="absolute top-2 right-2 cursor-pointer text-error hover:text-error/70"
-                    wire:click="delete({{ $address->id }})"
-                    wire:confirm="Êtes-vous sûr de vouloir supprimer cette adresse ?"
+                    wire:click="confirmDelete({{ $address->id }})"
                 />
                 
                 <x-list-item :item="$address" sub-value="full_address" no-separator>
@@ -59,4 +59,16 @@
     </div>
 
     {{ $addresses->links() }}
+
+    <!-- Delete Confirmation Modal -->
+    <x-modal wire:model.defer="confirmingDelete" class="backdrop-blur">
+        <x-card title="Confirmer la suppression" separator>
+            <p>Êtes-vous sûr de vouloir supprimer cette adresse ?</p>
+            
+            <x-slot:actions>
+                <x-button label="Annuler" @click="$wire.confirmingDelete = null" class="btn-ghost" />
+                <x-button label="Confirmer" wire:click="delete" class="btn-error" />
+            </x-slot:actions>
+        </x-card>
+    </x-modal>
 </div>

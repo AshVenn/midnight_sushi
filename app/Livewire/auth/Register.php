@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Mary\Traits\Toast; 
+use Illuminate\Support\Facades\Auth;
 
 class Register extends Component
 {
@@ -41,7 +42,7 @@ class Register extends Component
         ]);
 
         
-        User::create([
+        $user = User::create([
             'first_name' => $this->first_name,
             'last_name'  => $this->last_name,
             'email'      => $this->email,
@@ -49,13 +50,15 @@ class Register extends Component
             'role'       => 'customer',
         ]);
 
-       
+        Auth::login($user);
+        $user->sendEmailVerificationNotification();
+
         $this->success(
             title: 'Inscription réussie',
-            description: 'Votre compte a été créé avec succès !'
+            description: 'Un lien de vérification a été envoyé à votre adresse email.'
         );
 
-        return redirect('/login');
+        return redirect()->route('verification.notice');
     }
 
     public function render()

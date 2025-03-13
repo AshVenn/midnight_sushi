@@ -88,8 +88,6 @@ class Product extends Model
     }
     public function reviews()
     {
-        return $this->morphMany(\App\Models\Review::class, 'reviewable');
+        return $this->morphMany(Review::class, 'reviewable');
     }
-    
-    public const MORPH_KEY = 'App\\Models\\Product';
 }

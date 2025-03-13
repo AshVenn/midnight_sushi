@@ -20,25 +20,26 @@ class MenusProducts extends Component
     public $selectedProduct;
     protected $queryString = ['searchTerm', 'selectedAllergen'];
 
+
     public function updatingSearchTerm()
     {
         $this->resetPage();
     }
 
-    public function updatingSelectedAllergen()
-    {
-        $this->resetPage();
-    }
-
+    
     public function showMenuDetails($menuId)
     {
-        $this->selectedMenu = Menu::with(['products.category', 'reviews'])->find($menuId);
+        $this->selectedMenu = Menu::with(['products.category', 'reviews.user'])
+        ->withAvg('reviews as reviews_avg_rating', 'rating')
+        ->find($menuId);     
         $this->showMenuDrawer = true;
     }
     
     public function showProductDetails($productId)
     {
-        $this->selectedProduct = Product::with(['category', 'reviews'])->find($productId);
+        $this->selectedProduct = Product::with(['category', 'reviews.user'])
+        ->withAvg('reviews as reviews_avg_rating', 'rating')
+        ->find($productId);
         $this->showProductDrawer = true;
     }
 
@@ -63,7 +64,7 @@ class MenusProducts extends Component
                 'name' => $key->name,
                 'price' => $type === 'menu' ? $key->price : $key->final_price,
                 'image' => $key->image,
-                'quantity' => 1 // Add quantity field
+                'quantity' => 1 
             ];
         }
     
@@ -71,18 +72,36 @@ class MenusProducts extends Component
         $this->dispatch('cartUpdated');
     }
 
-    public function render()
+    // app/Livewire/MenusProducts.php
+        public function render()
         {
-            $menus = Menu::with(['products.category'])
-                ->withAvg('reviews', 'rating') // Efficient SQL-level calculation
+            // Get all unique allergens from products
+            $allAllergens = Product::whereNotNull('allergens')
+                ->pluck('allergens')
+                ->flatten()
+                ->unique()
+                ->values()
+                ->map(fn($a) => ['id' => $a, 'name' => "Sans $a"])
+                ->prepend(['id' => '', 'name' => 'Tous les allergènes'])
+                ->toArray();
+
+            // Menus query with allergen filtering through their products
+            $menus = Menu::with(['products.category', 'reviews.user'])
+                ->withAvg('reviews as reviews_avg_rating', 'rating')
                 ->when($this->searchTerm, function ($query) {
                     $query->where('name', 'like', "%{$this->searchTerm}%")
                         ->orWhere('description', 'like', "%{$this->searchTerm}%");
                 })
+                ->when($this->selectedAllergen, function ($query) {
+                    $query->whereHas('products', function($q) {
+                        $q->whereJsonContains('allergens', $this->selectedAllergen);
+                    });
+                })
                 ->paginate(6, ['*'], 'menuPage');
 
-            $products = Product::with(['category'])
-                ->withAvg('reviews', 'rating') // Efficient SQL-level calculation
+            // Products query (existing)
+            $products = Product::with(['category', 'reviews.user'])
+            ->withAvg('reviews as reviews_avg_rating', 'rating')
                 ->when($this->searchTerm, function ($query) {
                     $query->where('name', 'like', "%{$this->searchTerm}%")
                         ->orWhere('description', 'like', "%{$this->searchTerm}%");
@@ -95,7 +114,8 @@ class MenusProducts extends Component
 
             return view('livewire.menus-products', [
                 'menus' => $menus,
-                'products' => $products
+                'products' => $products,
+                'allAllergens' => $allAllergens
             ]);
         }
 

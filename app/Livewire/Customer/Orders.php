@@ -19,6 +19,31 @@ class Orders extends Component
     public ?int $reviewOrderId = null;
     public array $reviewData = [];
 
+    protected $messages = [
+        'reviewData.*.rating.required' => 'La note est obligatoire',
+        'reviewData.*.rating.min' => 'La note minimale est 1 étoile',
+        'reviewData.*.rating.max' => 'La note maximale est 5 étoiles',
+        'reviewData.*.comment.max' => 'Le commentaire ne doit pas dépasser 500 caractères'
+    ];
+
+    public $filtres = [
+        ['id' => '', 'name' => 'Toutes les commandes'],
+        ['id' => 'pending', 'name' => 'En attente'],
+        ['id' => 'confirmed', 'name' => 'Confirmée'],
+        ['id' => 'preparing', 'name' => 'En préparation'],
+        ['id' => 'ready', 'name' => 'Prête'],
+        ['id' => 'out_for_delivery', 'name' => 'En livraison'],
+        ['id' => 'delivered', 'name' => 'Livrée'],
+        ['id' => 'cancelled', 'name' => 'Annulée'],
+        ['id' => 'returned', 'name' => 'Retournée'],
+    ];
+    
+
+    public function resetPageOnChange():void{
+        $this->resetPage();
+    }
+
+
     public function getOrdersProperty()
     {
         return Order::where('customer_id', Auth::id())
@@ -71,19 +96,32 @@ class Orders extends Component
     public function saveReviews()
     {
         $morphMap = Relation::morphMap();
-
+        $validatorData = [];
+    
+        foreach ($this->reviewData as $index => $data) {
+            $validatorData["reviewData.$index.rating"] = [
+                'required',
+                'integer',
+                'min:1',
+                'max:5'
+            ];
+        }
+    
+        $this->validate([
+            'reviewData.*.rating' => 'required|integer|min:1|max:5',
+            'reviewData.*.comment' => 'nullable|string|max:500'
+        ]);
+    
         foreach ($this->reviewData as $data) {
-            if ($data['rating'] !== null && $data['rating'] >= 1 && $data['rating'] <= 5) {
-                $fqcn = $morphMap[$data['reviewable_type']] ?? $data['reviewable_type'];
-
-                Review::create([
-                    'user_id'         => Auth::id(),
-                    'reviewable_type' => $fqcn,
-                    'reviewable_id'   => $data['reviewable_id'],
-                    'rating'          => $data['rating'],
-                    'comment'         => $data['comment'],
-                ]);
-            }
+            $fqcn = $morphMap[$data['reviewable_type']] ?? $data['reviewable_type'];
+            
+            Review::create([
+                'user_id'         => Auth::id(),
+                'reviewable_type' => $fqcn,
+                'reviewable_id'   => $data['reviewable_id'],
+                'rating'          => $data['rating'],
+                'comment'         => $data['comment']
+            ]);
         }
 
         $this->showReviewDrawer = false;
@@ -96,6 +134,7 @@ class Orders extends Component
     {
         return view('livewire.customer.orders', [
             'orders' => $this->orders,
+            'filtres'=>$this->filtres,
         ]);
     }
 }

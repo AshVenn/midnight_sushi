@@ -15,7 +15,7 @@ class CreateAddressesTable extends Migration
             $table->string('street_address');
             $table->string('city');
             $table->string('postal_code');
-            $table->string('country')->default('Switzerland');
+            $table->string('country')->default('Suisse');
             $table->timestamps();
         });
     }

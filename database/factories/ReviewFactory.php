@@ -25,23 +25,22 @@ class ReviewFactory extends Factory
         $user = User::inRandomOrder()->first();
         $reviewableType = $this->faker->randomElement([Product::class, Menu::class]);
 
-        
         $reviewable = $reviewableType::inRandomOrder()->first();
 
-        
+        // Ensure that the user hasn't already reviewed this item
         while (Review::where('user_id', $user->id)
             ->where('reviewable_id', $reviewable->id)
-            ->where('reviewable_type', get_class($reviewable))
+            ->where('reviewable_type', $reviewable instanceof Product ? 'Product' : 'Menu')
             ->exists()) {
-            $reviewable = $reviewableType::inRandomOrder()->first(); 
+            $reviewable = $reviewableType::inRandomOrder()->first();
         }
 
         return [
-            'user_id' => $user->id,
-            'reviewable_id' => $reviewable->id,
-            'reviewable_type' => $reviewable instanceof Product ? 'App\\Models\\Product' : 'App\\Models\\Menu',
-            'rating' => $this->faker->numberBetween(1, 5),
-            'comment' => $this->faker->sentence(),
+            'user_id'          => $user->id,
+            'reviewable_id'    => $reviewable->id,
+            'reviewable_type'  => $reviewable instanceof Product ? 'Product' : 'Menu',
+            'rating'           => $this->faker->numberBetween(1, 5),
+            'comment'          => $this->faker->sentence(),
         ];
     }
 }

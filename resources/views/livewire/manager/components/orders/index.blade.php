@@ -76,6 +76,10 @@
         @scope('cell_id', $order)
             <div>{{ $order->id }}</div>
         @endscope
+        
+        @scope('cell_order_number', $order)
+            <div>{{ $order->order_number }}</div>
+        @endscope
 
         @scope('cell_customer', $order)
             <div>{{ $order->customer->full_name ?? 'Pas de Client' }}</div>

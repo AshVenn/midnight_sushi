@@ -8,6 +8,13 @@ Route::get('/', \App\Livewire\Home\Home::class)->name('home');
 
 Route::post('/logout', [\App\Http\Controllers\AuthController::class, 'logout'])->name('logout');
 
+Route::get('/email/verify', \App\Livewire\Auth\VerifyEmail::class)
+    ->name('verification.notice');
+
+Route::get('/email/verify/{id}/{hash}', \App\Http\Controllers\Auth\VerificationController::class)
+    ->middleware([ 'signed'])
+    ->name('verification.verify');
+
 Route::middleware('guest')->group(function () {
     Route::get('/login', [\App\Http\Controllers\AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [\App\Http\Controllers\AuthController::class, 'login']);
@@ -43,7 +50,7 @@ Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle'])
     ->name('stripe.webhook');
 
 // Protected routes
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth','verified'])->group(function () {
     // Admin routes
     Route::middleware(['role:admin'])->group(function () {
         Route::get('/admin/dashboard', \App\Livewire\Admin\Dashboard::class)->name('admin.dashboard');

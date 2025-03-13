@@ -19,9 +19,16 @@
     </x-modal>
 
     {{-- Action Bar --}}
-    <div class="mb-4 flex flex-col sm:flex-row gap-4">
-        <x-button label="Filtres" icon="o-funnel" wire:click="openFiltersModal" class="btn-ghost" />
-        <x-input wire:model.live="search" icon="o-magnifying-glass" placeholder="Rechercher..." class="flex-1" />
+    <div class="mb-4 sm:space-x-2 space-y-4 lg:flex lg:space-y-0 lg:items-center lg:justify-between">
+
+        <div class="lg:flex-shrink-0">
+            <x-button label="Filtres" icon="o-funnel" wire:click="openFiltersModal" class="btn-ghost" />
+        </div>
+       
+        <div class="lg:flex-grow">
+            <x-input wire:model.live="search" icon="o-magnifying-glass" placeholder="Rechercher..." class="flex-1" />
+        </div>
+        
     </div>
 
     {{-- Deliveries Table --}}

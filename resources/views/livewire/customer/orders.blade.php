@@ -16,20 +16,12 @@
             </h1>
 
             <div>
-                <select 
+                <x-select 
                     wire:model="filterStatus"
+                    :options="$filtres"
                     class="select select-bordered w-full max-w-xs"
-                >
-                    <option value="">Toutes les commandes</option>
-                    <option value="pending">En attente</option>
-                    <option value="confirmed">Confirmée</option>
-                    <option value="preparing">En préparation</option>
-                    <option value="ready">Prête</option>
-                    <option value="out_for_delivery">En livraison</option>
-                    <option value="delivered">Livrée</option>
-                    <option value="cancelled">Annulée</option>
-                    <option value="returned">Retournée</option>
-                </select>
+                    wire:change="resetPageOnChange"
+                />
             </div>
         </div>
 
@@ -143,7 +135,7 @@
                 <x-button 
                     label="Parcourir le Menu" 
                     icon-right="o-arrow-right" 
-                    link="/"
+                    link="/menus-products"
                 />
             </div>
         @endif
@@ -165,26 +157,42 @@
                 <div class="rounded p-3 border bg-base-100">
                     <div class="font-bold mb-2">{{ $item['name'] }}</div>
 
-                    <label class="block text-sm font-medium mb-1">Note (1 à 5)</label>
-                    <input 
-                        type="number" 
-                        min="1" 
-                        max="5" 
-                        placeholder="1 à 5" 
-                        class="input input-bordered w-full mb-3"
-                        wire:model.defer="reviewData.{{ $index }}.rating"
-                    />
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium mb-2">Note</label>
+                        <div class="rating rating-md">
+                            @for($i = 5; $i >= 1; $i--)
+                                <input 
+                                    type="radio" 
+                                    name="rating-{{ $index }}" 
+                                    class="mask mask-star-2 bg-primary"
+                                    wire:model="reviewData.{{ $index }}.rating"
+                                    value="{{ $i }}"
+                                />
+                            @endfor
+                        </div>
+                        @error("reviewData.{$index}.rating")
+                            <div class="text-red-500 text-xs mt-1">{{ $message }}</div>
+                        @enderror
+                    </div>
 
-                    <label class="block text-sm font-medium mb-1">Commentaire</label>
-                    <textarea 
-                        class="textarea textarea-bordered w-full"
-                        placeholder="Vos impressions..."
-                        wire:model.defer="reviewData.{{ $index }}.comment"
-                    ></textarea>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Commentaire</label>
+                        <textarea 
+                            class="textarea textarea-bordered w-full @error("reviewData.{$index}.comment") textarea-error @enderror"
+                            placeholder="Vos impressions..."
+                            wire:model.defer="reviewData.{{ $index }}.comment"
+                            rows="3"
+                        ></textarea>
+                        @error("reviewData.{$index}.comment")
+                            <div class="text-red-500 text-xs mt-1">{{ $message }}</div>
+                        @enderror
+                    </div>
                 </div>
             @endforeach
         @else
-            <p>Aucun article restant à noter.</p>
+            <x-alert icon="o-check" class="bg-base-200">
+                Tous les articles ont déjà été notés !
+            </x-alert>
         @endif
     </div>
 
