@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon;
 
 class UsersSeeder extends Seeder
 {
@@ -21,6 +22,7 @@ class UsersSeeder extends Seeder
                 'password' => Hash::make('admin1@example.com'),
                 'avatar' => '/images/midnight_sushi/midnight_sushi_user.jpg',
                 'role' => 'admin',
+                'email_verified_at' => now(), // Ensure email is verified
             ],
             [
                 'first_name' => 'Manager',
@@ -29,6 +31,7 @@ class UsersSeeder extends Seeder
                 'password' => Hash::make('manager1@example.com'),
                 'avatar' => '/images/midnight_sushi/midnight_sushi_user.jpg',
                 'role' => 'manager',
+                'email_verified_at' => now(),
             ],
             [
                 'first_name' => 'Customer',
@@ -37,6 +40,7 @@ class UsersSeeder extends Seeder
                 'password' => Hash::make('customer1@example.com'),
                 'avatar' => '/images/midnight_sushi/midnight_sushi_user.jpg',
                 'role' => 'customer',
+                'email_verified_at' => now(),
             ],
             [
                 'first_name' => 'Delivery',
@@ -45,6 +49,7 @@ class UsersSeeder extends Seeder
                 'password' => Hash::make('delivery1@example.com'),
                 'avatar' => '/images/midnight_sushi/midnight_sushi_user.jpg',
                 'role' => 'delivery_person',
+                'email_verified_at' => now(),
             ],
         ];
 
@@ -55,14 +60,15 @@ class UsersSeeder extends Seeder
             );
         }
 
-        
+        // Generate additional users with verified emails
         User::factory()->count(3)->state([
             'role' => 'delivery_person',
+            'email_verified_at' => now(),
         ])->create();
 
-       
         User::factory()->count(10)->state([
             'role' => 'customer',
+            'email_verified_at' => now(),
         ])->create();
     }
 }

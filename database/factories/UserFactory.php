@@ -12,11 +12,6 @@ use Illuminate\Support\Str;
 class UserFactory extends Factory
 {
     /**
-     * The current password being used by the factory.
-     */
-    protected static ?string $password;
-
-    /**
      * Define the model's default state.
      *
      * @return array<string, mixed>
@@ -32,6 +27,7 @@ class UserFactory extends Factory
             'phone_number' => $this->faker->unique()->phoneNumber,
             'avatar' => '/images/midnight_sushi/midnight_sushi_user.jpg',
             'status' => $this->faker->randomElement(['active', 'inactive', 'banned']),
+            'email_verified_at' => now(), // Ensure email is verified
         ];
     }
 
