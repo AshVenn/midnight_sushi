@@ -62,22 +62,11 @@
         @endscope
 
         @scope('cell_status', $delivery)
-            <x-badge 
-                :value="match ($delivery->status) {
-                    'assigned'  => 'Attribuée',
-                    'picked_up' => 'Ramassée',
-                    'delivered' => 'Livrée',
-                    'returned'  => 'Retournée',
-                    default     => ucfirst($delivery->status),
-                }" 
-                class="badge-{{ match ($delivery->status) {
-                    'assigned'  => 'primary',
-                    'picked_up' => 'warning',
-                    'delivered' => 'success',
-                    'returned'  => 'error',
-                    default     => 'neutral',
-                } }}"
-            />
+        <x-badge 
+            :value="$delivery->status_text ?? 'Inconnu'" 
+            :class="$delivery->status_color ?? 'badge-neutral'" 
+        />
+
         @endscope
 
         @scope('cell_actions', $delivery)

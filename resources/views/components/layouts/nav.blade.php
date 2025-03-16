@@ -8,10 +8,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://cdn.jsdelivr.net/npm/motion@11.11.13/dist/motion.js"></script>
-    <script>
-    const { animate, scroll } = Motion
-    </script>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
@@ -97,7 +93,6 @@
                             <x-menu-item title="Commandes" icon="s-shopping-cart" link="/admin/orders" />
                             <x-menu-item title="Livraisons" icon="o-truck" link="/admin/deliveries" />
                         </x-menu-sub>
-                        <x-menu-item title="Rapports" icon="o-chart-bar" link="/admin/reports" />
                         <x-menu-item title="Paramètres" icon="o-cog-6-tooth" link="/admin/settings" />
                     </x-menu>
 
@@ -121,7 +116,6 @@
                                 <x-menu-item title="Commandes" icon="s-shopping-cart" link="/manager/orders" />
                                 <x-menu-item title="Livraisons" icon="o-truck" link="/manager/deliveries" />
                             </x-menu-sub>
-                            <x-menu-item title="Rapports" icon="o-chart-bar" link="/manager/reports" />
                             <x-menu-item title="Paramètres" icon="o-cog-6-tooth" link="/manager/settings" />
                         </x-menu>
 

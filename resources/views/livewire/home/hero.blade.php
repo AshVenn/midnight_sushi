@@ -20,12 +20,12 @@
         <!-- Logo -->
         <div class="flex items-center justify-center space-x-4">
             <img 
-                src="/Needs/Logo midnight sushi Light.svg" 
+                src="/images/midnight_sushi/Logo midnight sushi Light.svg" 
                 alt="Midnight Sushi Logo Light" 
                 class="dark:hidden w-64 md:w-[26rem] lg:w-[30rem]"
             />
             <img 
-                src="/Needs/Logo midnight sushi Dark.svg" 
+                src="/images/midnight_sushi/Logo midnight sushi Dark.svg" 
                 alt="Midnight Sushi Logo Dark" 
                 class="hidden dark:block w-64 md:w-[26rem] lg:w-[30rem]"
             />

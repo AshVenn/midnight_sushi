@@ -50,15 +50,7 @@
 
             {{-- Colonne Statut --}}
             @scope('cell_status', $inquiry)
-                @php
-                    // Map status values to French translations
-                    $statusTranslations = [
-                        'open' => 'Ouverte',
-                        'resolved' => 'Résolue',
-                    ];
-                    $translatedStatus = $statusTranslations[$inquiry->status] ?? $inquiry->status;
-                @endphp
-                <x-badge :value="$translatedStatus" class="{{ $inquiry->status === 'open' ? 'badge-error' : 'badge-success' }}" />
+                <x-badge :value="$inquiry->status_text" class="{{ $inquiry->status_color }}" />
             @endscope
 
             {{-- Colonne Date --}}
@@ -76,7 +68,7 @@
                             wire:click="markAsResolved({{ $inquiry->id }})"
                         />
                     @else
-                        <span class="text-sm text-gray-500">Résolu</span>
+                        <span class="text-sm text-success">Résolu</span>
                     @endif
                 </div>
             @endscope

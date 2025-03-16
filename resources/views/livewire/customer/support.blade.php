@@ -20,14 +20,13 @@
                 @enderror
             </div>
 
-            <!-- Submit Button -->
             <div class="flex justify-end">
                 <x-button type="submit" label="Envoyer" icon="o-paper-airplane" spinner="submitInquiry" class="btn-primary" />
             </div>
         </form>
     </x-card>
 
-    <!-- List of Customer's Inquiries -->
+    
     <x-card title="Vos demandes" separator>
         @if($inquiries->count())
             <div class="divide-y">
@@ -43,13 +42,19 @@
                         </div>
                         <div class="text-sm">{{ $inquiry->message }}</div>
                         <div class="mt-1">
-                            <x-badge :value="$inquiry->status" class="{{ $inquiry->status === 'open' ? 'badge-error' : 'badge-success' }}" />
+                            <x-badge :value="$inquiry->status_text" class="{{ $inquiry->status_color }}" />
                         </div>
                     </div>
                 @endforeach
+            </div>
+
+            <!-- Pagination Links -->
+            <div class="mt-4">
+                {{ $inquiries->links() }} 
             </div>
         @else
             <div>Aucune demande trouvée.</div>
         @endif
     </x-card>
+
 </div>

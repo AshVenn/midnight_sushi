@@ -16,8 +16,6 @@ class Success extends Component
      */
     public function mount(Order $order)
     {
-        // Optional: If you want to clear the cart upon success,
-        // this is a good place to do it.
         Session::forget('cart');
     }
 

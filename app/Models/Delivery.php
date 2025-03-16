@@ -28,7 +28,7 @@ class Delivery extends Model
         'assigned_at'   => 'datetime',
         'picked_up_at'  => 'datetime',
         'delivered_at'  => 'datetime',
-        'returned_at'=> 'datetime',
+        'returned_at'   => 'datetime',
         'delivery_fee'  => 'decimal:2',
     ];
 
@@ -41,10 +41,37 @@ class Delivery extends Model
     {
         return $this->belongsTo(User::class, 'delivery_person_id');
     }
-    
-        public function isReturnable(): bool
+
+    public function isReturnable(): bool
     {
         return in_array($this->status, ['picked_up']);
     }
 
+    /**
+     * Get the translated delivery status.
+     */
+    public function getStatusTextAttribute(): string
+    {
+        return match($this->status) {
+            'assigned' => 'Attribuée',
+            'picked_up' => 'Récupérée',
+            'delivered' => 'Livrée',
+            'returned' => 'Retournée',
+            default => 'Inconnu',
+        };
+    }
+
+    /**
+     * Get the status badge color.
+     */
+    public function getStatusColorAttribute(): string
+    {
+        return match($this->status) {
+            'assigned' => 'badge-secondary', 
+            'picked_up' => 'badge-primary', 
+            'delivered' => 'badge-success', 
+            'returned' => 'badge-muted', 
+            default => 'badge-neutral', 
+        };
+    }
 }

@@ -94,28 +94,7 @@
         @endscope
 
         @scope('cell_status', $order)
-            @php
-                $statusLabels = [
-                    'pending' => 'En attente',
-                    'confirmed' => 'Confirmée',
-                    'preparing' => 'En préparation',
-                    'ready' => 'Prête',
-                    'out_for_delivery' => 'En livraison',
-                    'delivered' => 'Livrée',
-                    'cancelled' => 'Annulée',
-                ];
-                $statusClass = match($order->status) {
-                    'pending' => 'badge-warning',
-                    'confirmed' => 'badge-primary',
-                    'preparing' => 'badge-info',
-                    'ready' => 'badge-success',
-                    'out_for_delivery' => 'badge-primary',
-                    'delivered' => 'badge-success',
-                    'cancelled' => 'badge-error',
-                    default => 'badge-secondary',
-                };
-            @endphp
-            <x-badge :value="$statusLabels[$order->status] ?? 'Inconnu'" :class="$statusClass" />
+        <x-badge :value="$order->status_text" :class="$order->status_color" />
         @endscope
 
         @scope('cell_created_at', $order)

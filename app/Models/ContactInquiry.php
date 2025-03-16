@@ -14,4 +14,22 @@ class ContactInquiry extends Model
         'message',
         'status',
     ];
+
+    public function getStatusTextAttribute(): String{
+
+        return match($this->status){
+            'open'=>'Ouverte',
+            'closed'=>'Résolue',
+            default=> 'inconnu',
+        };
+    }
+    public function getStatusColorAttribute(): string
+        {
+            return match($this->status) {
+               
+                'open'=>'badge-error',
+                'closed'=>'badge-success',
+                default => 'badge-neutral',
+            };
+        }
 }

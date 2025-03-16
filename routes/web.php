@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\StripeWebhookController;
+
 
 // Public routes
 Route::get('/', \App\Livewire\Home\Home::class)->name('home');
@@ -45,9 +45,7 @@ Route::get('/checkout/success/{order}', \App\Livewire\Checkout\Success::class)
 Route::get('/checkout/cancel', \App\Livewire\Checkout\Cancel::class)
     ->name('checkout.cancel');
 
-// NEW: Stripe Webhook route
-Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle'])
-    ->name('stripe.webhook');
+
 
 // Protected routes
 Route::middleware(['auth','verified'])->group(function () {

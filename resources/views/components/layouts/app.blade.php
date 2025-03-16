@@ -8,11 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://cdn.jsdelivr.net/npm/motion@11.11.13/dist/motion.js"></script>
-    <script>
-    const { animate, scroll } = Motion
-    </script>
-
+ 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="font-sans antialiased">
@@ -35,24 +31,42 @@
             </label>
 
             <a href="/">
-                <img 
-                    src="/Needs/Logo midnight sushi Light.svg" 
-                    alt="Midnight Sushi"
-                    class="h-16 dark:hidden"
+            <img
+                src="/images/midnight_sushi/Logo midnight sushi Light.svg"
+                alt="Desktop Light Logo"
+                class="hidden md:block h-16 dark:hidden"  
+            />
+
+            <img
+                src="/images/midnight_sushi/Logo midnight sushi Dark.svg"
+                alt="Desktop Dark Logo"
+                class="hidden md:hidden md:dark:block  h-16"
+            />
+
+            <img
+                src="/images/midnight_sushi/Midnight Sushi Mobile Light.svg"
+                alt="Mobile Light Logo"
+                class="block h-12 md:hidden dark:hidden"  
+            />
+
+        
+            <img
+                    src="/images/midnight_sushi/Midnight Sushi Mobile Dark.svg"
+                    alt="Mobile Dark Logo"
+                    class="hidden h-12 md:hidden dark:block dark:md:hidden"
                 />
 
-                <img 
-                    src="/Needs/Logo midnight sushi Dark.svg" 
-                    alt="Midnight Sushi"
-                    class="h-16 hidden dark:block"
-                />
-            </a>
+        </a>
+
         </x-slot:brand>
 
 
         <x-slot:actions>
-            <x-theme-toggle class="btn btn-circle" />
-            @livewire('cart')
+            <x-theme-toggle class="btn btn-circle btn-ghost" />
+            @unless(auth()->check() && in_array(auth()->user()->role, ['admin', 'manager', 'delivery_person']))
+            <x-button icon="o-shopping-bag" class="btn-circle btn-ghost" link="/menus-products" />
+                @livewire('cart')
+            @endunless
             @if(auth()->check())
             <form method="POST" action="{{ route('logout') }}">
                         @csrf
@@ -99,7 +113,6 @@
                             <x-menu-item title="Commandes" icon="s-shopping-cart" link="/admin/orders" />
                             <x-menu-item title="Livraisons" icon="o-truck" link="/admin/deliveries" />
                         </x-menu-sub>
-                        <x-menu-item title="Rapports" icon="o-chart-bar" link="/admin/reports" />
                         <x-menu-item title="Demandes de contact" icon="o-information-circle" link="/admin/contactinquiries" />
                         <x-menu-item title="Paramètres" icon="o-cog-6-tooth" link="/admin/settings" />
                     </x-menu>
@@ -125,7 +138,6 @@
                                 <x-menu-item title="Commandes" icon="s-shopping-cart" link="/manager/orders" />
                                 <x-menu-item title="Livraisons" icon="o-truck" link="/manager/deliveries" />
                             </x-menu-sub>
-                            <x-menu-item title="Rapports" icon="o-chart-bar" link="/manager/reports" />
                             <x-menu-item title="Paramètres" icon="o-cog-6-tooth" link="/manager/settings" />
                         </x-menu>
 

@@ -21,8 +21,14 @@
             </x-alert>
         @else
             <x-table :headers="$headers" :rows="$recentOrders" link="{{ route('customer.orders.index') }}">
+                @scope('cell_order_number', $order)
+                    <div>{{$order->order_number}}</div>
+                @endscope
+                @scope('cell_created_at', $order)
+                    <div>{{$order->created_at}}</div>
+                @endscope
                 @scope('cell_status', $order)
-                    <x-badge :value="$order->status_text" class="{{ $statusColors[$order->status_text] ?? 'badge-neutral' }}" />
+                    <x-badge :value="$order->status_text" class="{{ $order->status_color }}" />
                 @endscope
             </x-table>
         @endif
@@ -44,7 +50,7 @@
                         </div>
                     </x-slot:value>
                     <x-slot:actions>
-                        <x-badge :value="$delivery->status" class="badge-primary" />
+                        <x-badge :value="$delivery->status_text" class="{{$delivery->status_color}}" />
                     </x-slot:actions>
                 </x-list-item>
             @empty

@@ -3,24 +3,24 @@
 namespace App\Livewire\Customer;
 
 use Livewire\Component;
+use Livewire\WithPagination;
 use App\Models\ContactInquiry;
 use Illuminate\Support\Facades\Auth;
 use Mary\Traits\Toast;
 
 class Support extends Component
 {
-    use Toast;
+    use Toast, WithPagination; // Add pagination trait
 
     public $subject;
     public $message;
 
     public function render()
     {
-        
         $userEmail = Auth::user()->email ?? 'guest@example.com';
         $inquiries = ContactInquiry::where('email', $userEmail)
                                    ->orderBy('created_at', 'desc')
-                                   ->get();
+                                   ->paginate(5); // Add pagination
 
         return view('livewire.customer.support', compact('inquiries'));
     }

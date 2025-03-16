@@ -9,12 +9,7 @@ use App\Models\Delivery;
 
 class Dashboard extends Component
 {
-    public $statusColors = [
-        'pending' => 'badge-warning',
-        'confirmed' => 'badge-info',
-        'delivered' => 'badge-success',
-        'cancelled' => 'badge-error',
-    ];
+  
 
     public function render()
     {
@@ -42,7 +37,7 @@ class Dashboard extends Component
                 ->take(3)
                 ->get(),
             'headers' => [
-                ['key' => 'id', 'label' => 'Commande'],
+                ['key' => 'order_number', 'label' => 'Commande'],
                 ['key' => 'created_at', 'label' => 'Date'],
                 ['key' => 'status', 'label' => 'Statut'],
                 ['key' => 'total_price', 'label' => 'Total']
