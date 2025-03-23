@@ -19,8 +19,7 @@ class Profile extends Component
     public ?string $phone_number = null;
     public $avatar;
     public ?string $oldAvatarUrl = null;
-    public string $password = '';
-    public string $confirm_password = '';
+
 
     protected $rules = [
         'first_name'       => 'required|string|max:255',
@@ -28,7 +27,6 @@ class Profile extends Component
         'email'            => 'required|email|unique:users,email,' . 'user_id',
         'phone_number'     => 'required|string|max:15',
         'avatar'           => 'nullable|image|max:2048',
-        'password'         => 'nullable|string|min:6|same:confirm_password',
     ];
 
     public function mount(): void
@@ -65,9 +63,6 @@ class Profile extends Component
                 'email'        => $this->email,
                 'phone_number' => $this->phone_number,
                 'avatar'       => $this->oldAvatarUrl,
-                'password'     => $this->password
-                    ? Hash::make($this->password)
-                    : $user->password,
             ]);
 
             $this->success(

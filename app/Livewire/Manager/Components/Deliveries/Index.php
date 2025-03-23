@@ -364,7 +364,7 @@ class Index extends Component
 
     public function render()
     {
-        return view('livewire.admin.deliveries.index', [
+        return view('livewire.manager.deliveries.index', [
             'deliveries' => $this->deliveries(),
             'headers'    => $this->headers(),
         ]);

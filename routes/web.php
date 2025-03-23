@@ -48,7 +48,7 @@ Route::get('/checkout/cancel', \App\Livewire\Checkout\Cancel::class)
 
 
 // Protected routes
-Route::middleware(['auth','verified'])->group(function () {
+Route::middleware(['auth','verified','check_banned'])->group(function () {
     // Admin routes
     Route::middleware(['role:admin'])->group(function () {
         Route::get('/admin/dashboard', \App\Livewire\Admin\Dashboard::class)->name('admin.dashboard');
@@ -101,6 +101,7 @@ Route::middleware(['auth','verified'])->group(function () {
     Route::middleware(['role:manager'])->group(function () {
         Route::get('/manager/dashboard', \App\Livewire\Manager\Dashboard::class)->name('manager.dashboard');
         Route::get('/manager/settings', \App\Livewire\Manager\Components\Settings::class)->name('manager.settings');
+        Route::get('/manager/contactinquiries', \App\Livewire\Admin\ContactInquiries::class)->name('manager.contactinquiries');
 
         Route::get('/manager/users', \App\Livewire\Manager\Components\Users\Index::class)->name('manager.users.index');
         Route::get('/manager/users/create', \App\Livewire\Manager\Components\Users\Create::class)->name('manager.users.create');

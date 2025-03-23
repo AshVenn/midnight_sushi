@@ -2,7 +2,7 @@
     <x-form method="POST" action="{{ route('password.email') }}" class="space-y-4">
         @csrf
 
-        <x-input label="Adresse Email" name="email" type="email" required autofocus />
+        <x-input label="Adresse Email" name="email" type="email" required autofocus  autocomplete="off"/>
 
         <x-button label="Envoyer le lien de réinitialisation" type="submit" variant="primary" class="w-full" />
 

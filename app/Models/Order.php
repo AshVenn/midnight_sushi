@@ -74,11 +74,9 @@ class Order extends Model
             return match($this->status) {
                 'pending' => 'En attente',
                 'confirmed' => 'Confirmée',
-                'preparing' => 'En préparation',
                 'ready' => 'Prête',
                 'out_for_delivery' => 'En livraison',
                 'delivered' => 'Livrée',
-                'cancelled' => 'Annulée',
                 'returned' => 'Retournée',
                 default => 'Inconnu',
             };
@@ -87,23 +85,17 @@ class Order extends Model
         public function getStatusColorAttribute(): string
         {
             return match($this->status) {
-                'pending' => 'badge-secondary', // Cool gray tone
-                'confirmed' => 'badge-info', // Soft blue for confirmation
-                'preparing' => 'badge-warning', // Warm yellow to indicate action
-                'ready' => 'badge-primary', // Strong blue indicating readiness
-                'out_for_delivery' => 'badge-accent', // Bright cyan to indicate movement
-                'delivered' => 'badge-success', // Green for successful delivery
-                'cancelled' => 'badge-error', // Red for cancellation
-                'returned' => 'badge-muted', // Soft gray to indicate a returned order
-                default => 'badge-neutral', // Neutral for unknown statuses
+                'pending' => 'badge-secondary', 
+                'confirmed' => 'badge-info', 
+                'ready' => 'badge-primary',
+                'out_for_delivery' => 'badge-warning', 
+                'delivered' => 'badge-success', 
+                'returned' => 'badge-muted', 
+                default => 'badge-neutral', 
             };
         }
 
     
-    public function getCanBeCancelledAttribute(): bool
-    {
-        return in_array($this->status, ['pending', 'confirmed']);
-    }
     
     public function getHasStartedPreparationAttribute(): bool
     {

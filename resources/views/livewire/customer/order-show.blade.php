@@ -1,14 +1,13 @@
 <div>
     <div class="mb-4">
-            <x-button 
-                label="Retour" 
-                icon="o-arrow-left" 
-                link="{{ route('customer.orders.index') }}" 
-                class="btn-secondary"
-            />
-        </div>
+        <x-button 
+            label="Retour" 
+            icon="o-arrow-left" 
+            link="{{ route('customer.orders.index') }}" 
+            class="btn-secondary"
+        />
+    </div>
     <x-card title="Détails de la Commande {{ $order->order_number }}" separator>
-
         {{-- Status --}}
         <div class="mb-4 text-sm">
             <span class="font-semibold">Statut:</span>
@@ -20,9 +19,6 @@
                     @case('confirmed')
                         Confirmée
                         @break
-                    @case('preparing')
-                        En préparation
-                        @break
                     @case('ready')
                         Prête
                         @break
@@ -32,8 +28,8 @@
                     @case('delivered')
                         Livrée
                         @break
-                    @case('cancelled')
-                        Annulée
+                    @case('returned')
+                        Retournée
                         @break
                     @default
                         Inconnu
@@ -105,23 +101,11 @@
         <div class="mt-6 text-right text-lg font-bold">
             Total: {{ number_format($order->total_price, 2) }} CHF
         </div>
-
-        {{-- Cancel Button if allowed --}}
-        @if($order->can_be_cancelled)
-            <div class="mt-4 text-right">
-                <x-button
-                    label="Annuler la commande"
-                    icon="o-x-circle"
-                    wire:click="cancelOrder"
-                    class="btn-primary"
-                />
-            </div>
-        @endif
     </x-card>
 
-    {{-- TIMELINE EXAMPLE --}}
+    {{-- Timeline --}}
     <x-card title="Progression de la Commande" separator class="mt-6">
-    <div class="px-4 py-5 space-y-4">
+        <div class="px-4 py-5 space-y-4">
             @foreach ($statusTimeline as $step)
                 <x-timeline-item
                     :title="$step['title']"
@@ -134,25 +118,4 @@
             @endforeach
         </div>
     </x-card>
-
-
-    {{-- Modal for cancellation confirmation --}}
-    @if($confirmingCancellation)
-        <x-modal title="Confirmer l'annulation" separator wire:model="confirmingCancellation">
-            <div class="space-y-4">
-                <p>Êtes-vous sûr de vouloir annuler cette commande ?</p>
-            </div>
-
-            <x-slot:actions>
-                <x-button label="Non" class="btn-ghost" @click="$wire.confirmingCancellation = false" />
-                <x-button
-                    label="Oui, annuler"
-                    icon="o-check"
-                    wire:click="cancelOrder"
-                    class="btn-error"
-                    spinner
-                />
-            </x-slot:actions>
-        </x-modal>
-    @endif
 </div>

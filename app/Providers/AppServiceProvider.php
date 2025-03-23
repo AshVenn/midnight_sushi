@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\Menu;
 use App\Models\Product;
+use App\Models\Address;
 
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
@@ -30,6 +31,7 @@ class AppServiceProvider extends ServiceProvider
         Relation::enforceMorphMap([
             'Menu' => Menu::class,
             'Product' => Product::class,
+            'Address'=>Address::class,
         ]);
         
     }

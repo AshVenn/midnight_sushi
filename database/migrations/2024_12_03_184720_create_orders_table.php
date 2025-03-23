@@ -16,15 +16,13 @@ class CreateOrdersTable extends Migration
             $table->enum('status', [
                 'pending',
                 'confirmed',
-                'preparing',
                 'ready',
                 'out_for_delivery',
                 'delivered',
-                'cancelled',
                 'returned'
             ])->default('pending');
             $table->string('payment_method')->nullable();
-            $table->string('payment_status')->default('unpaid');
+            $table->enum('payment_status',['paid','unpaid'])->default('unpaid');
             $table->string('phone_number');
             $table->text('address_text')->nullable();
             $table->text('notes')->nullable();

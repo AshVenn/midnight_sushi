@@ -2,7 +2,7 @@
     <x-card title="Mes Livraisons" separator>
         <div class="mb-4 flex flex-wrap gap-4 items-end">
             <div class="flex-grow">
-                <x-input wire:model.lazy="search" placeholder="Rechercher..." icon="o-magnifying-glass" />
+                <x-input wire:model.lazy="search" placeholder="Rechercher..." icon="o-magnifying-glass" autocomplete="off" />
             </div>
             
             <div class="flex gap-4 items-center">

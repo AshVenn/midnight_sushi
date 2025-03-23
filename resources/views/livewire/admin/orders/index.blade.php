@@ -110,17 +110,20 @@
                 {{-- Eye Button to view details --}}
                 <x-button icon="o-eye" wire:click="viewOrderDetails({{ $order->id }})" />
 
-                @if (in_array($order->status, ['delivered', 'cancelled']))
+                @if ($order->status === 'delivered')
                     <x-badge value="-" class="badge-error" />
-                @elseif ($order->status === 'preparing')
+                @elseif ($order->status === 'confirmed' && $order->payment_status === 'paid')
                     <x-button wire:click="markAsReady({{ $order->id }})" class="btn-secondary" label="Prête !" />
-                @elseif ($order->status === 'ready' && $order->currentDelivery()?->deliveryPerson)
+                @elseif (($order->status === 'ready' || $order->status === 'returned') && $order->currentDelivery()?->deliveryPerson)
                     <x-button wire:click="reassignDelivery({{ $order->id }})" class="btn-warning" label="Réassigner" />
-                @elseif ($order->status === 'ready' && !$order->currentDelivery()?->deliveryPerson)
+                @elseif (($order->status === 'ready' || $order->status === 'returned') && !$order->currentDelivery()?->deliveryPerson)
                     <x-button wire:click="assignDelivery({{ $order->id }})" class="btn-primary" label="Assigner" />
                 @else
                     <x-badge value="-" class="badge-secondary" />
                 @endif
+
+
+
             </div>
         @endscope
     </x-table>

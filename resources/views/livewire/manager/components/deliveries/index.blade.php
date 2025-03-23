@@ -26,7 +26,7 @@
         </div>
        
         <div class="lg:flex-grow">
-            <x-input wire:model.live="search" icon="o-magnifying-glass" placeholder="Rechercher..." class="flex-1" />
+            <x-input wire:model.live="search" icon="o-magnifying-glass" placeholder="Rechercher..." class="flex-1" autocomplete="off" />
         </div>
         
     </div>

@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Models;
+use Illuminate\Support\Facades\DB;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -57,6 +58,22 @@ class Menu extends Model
     {
         return $this->morphMany(Review::class, 'reviewable');
     }
-    
+    public static function topSellingMenus($limit = 5)
+    {
+        return DB::table('menus as m')
+            ->select('m.name', 'm.price', DB::raw("COUNT(oi.id) as total_sales"))
+            ->leftJoin('order_items as oi', function($join) {
+                $join->on('oi.orderable_id', '=', 'm.id')
+                     ->where('oi.orderable_type', '=', 'App\Models\Menu');
+            })
+            ->leftJoin('orders as o', function($join) {
+                $join->on('o.id', '=', 'oi.order_id')
+                     ->where('o.status', '<>', 'cancelled');
+            })
+            ->groupBy('m.id', 'm.name', 'm.price')
+            ->orderByDesc('total_sales')
+            ->limit($limit)
+            ->get();
+    }
 }
 

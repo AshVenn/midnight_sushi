@@ -4,51 +4,66 @@ namespace App\Livewire\Auth;
 
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
+use Mary\Traits\Toast;
 
 class Login extends Component
 {
+    use Toast;
+
     public string $email = '';
     public string $password = '';
 
     public function login()
     {
-        $credentials = [
-            'email'    => $this->email,
-            'password' => $this->password,
-        ];
+        $credentials = $this->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
 
-        // 1) Attempt login
+        // Attempt login
         if (!Auth::attempt($credentials)) {
-            $this->addError('email', 'Invalid email or password.');
+            $this->error(
+                'Email ou mot de passe incorrect', 
+                redirectTo: '/login'
+            );
             return;
         }
 
-        // 2) Get the authenticated user
         $user = Auth::user();
 
-        // 3) Check if user’s email is verified
+        // Check banned status
+        if ($user->status === 'banned') {
+            Auth::logout();
+            $this->error(
+                'Votre compte a été suspendu', 
+                redirectTo: '/login'
+            );
+            return;
+        }
+
+        // Email verification check
         if (!$user->hasVerifiedEmail()) {
             Auth::logout();
-            session()->flash('error', 'Please verify your email first.');
-            return redirect()->route('verification.notice');
+            $this->error(
+                'Veuillez vérifier votre email avant de continuer',
+                redirectTo: route('verification.notice')
+            );
+            return;
         }
 
-        // 4) Regenerate session after successful login
         session()->regenerate();
 
-        // 5) Role-based redirect
-        switch ($user->role) {
-            case 'admin':
-                return redirect()->intended('/admin/dashboard');
-            case 'customer':
-                return redirect()->intended('/customer/dashboard');
-            case 'manager':
-                return redirect()->intended('/manager/dashboard');
-            case 'delivery_person':
-                return redirect()->intended('/deliveryperson/dashboard');
-            default:
-                return redirect()->intended('/dashboard');
-        }
+        // Role-based redirect with success toast
+        $this->success(
+            'Connexion réussie!', 
+            redirectTo: match($user->role) {
+                'admin' => '/admin/dashboard',
+                'customer' => '/customer/dashboard',
+                'manager' => '/manager/dashboard',
+                'delivery_person' => '/deliveryperson/dashboard',
+                default => '/dashboard'
+            }
+        );
     }
 
     public function render()

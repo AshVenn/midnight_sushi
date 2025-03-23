@@ -6,7 +6,7 @@
     <div class="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0 mb-4 items-center">
         {{-- Barre de recherche --}}
         <div class="flex-grow">
-            <x-input wire:model.lazy="search" placeholder="Rechercher des catégories..." icon="o-magnifying-glass" autocomplete="off" wire:enter="search" />
+            <x-input wire:model.lazy="search" placeholder="Rechercher des catégories..." icon="o-magnifying-glass" autocomplete="off" wire:enter="search" autocomplete="off" />
         </div>
     </div>
 

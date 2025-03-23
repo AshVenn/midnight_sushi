@@ -29,20 +29,33 @@
             <label for="main-drawer" class="lg:hidden mr-3">
                 <x-icon name="o-bars-3" class="cursor-pointer" />
             </label>
-            <img 
-                src="/Needs/Logo midnight sushi Light.svg" 
-                alt="Midnight Sushi"
-                class="h-16 dark:hidden"
+            <a href="/">
+            <img
+                src="/images/midnight_sushi/Logo midnight sushi Light.svg"
+                alt="Desktop Light Logo"
+                class="hidden md:block h-16 dark:hidden"  
             />
 
-            <img 
-                src="/Needs/Logo midnight sushi Dark.svg" 
-                alt="Midnight Sushi"
-                class="h-16 hidden dark:block"
+            <img
+                src="/images/midnight_sushi/Logo midnight sushi Dark.svg"
+                alt="Desktop Dark Logo"
+                class="hidden md:hidden md:dark:block  h-16"
             />
 
+            <img
+                src="/images/midnight_sushi/Midnight Sushi Mobile Light.svg"
+                alt="Mobile Light Logo"
+                class="block h-12 md:hidden dark:hidden"  
+            />
 
-                
+        
+            <img
+                    src="/images/midnight_sushi/Midnight Sushi Mobile Dark.svg"
+                    alt="Mobile Dark Logo"
+                    class="hidden h-12 md:hidden dark:block dark:md:hidden"
+                />
+
+        </a>
         </x-slot:brand>
 
         <x-slot:actions>
@@ -100,8 +113,8 @@
 
                     @case('customer')
                         <x-menu activate-by-route>
+                            <x-menu-item title="Orders" icon="o-shopping-cart" link="/customer/orders" />   
                             <x-menu-item title="Profile" icon="o-user" link="/customer/profile" />
-                            <x-menu-item title="Orders" icon="o-shopping-cart" link="/customer/orders" />
                             <x-menu-item title="Support" icon="o-information-circle" link="/customer/support" />
                         </x-menu>
                         @break

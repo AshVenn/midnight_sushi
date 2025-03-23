@@ -2,17 +2,14 @@
 <div class="grid lg:grid-cols-8 gap-10">
     <!-- IMAGE -->
     <div class="lg:col-span-2 flex items-center justify-center">
-        <!-- Adaptez le chemin de l'image à vos besoins -->
-        <img src="/images/midnight_sushi/checkout.png" width="250" class="mx-auto" alt="Checkout Illustration" />
+        <img src="/images/midnight_sushi/checkout.png" width="250" class="mx-auto" alt="Illustration de paiement" />
     </div>
 
     @php
-        // Récupération du panier en session
         $cart = Session::get('cart', []);
         $totalItems = 0;
         $totalPrice = 0;
 
-        // Calcul du nombre total d'items et du prix total
         foreach ($cart as $type => $items) {
             foreach ($items as $item) {
                 $totalItems += $item['quantity'];
@@ -53,19 +50,19 @@
             </x-card>
         </div>
 
-        <!-- FORMULAIRE 'ADRESSE / INFOS' ET BOUTON 'PASSER LA COMMANDE' -->
+        <!-- FORMULAIRE DE COMMANDE -->
         <div class="lg:col-span-3">
             <x-card title="Finaliser la commande" separator>
-                <!-- On utilise un formulaire Livewire -->
                 <form wire:submit.prevent="placeOrder" class="space-y-4">
                     <!-- Téléphone -->
                     <div>
-                        <label class="block font-medium text-sm mb-1" for="phone_number">Téléphone</label>
+                        <label class="block font-medium text-sm mb-1" for="phone_number">Téléphone suisse</label>
                         <x-input
                             id="phone_number"
                             wire:model="phone_number"
-                            placeholder="Votre numéro de téléphone"
+                            placeholder="Ex: +41 79 123 45 67 ou 079 123 45 67"
                             class="w-full"
+                            autocomplete="tel"
                         />
                         @error('phone_number')
                             <span class="text-error text-sm">{{ $message }}</span>
@@ -73,51 +70,84 @@
                     </div>
 
                     <!-- Adresse -->
-                    <div>
-                        <label class="block font-medium text-sm mb-1" for="address_text">Adresse</label>
-                        <x-textarea
-                            id="address_text"
-                            wire:model="address_text"
-                            placeholder="Votre adresse complète"
-                            class="w-full"
-                        />
-                        @error('address_text')
-                            <span class="text-error text-sm">{{ $message }}</span>
-                        @enderror
+                    <div class="space-y-4">
+                        <label class="block font-medium text-sm mb-1">Adresse de livraison</label>
+                        
+                        @if($addresses->isNotEmpty())
+                            <!-- Radio Buttons for selecting address type -->
+                            <div class="flex flex-col md:flex-row md:items-center md:space-x-4 space-y-2 md:space-y-0">
+                                <x-radio label="Adresse enregistrée" wire:model="address_type" value="saved" />
+                                <x-radio label="Nouvelle adresse" wire:model="address_type" value="custom" />
+                            </div>
+
+                            <!-- Show select dropdown only when "saved" is selected -->
+                            @if($address_type === 'saved')
+                                <div class="mt-2">
+                                    <x-select
+                                        wire:model="selected_address"
+                                        :options="$addresses"
+                                        option-label="full_address"
+                                        option-value="id"
+                                        placeholder="Sélectionnez une adresse"
+                                        wire:change="updateAddressText"
+                                        class="w-full"
+                                    />
+                                </div>
+                            @endif
+                        @endif
+
+                        <!-- Text area for address input (editable when "custom") -->
+                        <div class="mt-2">
+                            <x-textarea
+                                wire:model="address_text"
+                                placeholder="Entrez l'adresse complète de livraison"
+                                rows="4"
+                                :readonly="$address_type === 'saved'"
+                                class="w-full"
+                            />
+                            @error('address_text')
+                                <span class="text-error text-sm">{{ $message }}</span>
+                            @enderror
+                        </div>
                     </div>
 
                     <!-- Notes -->
                     <div>
-                        <label class="block font-medium text-sm mb-1" for="notes">Notes (facultatif)</label>
+                        <label class="block font-medium text-sm mb-1" for="notes">Instructions spéciales</label>
                         <x-textarea
                             id="notes"
                             wire:model="notes"
-                            placeholder="Notes pour la livraison / autres"
+                            placeholder="Informations supplémentaires pour le livreur..."
                             class="w-full"
+                            rows="2"
                         />
-                        @error('notes')
-                            <span class="text-error text-sm">{{ $message }}</span>
-                        @enderror
                     </div>
 
-                    <!-- Bouton SUBMIT -->
-                    <div class="flex justify-end mt-5">
+                    <!-- Bouton de paiement -->
+                    <div class="mt-6 text-center">
                         <x-button
-                            label="Passer la commande"
-                            icon="o-paper-airplane"
-                            class="btn-primary"
+                            label="Procéder au paiement sécurisé"
+                            icon="o-lock-closed"
+                            class="btn-primary w-full py-4 text-lg"
                             type="submit"
                             spinner="placeOrder"
                         />
+                        <p class="text-sm text-gray-500 mt-2">
+                            Vous serez redirigé vers le système de paiement sécurisé Stripe
+                        </p>
                     </div>
                 </form>
             </x-card>
         </div>
     @else
-        <!-- PANIER VIDE -->
         <div class="lg:col-span-6">
-            <div class="font-bold text-3xl mb-8">Le panier est vide</div>
-            <x-button label="Parcourir les produits" icon-right="o-arrow-right" link="/" />
+            <div class="font-bold text-3xl mb-8">Votre panier est vide</div>
+            <x-button 
+                label="Retour à la carte" 
+                icon-right="o-arrow-right" 
+                link="/menus-products" 
+                class="btn-ghost"
+            />
         </div>
     @endif
 </div>

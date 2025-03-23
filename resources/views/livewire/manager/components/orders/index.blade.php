@@ -94,28 +94,7 @@
         @endscope
 
         @scope('cell_status', $order)
-            @php
-                $statusLabels = [
-                    'pending' => 'En attente',
-                    'confirmed' => 'Confirmée',
-                    'preparing' => 'En préparation',
-                    'ready' => 'Prête',
-                    'out_for_delivery' => 'En livraison',
-                    'delivered' => 'Livrée',
-                    'cancelled' => 'Annulée',
-                ];
-                $statusClass = match($order->status) {
-                    'pending' => 'badge-warning',
-                    'confirmed' => 'badge-primary',
-                    'preparing' => 'badge-info',
-                    'ready' => 'badge-success',
-                    'out_for_delivery' => 'badge-primary',
-                    'delivered' => 'badge-success',
-                    'cancelled' => 'badge-error',
-                    default => 'badge-secondary',
-                };
-            @endphp
-            <x-badge :value="$statusLabels[$order->status] ?? 'Inconnu'" :class="$statusClass" />
+        <x-badge :value="$order->status_text" :class="$order->status_color" />
         @endscope
 
         @scope('cell_created_at', $order)
@@ -131,17 +110,20 @@
                 {{-- Eye Button to view details --}}
                 <x-button icon="o-eye" wire:click="viewOrderDetails({{ $order->id }})" />
 
-                @if (in_array($order->status, ['delivered', 'cancelled']))
+                @if ($order->status === 'delivered')
                     <x-badge value="-" class="badge-error" />
-                @elseif ($order->status === 'preparing')
+                @elseif ($order->status === 'confirmed' && $order->payment_status === 'paid')
                     <x-button wire:click="markAsReady({{ $order->id }})" class="btn-secondary" label="Prête !" />
-                @elseif ($order->status === 'ready' && $order->currentDelivery()?->deliveryPerson)
+                @elseif (($order->status === 'ready' || $order->status === 'returned') && $order->currentDelivery()?->deliveryPerson)
                     <x-button wire:click="reassignDelivery({{ $order->id }})" class="btn-warning" label="Réassigner" />
-                @elseif ($order->status === 'ready' && !$order->currentDelivery()?->deliveryPerson)
+                @elseif (($order->status === 'ready' || $order->status === 'returned') && !$order->currentDelivery()?->deliveryPerson)
                     <x-button wire:click="assignDelivery({{ $order->id }})" class="btn-primary" label="Assigner" />
                 @else
                     <x-badge value="-" class="badge-secondary" />
                 @endif
+
+
+
             </div>
         @endscope
     </x-table>

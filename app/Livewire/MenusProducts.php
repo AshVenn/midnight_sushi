@@ -6,6 +6,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Menu;
 use App\Models\Product;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Session;
 
 class MenusProducts extends Component
@@ -20,26 +21,24 @@ class MenusProducts extends Component
     public $selectedProduct;
     protected $queryString = ['searchTerm', 'selectedAllergen'];
 
-
     public function updatingSearchTerm()
     {
         $this->resetPage();
     }
 
-    
     public function showMenuDetails($menuId)
     {
         $this->selectedMenu = Menu::with(['products.category', 'reviews.user'])
-        ->withAvg('reviews as reviews_avg_rating', 'rating')
-        ->find($menuId);     
+            ->withAvg('reviews as reviews_avg_rating', 'rating')
+            ->find($menuId);
         $this->showMenuDrawer = true;
     }
     
     public function showProductDetails($productId)
     {
         $this->selectedProduct = Product::with(['category', 'reviews.user'])
-        ->withAvg('reviews as reviews_avg_rating', 'rating')
-        ->find($productId);
+            ->withAvg('reviews as reviews_avg_rating', 'rating')
+            ->find($productId);
         $this->showProductDrawer = true;
     }
 
@@ -60,10 +59,10 @@ class MenusProducts extends Component
             $cart[$type][$id]['quantity']++;
         } else {
             $cart[$type][$id] = [
-                'id' => $key->id,
-                'name' => $key->name,
-                'price' => $type === 'menu' ? $key->price : $key->final_price,
-                'image' => $key->image,
+                'id'       => $key->id,
+                'name'     => $key->name,
+                'price'    => $type === 'menu' ? $key->price : $key->final_price,
+                'image'    => $key->image,
                 'quantity' => 1 
             ];
         }
@@ -72,11 +71,11 @@ class MenusProducts extends Component
         $this->dispatch('cartUpdated');
     }
 
-    // app/Livewire/MenusProducts.php
-        public function render()
-        {
-            // Get all unique allergens from products
-            $allAllergens = Product::whereNotNull('allergens')
+    public function render()
+    {
+        // On peut aussi mettre en cache la liste des allergènes
+        $allAllergens = Cache::remember('allAllergens', 600, function () {
+            return Product::whereNotNull('allergens')
                 ->pluck('allergens')
                 ->flatten()
                 ->unique()
@@ -84,13 +83,17 @@ class MenusProducts extends Component
                 ->map(fn($a) => ['id' => $a, 'name' => "Sans $a"])
                 ->prepend(['id' => '', 'name' => 'Tous les allergènes'])
                 ->toArray();
+        });
 
-            // Menus query with allergen filtering through their products
-            $menus = Menu::with(['products.category', 'reviews.user'])
+        // Génération d'une clé de cache pour les menus
+        $menuPage = request('menuPage', 1);
+        $menusCacheKey = "menus:search={$this->searchTerm}:allergen={$this->selectedAllergen}:page={$menuPage}";
+        $menus = Cache::remember($menusCacheKey, 600, function () {
+            return Menu::with(['products.category', 'reviews.user'])
                 ->withAvg('reviews as reviews_avg_rating', 'rating')
                 ->when($this->searchTerm, function ($query) {
                     $query->where('name', 'like', "%{$this->searchTerm}%")
-                        ->orWhere('description', 'like', "%{$this->searchTerm}%");
+                          ->orWhere('description', 'like', "%{$this->searchTerm}%");
                 })
                 ->when($this->selectedAllergen, function ($query) {
                     $query->whereHas('products', function($q) {
@@ -98,25 +101,29 @@ class MenusProducts extends Component
                     });
                 })
                 ->paginate(6, ['*'], 'menuPage');
+        });
 
-            // Products query (existing)
-            $products = Product::with(['category', 'reviews.user'])
-            ->withAvg('reviews as reviews_avg_rating', 'rating')
+        // Génération d'une clé de cache pour les produits
+        $productPage = request('productPage', 1);
+        $productsCacheKey = "products:search={$this->searchTerm}:allergen={$this->selectedAllergen}:page={$productPage}";
+        $products = Cache::remember($productsCacheKey, 600, function () {
+            return Product::with(['category', 'reviews.user'])
+                ->withAvg('reviews as reviews_avg_rating', 'rating')
                 ->when($this->searchTerm, function ($query) {
                     $query->where('name', 'like', "%{$this->searchTerm}%")
-                        ->orWhere('description', 'like', "%{$this->searchTerm}%");
+                          ->orWhere('description', 'like', "%{$this->searchTerm}%");
                 })
                 ->when($this->selectedAllergen, function ($query) {
                     $query->whereJsonContains('allergens', $this->selectedAllergen);
                 })
                 ->where('is_available', true)
                 ->paginate(8, ['*'], 'productPage');
+        });
 
-            return view('livewire.menus-products', [
-                'menus' => $menus,
-                'products' => $products,
-                'allAllergens' => $allAllergens
-            ]);
-        }
-
+        return view('livewire.menus-products', [
+            'menus'        => $menus,
+            'products'     => $products,
+            'allAllergens' => $allAllergens,
+        ]);
+    }
 }

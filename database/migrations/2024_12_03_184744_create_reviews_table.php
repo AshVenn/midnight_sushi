@@ -12,7 +12,6 @@ class CreateReviewsTable extends Migration
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->morphs('reviewable');
             $table->tinyInteger('rating'); 
-            $table->text('comment')->nullable();
             $table->timestamps();
 
       

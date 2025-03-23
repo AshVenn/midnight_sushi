@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin\Components\Users;
 
 use App\Models\User;
+use App\Models\Order;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -13,12 +14,16 @@ class Index extends Component
 {
     use WithPagination, Toast;
 
-    public string $search = ''; 
-    public string $roleFilter = 'all'; 
-    public array $sortBy = ['column' => 'first_name', 'direction' => 'asc']; 
-    public bool $showDeleteModal = false; 
-    public ?int $deletingUserId = null; 
-    public ?string $deletingUserName = null; 
+    public string $search = '';
+    public string $roleFilter = 'all';
+    public array $sortBy = ['column' => 'first_name', 'direction' => 'asc'];
+    public bool $showBanModal = false;
+    public bool $showDeleteModal = false;
+    public ?int $banningUserId = null;
+    public ?int $deletingUserId = null;
+    public ?string $banningUserName = null;
+    public ?string $deletingUserName = null;
+    public ?string $currentStatus = null;
 
     /**
      * Réinitialise la pagination lorsque la recherche ou le filtre change.
@@ -37,6 +42,11 @@ class Index extends Component
         $this->resetPage();
     }
 
+    private function hasOrders(User $user): bool
+    {
+        return Order::where('customer_id', $user->id)->exists();
+    }
+
     /**
      * Met à jour le tri des colonnes.
      */
@@ -51,84 +61,127 @@ class Index extends Component
         $this->resetPage();
     }
 
-    /**
-     * Ouvre la fenêtre de confirmation de suppression.
-     */
-    public function confirmDelete(int $userId): void
+    public function confirmBan($userId, $currentStatus): void
     {
-        try {
-            $authenticatedUser = Auth::user();
-
-            if (!$authenticatedUser) {
-                $this->error(
-                    title: 'Erreur',
-                    description: 'Vous devez être authentifié pour effectuer cette action.'
-                );
-                return;
-            }
-
-            $user = User::findOrFail($userId);
-            $this->deletingUserId = $user->id;
-            $this->deletingUserName = "{$user->first_name} {$user->last_name}";
-            $this->showDeleteModal = true;
-        } catch (\Exception $e) {
-            $this->error(
-                title: 'Erreur',
-                description: 'Une erreur est survenue lors de la récupération des données de l\'utilisateur.'
-            );
-        }
+        $user = User::findOrFail($userId);
+        $this->banningUserId = $user->id;
+        $this->banningUserName = $user->full_name;
+        $this->currentStatus = $currentStatus;
+        $this->showBanModal = true;
     }
 
-    /**
-     * Ferme le modal de suppression.
-     */
+    
+
+    public function cancelBan(): void
+    {
+        $this->reset(['showBanModal', 'banningUserId', 'banningUserName', 'currentStatus']);
+    }
+
+    
+    public function confirmDelete(int $userId): void
+    {
+        $user = User::findOrFail($userId);
+        
+        if ($user->role === 'admin') {
+            $this->error(
+                title: 'Erreur',
+                description: 'Les administrateurs ne peuvent pas être supprimés.'
+            );
+            return;
+        }
+
+        if ($this->hasOrders($user)) {
+            $this->error(
+                title: 'Erreur',
+                description: 'Impossible de supprimer un utilisateur avec des commandes.'
+            );
+            return;
+        }
+
+        $this->deletingUserId = $user->id;
+        $this->deletingUserName = "{$user->first_name} {$user->last_name}";
+        $this->showDeleteModal = true;
+    }
+
     public function cancelDelete(): void
     {
         $this->reset(['showDeleteModal', 'deletingUserId', 'deletingUserName']);
     }
+   
 
-    /**
-     * Supprime un utilisateur et son avatar.
-     */
     public function deleteUser(): void
     {
         try {
-            $authenticatedUser = Auth::user();
+            $user = User::find($this->deletingUserId);
 
-            if (!$authenticatedUser) {
+            if (!$user) {
                 $this->error(
                     title: 'Erreur',
-                    description: 'Vous devez être authentifié pour effectuer cette action.'
+                    description: 'Utilisateur introuvable.'
                 );
                 return;
             }
 
-            if ($this->deletingUserId) {
-                $user = User::find($this->deletingUserId);
-
-                if ($user) {
-                    // Supprime l'avatar sur Cloudinary s'il existe
-                    if ($user->avatar) {
-                        $publicId = $this->getPublicIdFromUrl($user->avatar);
-                        Cloudinary::destroy($publicId);
-                    }
-
-                    // Supprime l'utilisateur
-                    $user->delete();
-                    $this->success(
-                        title: 'Utilisateur supprimé',
-                        description: 'L\'utilisateur a été supprimé avec succès.'
-                    );
-                }
-
-                $this->cancelDelete();
+            if ($user->role === 'admin') {
+                $this->error(
+                    title: 'Erreur',
+                    description: 'Les administrateurs ne peuvent pas être supprimés.'
+                );
+                return;
             }
+
+            if ($this->hasOrders($user)) {
+                $this->error(
+                    title: 'Erreur',
+                    description: 'Impossible de supprimer un utilisateur avec des commandes.'
+                );
+                return;
+            }
+
+            // Delete avatar if exists
+            if ($user->avatar) {
+                $publicId = $this->getPublicIdFromUrl($user->avatar);
+                Cloudinary::destroy($publicId);
+            }
+
+            $user->delete();
+            $this->success(
+                title: 'Suppression réussie',
+                description: 'L\'utilisateur a été supprimé avec succès.'
+            );
+
+            $this->cancelDelete();
         } catch (\Exception $e) {
             $this->error(
                 title: 'Erreur',
-                description: 'Une erreur est survenue lors de la suppression de l\'utilisateur.'
+                description: 'Une erreur est survenue lors de la suppression.'
             );
         }
+    }
+
+    public function performBan(): void
+    {
+        $user = User::find($this->banningUserId);
+        
+        if ($user->role === 'admin') {
+            $this->error(
+                title: 'Erreur',
+                description: 'Les administrateurs ne peuvent pas être bannis.'
+            );
+            $this->cancelBan();
+            return;
+        }
+
+        if ($user) {
+            $newStatus = $this->currentStatus === 'active' ? 'banned' : 'active';
+            $user->update(['status' => $newStatus]);
+            $this->success(
+                title: 'Statut mis à jour',
+                description: "Le statut de l'utilisateur a été modifié en {$newStatus}."
+            );
+        }
+
+        $this->cancelBan();
     }
 
     /**
@@ -162,6 +215,7 @@ class Index extends Component
             ->paginate(10)
             ->through(function ($user) {
                 $user->full_name = "{$user->first_name} {$user->last_name}";
+                $user->hasOrders = Order::where('customer_id', $user->id)->exists();
                 return $user;
             });
     }
@@ -176,6 +230,7 @@ class Index extends Component
             ['key' => 'full_name', 'label' => 'Nom Complet', 'sortable' => false],
             ['key' => 'email', 'label' => 'Adresse Email', 'sortable' => true],
             ['key' => 'role', 'label' => 'Rôle', 'sortable' => true],
+            ['key' => 'status', 'label' => 'Statut', 'sortable' => true],
             ['key' => 'actions', 'label' => 'Actions', 'sortable' => false],
         ];
     }
@@ -188,6 +243,7 @@ class Index extends Component
         return view('livewire.admin.components.users.index', [
             'users' => $this->users(),
             'headers' => $this->headers(),
+            
         ]);
     }
 }

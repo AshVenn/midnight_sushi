@@ -33,25 +33,6 @@
                     class="w-full"
                 />
             </div>
-
-            <!-- Row 3: Password & Confirm Password -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <x-input
-                    wire:model="password"
-                    label="Mot de Passe"
-                    type="password"
-                    placeholder="Nouveau mot de passe (facultatif)"
-                    class="w-full"
-                />
-                <x-input
-                    wire:model="confirm_password"
-                    label="Confirmation"
-                    type="password"
-                    placeholder="Confirmez le mot de passe"
-                    class="w-full"
-                />
-            </div>
-
             <!-- Avatar Upload -->
             <div class="space-y-4">
                 <x-file

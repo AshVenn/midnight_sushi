@@ -77,4 +77,48 @@ class User extends Authenticatable implements MustVerifyEmail
         {
             return $this->hasMany(Review::class);
     }
+
+    public function getStatusTextAttribute(): string
+    {
+        return match ($this->status) {
+            'active' => 'Actif',
+            'inactive' => 'Inactif',
+            'banned' => 'Banni',
+            default => 'Inconnu',
+        };
+    }
+    
+    public function getStatusColorAttribute(): string
+    {
+        return match ($this->status) {
+            'active' => 'text-green-600 border-green-600',
+            'inactive' => 'text-gray-600 border-gray-600',
+            'banned' => 'text-red-600 border-red-600',
+            default => 'text-neutral-600 border-neutral-600',
+        };
+    }
+
+    public function getRoleTextAttribute(): string
+        {
+            return match ($this->role) {
+                'admin' => 'Administrateur',
+                'manager' => 'Responsable',
+                'delivery_person' => 'Livreur',
+                'customer' => 'Client',
+                default => 'Inconnu',
+            };
+        }
+
+        public function getRoleColorAttribute(): string
+        {
+            return match ($this->role) {
+                'admin' => 'text-purple-600 border-purple-600',
+                'manager' => 'text-blue-600 border-blue-600',
+                'delivery_person' => 'text-orange-600 border-orange-600',
+                'customer' => 'text-gray-600 border-gray-600',
+                default => 'text-neutral-600 border-neutral-600',
+            };
+        }
+
+    
 }

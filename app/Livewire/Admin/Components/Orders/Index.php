@@ -47,7 +47,6 @@ class Index extends Component
             ['id' => 'all', 'name' => 'Tous'],
             ['id' => 'assigned', 'name' => 'Attribué'],
             ['id' => 'unassigned', 'name' => 'Non attribué'],
-            ['id' => 'preparing', 'name' => 'En préparation'],
             ['id' => 'ready', 'name' => 'Prêts'],
         ];
     }
@@ -89,16 +88,17 @@ class Index extends Component
     public function markAsReady(int $orderId): void
     {
         $order = Order::find($orderId);
+        
         if (!$order) {
             $this->error('Commande introuvable.');
             return;
         }
-
-        if ($order->status !== 'preparing') {
+        
+        if ($order->status !== 'confirmed' || $order->payment_status !== 'paid') {
             $this->error('Cette commande ne peut pas être marquée comme prête.');
             return;
         }
-
+    
         $order->update(['status' => 'ready']);
         $this->success('Commande marquée comme prête !');
     }
@@ -247,8 +247,6 @@ class Index extends Component
                     $query->whereDoesntHave('deliveries', function ($q) {
                         $q->whereIn('status', ['assigned', 'picked_up']);
                     });
-                } elseif ($this->deliveryStatusFilter === 'preparing') {
-                    $query->where('status', 'preparing');
                 } elseif ($this->deliveryStatusFilter === 'ready') {
                     $query->where('status', 'ready');
                 }

@@ -31,7 +31,7 @@
                         <div class="flex justify-between items-center">
                             <x-badge :value="number_format($menu->price, 2).' CHF'" class="badge-secondary" />
                             <x-button 
-                                link="/menus-product" 
+                                link="/menus-products" 
                                 label="Découvrir" 
                                 class="btn-ghost"
                             />

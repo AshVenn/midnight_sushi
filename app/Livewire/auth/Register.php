@@ -21,7 +21,7 @@ class Register extends Component
 
     public function register()
     {
-        // Protection anti-spam : si le champ honeypot est rempli, bloquer l'inscription
+        
         if (!empty($this->honeypot)) {
             Log::warning('Bot détecté lors de l\'inscription.', ['email' => $this->email]);
 

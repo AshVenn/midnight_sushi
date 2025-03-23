@@ -1,74 +1,115 @@
 <x-card title="Gestion des Utilisateurs" separator>
     <x-slot:menu>
-        <x-button label="Ajouter un Utilisateur" link="{{ route('admin.users.create') }}" class="btn-primary" icon="o-plus" responsive />
+        <x-button label="Ajouter un Utilisateur"
+                  link="{{ route('admin.users.create') }}"
+                  class="btn-primary"
+                  icon="o-plus"
+                  responsive />
     </x-slot:menu>
 
-    <div class="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0 mb-4 items-center">
-        {{-- Barre de recherche --}}
-        <div class="flex-grow w-full">
-            <x-input wire:model.lazy="search" placeholder="Rechercher des utilisateurs..." icon="o-magnifying-glass" autocomplete="off" />
-        </div>
-
-        {{-- Filtre des rôles --}}
-        @php
-            $roleOptions = [
-                ['id' => 'all', 'name' => 'Tous les Rôles'],
-                ['id' => 'admin', 'name' => 'Administrateur'],
-                ['id' => 'manager', 'name' => 'Responsable'],
-                ['id' => 'delivery_person', 'name' => 'Livreur'],
-                ['id' => 'customer', 'name' => 'Client'],
-            ];
-        @endphp
-        <div class="w-full md:w-1/3">
-            <x-select wire:model="roleFilter" wire:change="updateFilter" :options="$roleOptions" placeholder="Filtrer par Rôle" />
-        </div>
+    {{-- Barre de recherche et filtre --}}
+    <div class="flex flex-col md:flex-row md:items-center md:gap-4 gap-2 mb-4">
+    <div class="w-full md:w-3/5">
+        <x-input wire:model.lazy="search"
+                 placeholder="Rechercher..."
+                 icon="o-magnifying-glass"
+                 class="w-full"
+                 autocomplete="off" />
     </div>
 
-    {{-- Table Component --}}
+    <div class="w-full md:w-2/5">
+        <x-select wire:model="roleFilter"
+                  wire:change="updateFilter"
+                  :options="[
+                      ['id' => 'all', 'name' => 'Tous les rôles'],
+                      ['id' => 'admin', 'name' => 'Administrateurs'],
+                      ['id' => 'manager', 'name' => 'Responsables'],
+                      ['id' => 'delivery_person', 'name' => 'Livreurs'],
+                      ['id' => 'customer', 'name' => 'Clients'],
+                  ]"
+                  option-label="name"
+                  option-value="id"
+                  class="w-full" />
+    </div>
+</div>
+
+    {{-- Tableau des utilisateurs --}}
     <x-table :headers="$headers" :rows="$users" :sort-by="$sortBy" with-pagination>
-        {{-- Colonne Avatar --}}
         @scope('cell_avatar', $user)
-            <x-avatar :image="$user->avatar" class="!w-16 !h-16" />
+            <x-avatar :image="$user->avatar" class="!w-10 !h-10 rounded-full" />
         @endscope
 
-        {{-- Colonne Nom Complet --}}
-        @scope('cell_full_name', $user)
-            <div>{{ $user->full_name }}</div>
-        @endscope
-
-        {{-- Colonne Email --}}
-        @scope('cell_email', $user)
-            <div>{{ $user->email }}</div>
-        @endscope
-
-        {{-- Colonne Rôle --}}
         @scope('cell_role', $user)
-            @php
-                $roleTranslations = [
-                    'admin' => 'Administrateur',
-                    'manager' => 'Responsable',
-                    'delivery_person' => 'Livreur',
-                    'customer' => 'Client',
-                ];
-            @endphp
-            <div>{{ $roleTranslations[$user->role] ?? ucfirst($user->role) }}</div>
+            <x-badge :value="$user->role_text"
+                    class="border {{ $user->role_color }} font-medium px-2 py-1 text-sm rounded-full" />
         @endscope
 
-        {{-- Colonne Actions --}}
+
+        @scope('cell_status', $user)
+            <x-badge :value="$user->status_text"
+                     class="border {{ $user->status_color }} font-medium px-2 py-1 text-sm rounded-full" />
+        @endscope
+
         @scope('cell_actions', $user)
             <div class="flex gap-2">
-                <x-button wire:click="confirmDelete({{ $user->id }})" class="btn-error" icon="o-trash" />
-                <x-button link="{{ route('admin.users.edit', ['user' => $user->id]) }}" class="btn-primary" icon="o-pencil" />
+                {{-- Bannir / Débannir --}}
+                @if ($user->role !== 'admin')
+                    <x-button icon="o-x-mark"
+                              class="{{ $user->status === 'active' ? 'btn-error' : 'btn-success' }}"
+                              wire:click="confirmBan({{ $user->id }}, '{{ $user->status }}')"
+                              :label="$user->status === 'active' ? 'Bannir' : 'Débannir'"
+                              spinner />
+                @endif
+
+                {{-- Supprimer --}}
+                @if ($user->role !== 'admin' && !$user->hasOrders)
+                    <x-button icon="o-trash"
+                              class="btn-error"
+                              wire:click="confirmDelete({{ $user->id }})"
+                              spinner />
+                @endif
+
+                {{-- Modifier --}}
+                <x-button icon="o-pencil"
+                          link="{{ route('admin.users.edit', $user) }}"
+                          class="btn-primary" />
             </div>
         @endscope
     </x-table>
 
-    {{-- Modal de Confirmation de Suppression --}}
-    <x-modal wire:model="showDeleteModal" title="Confirmer la Suppression">
-        <p>Êtes-vous sûr(e) de vouloir supprimer <strong>{{ $deletingUserName }}</strong> ? Cette action est irréversible.</p>
+    {{-- Modal Bannissement --}}
+    <x-modal wire:model="showBanModal"
+             title="{{ $currentStatus === 'active' ? 'Confirmer le bannissement' : 'Confirmer le débannissement' }}"
+             separator>
+        <p>Êtes-vous sûr de vouloir
+            {{ $currentStatus === 'active' ? 'bannir' : 'débannir' }}
+            <strong>{{ $banningUserName }}</strong> ?
+        </p>
+
         <x-slot:actions>
-            <x-button label="Annuler" wire:click="cancelDelete" />
-            <x-button label="Supprimer" class="btn-error" wire:click="deleteUser" />
+            <x-button label="Annuler" @click="$wire.cancelBan()" />
+            <x-button :label="$currentStatus === 'active' ? 'Bannir' : 'Débannir'"
+                      class="btn-error"
+                      wire:click="performBan"
+                      spinner />
+        </x-slot:actions>
+    </x-modal>
+
+    {{-- Modal Suppression --}}
+    <x-modal wire:model="showDeleteModal"
+             title="Confirmer la suppression"
+             separator>
+        <p>Êtes-vous certain de vouloir supprimer définitivement
+            <strong>{{ $deletingUserName }}</strong> ?
+        </p>
+        <p class="text-red-500 text-sm mt-2">Cette action est irréversible !</p>
+
+        <x-slot:actions>
+            <x-button label="Annuler" @click="$wire.cancelDelete()" />
+            <x-button label="Supprimer"
+                      class="btn-error"
+                      wire:click="deleteUser"
+                      spinner />
         </x-slot:actions>
     </x-modal>
 </x-card>

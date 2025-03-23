@@ -12,17 +12,6 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="font-sans antialiased">
-        @if(session('success'))
-        <div class="alert alert-success">
-            {{ session('success') }}
-        </div>
-        @endif
-
-        @if(session('error'))
-        <div class="alert alert-error">
-            {{ session('error') }}
-        </div>
-        @endif
     {{-- Navbar --}}
     <x-nav sticky full-width class="sticky top-0 z-50">
     <x-slot:brand class="z-50">
@@ -122,8 +111,8 @@
                     @case('customer')
                         <x-menu activate-by-route>
                             <x-menu-item title="Tableau de Bord" icon="o-home" link="/customer/dashboard" />
-                            <x-menu-item title="Profile" icon="o-user" link="/customer/profile" />
                             <x-menu-item title="Orders" icon="o-shopping-cart" link="/customer/orders" />
+                            <x-menu-item title="Profile" icon="o-user" link="/customer/profile" />
                             <x-menu-item title="Support" icon="o-information-circle" link="/customer/support" />
                         </x-menu>
                         @break
@@ -138,6 +127,7 @@
                                 <x-menu-item title="Commandes" icon="s-shopping-cart" link="/manager/orders" />
                                 <x-menu-item title="Livraisons" icon="o-truck" link="/manager/deliveries" />
                             </x-menu-sub>
+                            <x-menu-item title="Demandes de contact" icon="o-information-circle" link="/manager/contactinquiries" />
                             <x-menu-item title="Paramètres" icon="o-cog-6-tooth" link="/manager/settings" />
                         </x-menu>
 
@@ -154,13 +144,27 @@
 
                     @default
                         <x-menu activate-by-route>
-                            <x-menu-item title="Home" icon="o-home" link="/" />
+                      
+                        <x-menu-item 
+                            title="Home" 
+                            icon="o-home" 
+                            x-data 
+                            @click="location.reload()" 
+                        />
+                    
                         </x-menu>
                 @endswitch
             @else
                 {{-- Default Sidebar for Guests --}}
                 <x-menu activate-by-route>
-                    <x-menu-item title="Home" icon="o-home" link="/" />
+                                
+                        <x-menu-item 
+                            title="Home" 
+                            icon="o-home" 
+                            x-data 
+                            @click="window.location.href = '/';" 
+                        />
+                                    
                     <x-menu-item title="Menus & Produits" icon="o-swatch" link="{{ route('menus-products') }}" />
                     <x-menu-item title="À propos" icon="o-information-circle" link="/about" />
                     <x-menu-item title="Contact" icon="o-envelope" link="/contact" />

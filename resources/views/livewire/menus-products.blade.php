@@ -7,6 +7,7 @@
                 wire:model.live="searchTerm" 
                 placeholder="Rechercher menus et produits..." 
                 class="flex-1 w-full"
+                autocomplete="off"
             />
         </div>
 
@@ -40,43 +41,43 @@
                             {{ $menu->name }}
                         </h3>
                         
-                        <!-- Updated dynamic star rating for Menus -->
+                        <!-- Dynamic star rating for Menus -->
                         <div class="flex items-center gap-2">
-                            <div class="rating rating-md">
+                            <div class="flex items-center">
                                 @php
                                     $rating = $menu->reviews_avg_rating ?? 0;
-                                    $fullStars = floor($rating);
-                                    $hasHalfStar = ($rating - $fullStars) >= 0.5;
-                                    $emptyStars = 5 - $fullStars - ($hasHalfStar ? 1 : 0);
                                 @endphp
-
-                                <!-- Full Stars -->
-                                @for ($i = 0; $i < $fullStars; $i++)
-                                    <input type="radio" name="menu-rating-{{ $menu->id }}" 
-                                           class="mask mask-star-2 bg-primary" checked disabled />
-                                @endfor
-
-                                <!-- Half Star -->
-                                @if ($hasHalfStar)
-                                    <input type="radio" name="menu-rating-{{ $menu->id }}" 
-                                           class="mask mask-star-2 bg-primary mask-half-1" 
-                                           checked disabled />
-                                    <input type="radio" name="menu-rating-{{ $menu->id }}" 
-                                           class="mask mask-star-2 bg-primary mask-half-2" 
-                                           checked disabled />
-                                @endif
-
-                                <!-- Empty Stars -->
-                                @for ($i = 0; $i < $emptyStars; $i++)
-                                    <input type="radio" name="menu-rating-{{ $menu->id }}" 
-                                           class="mask mask-star-2 bg-gray-300" disabled />
+                                @for ($i = 1; $i <= 5; $i++)
+                                    @if($rating >= $i)
+                                        <!-- Full star -->
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-primary" viewBox="0 0 20 20" fill="currentColor">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.973a1 1 0 00.95.69h4.177c.969 0 1.371 1.24.588 1.81l-3.38 2.455a1 1 0 00-.364 1.118l1.286 3.973c.3.921-.755 1.688-1.54 1.118l-3.38-2.455a1 1 0 00-1.175 0l-3.38 2.455c-.784.57-1.838-.197-1.54-1.118l1.286-3.973a1 1 0 00-.364-1.118L2.05 9.4c-.783-.57-.38-1.81.588-1.81h4.177a1 1 0 00.95-.69l1.286-3.973z" />
+                                        </svg>
+                                    @elseif($rating >= $i - 0.5)
+                                        <!-- Half star using overlay -->
+                                        <div class="relative inline-block">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-300" viewBox="0 0 20 20" fill="currentColor">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.973a1 1 0 00.95.69h4.177c.969 0 1.371 1.24.588 1.81l-3.38 2.455a1 1 0 00-.364 1.118l1.286 3.973c.3.921-.755 1.688-1.54 1.118l-3.38-2.455a1 1 0 00-1.175 0l-3.38 2.455c-.784.57-1.838-.197-1.54-1.118l1.286-3.973a1 1 0 00-.364-1.118L2.05 9.4c-.783-.57-.38-1.81.588-1.81h4.177a1 1 0 00.95-.69l1.286-3.973z" />
+                                            </svg>
+                                            <div class="absolute top-0 left-0 overflow-hidden" style="width:50%;">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-primary" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.973a1 1 0 00.95.69h4.177c.969 0 1.371 1.24.588 1.81l-3.38 2.455a1 1 0 00-.364 1.118l1.286 3.973c.3.921-.755 1.688-1.54 1.118l-3.38-2.455a1 1 0 00-1.175 0l-3.38 2.455c-.784.57-1.838-.197-1.54-1.118l1.286-3.973a1 1 0 00-.364-1.118L2.05 9.4c-.783-.57-.38-1.81.588-1.81h4.177a1 1 0 00.95-.69l1.286-3.973z" />
+                                                </svg>
+                                            </div>
+                                        </div>
+                                    @else
+                                        <!-- Empty star -->
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-300" viewBox="0 0 20 20" fill="currentColor">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.973a1 1 0 00.95.69h4.177c.969 0 1.371 1.24.588 1.81l-3.38 2.455a1 1 0 00-.364 1.118l1.286 3.973c.3.921-.755 1.688-1.54 1.118l-3.38-2.455a1 1 0 00-1.175 0l-3.38 2.455c-.784.57-1.838-.197-1.54-1.118l1.286-3.973a1 1 0 00-.364-1.118L2.05 9.4c-.783-.57-.38-1.81.588-1.81h4.177a1 1 0 00.95-.69l1.286-3.973z" />
+                                        </svg>
+                                    @endif
                                 @endfor
                             </div>
                             <span class="text-sm text-gray-600">
                                 ({{ $menu->reviews->count() }} avis)
                             </span>
                         </div>
-                        <!-- End updated rating block -->
+                        <!-- End rating block -->
 
                         <p class="text-gray-600 line-clamp-2">
                             {{ $menu->description }}
@@ -129,43 +130,40 @@
                             {{ $product->name }}
                         </h3>
                         
-                        <!-- Updated dynamic star rating for Products -->
+                        <!-- Dynamic star rating for Products -->
                         <div class="flex items-center gap-2">
-                            <div class="rating rating-md">
+                            <div class="flex items-center">
                                 @php
                                     $rating = $product->reviews_avg_rating ?? 0;
-                                    $fullStars = floor($rating);
-                                    $hasHalfStar = ($rating - $fullStars) >= 0.5;
-                                    $emptyStars = 5 - $fullStars - ($hasHalfStar ? 1 : 0);
                                 @endphp
-
-                                <!-- Full Stars -->
-                                @for ($i = 0; $i < $fullStars; $i++)
-                                    <input type="radio" name="product-rating-{{ $product->id }}" 
-                                           class="mask mask-star-2 bg-primary" checked disabled />
-                                @endfor
-
-                                <!-- Half Star -->
-                                @if ($hasHalfStar)
-                                    <input type="radio" name="product-rating-{{ $product->id }}" 
-                                           class="mask mask-star-2 bg-primary mask-half-1" 
-                                           checked disabled />
-                                    <input type="radio" name="product-rating-{{ $product->id }}" 
-                                           class="mask mask-star-2 bg-primary mask-half-2" 
-                                           checked disabled />
-                                @endif
-
-                                <!-- Empty Stars -->
-                                @for ($i = 0; $i < $emptyStars; $i++)
-                                    <input type="radio" name="product-rating-{{ $product->id }}" 
-                                           class="mask mask-star-2 bg-gray-300" disabled />
+                                @for ($i = 1; $i <= 5; $i++)
+                                    @if($rating >= $i)
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-primary" viewBox="0 0 20 20" fill="currentColor">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.973a1 1 0 00.95.69h4.177c.969 0 1.371 1.24.588 1.81l-3.38 2.455a1 1 0 00-.364 1.118l1.286 3.973c.3.921-.755 1.688-1.54 1.118l-3.38-2.455a1 1 0 00-1.175 0l-3.38 2.455c-.784.57-1.838-.197-1.54-1.118l1.286-3.973a1 1 0 00-.364-1.118L2.05 9.4c-.783-.57-.38-1.81.588-1.81h4.177a1 1 0 00.95-.69l1.286-3.973z" />
+                                        </svg>
+                                    @elseif($rating >= $i - 0.5)
+                                        <div class="relative inline-block">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-300" viewBox="0 0 20 20" fill="currentColor">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.973a1 1 0 00.95.69h4.177c.969 0 1.371 1.24.588 1.81l-3.38 2.455a1 1 0 00-.364 1.118l1.286 3.973c.3.921-.755 1.688-1.54 1.118l-3.38-2.455a1 1 0 00-1.175 0l-3.38 2.455c-.784.57-1.838-.197-1.54-1.118l1.286-3.973a1 1 0 00-.364-1.118L2.05 9.4c-.783-.57-.38-1.81.588-1.81h4.177a1 1 0 00.95-.69l1.286-3.973z" />
+                                            </svg>
+                                            <div class="absolute top-0 left-0 overflow-hidden" style="width:50%;">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-primary" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.973a1 1 0 00.95.69h4.177c.969 0 1.371 1.24.588 1.81l-3.38 2.455a1 1 0 00-.364 1.118l1.286 3.973c.3.921-.755 1.688-1.54 1.118l-3.38-2.455a1 1 0 00-1.175 0l-3.38 2.455c-.784.57-1.838-.197-1.54-1.118l1.286-3.973a1 1 0 00-.364-1.118L2.05 9.4c-.783-.57-.38-1.81.588-1.81h4.177a1 1 0 00.95-.69l1.286-3.973z" />
+                                                </svg>
+                                            </div>
+                                        </div>
+                                    @else
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-300" viewBox="0 0 20 20" fill="currentColor">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.973a1 1 0 00.95.69h4.177c.969 0 1.371 1.24.588 1.81l-3.38 2.455a1 1 0 00-.364 1.118l1.286 3.973c.3.921-.755 1.688-1.54 1.118l-3.38-2.455a1 1 0 00-1.175 0l-3.38 2.455c-.784.57-1.838-.197-1.54-1.118l1.286-3.973a1 1 0 00-.364-1.118L2.05 9.4c-.783-.57-.38-1.81.588-1.81h4.177a1 1 0 00.95-.69l1.286-3.973z" />
+                                        </svg>
+                                    @endif
                                 @endfor
                             </div>
                             <span class="text-sm text-gray-600">
                                 ({{ $product->reviews->count() }} avis)
                             </span>
                         </div>
-                        <!-- End updated rating block -->
+                        <!-- End rating block -->
 
                         <p class="text-sm text-gray-600">
                             {{ $product->category->name }}
@@ -242,104 +240,51 @@
                 <div>
                     <h3 class="font-bold">Avis</h3>
                     <div class="flex items-center gap-2 mb-4">
-                        <div class="rating rating-md">
+                        <div class="flex items-center">
                             @php
                                 $rating = $selectedMenu->reviews_avg_rating ?? 0;
-                                $fullStars = floor($rating);
-                                $hasHalfStar = ($rating - $fullStars) >= 0.5;
-                                $emptyStars = 5 - $fullStars - ($hasHalfStar ? 1 : 0);
                             @endphp
-
-                            <!-- Full Stars -->
-                            @for ($i = 0; $i < $fullStars; $i++)
-                                <input type="radio" name="drawer-menu-rating-{{ $selectedMenu->id }}" 
-                                       class="mask mask-star-2 bg-primary" checked disabled />
-                            @endfor
-
-                            <!-- Half Star -->
-                            @if ($hasHalfStar)
-                                <input type="radio" name="drawer-menu-rating-{{ $selectedMenu->id }}" 
-                                       class="mask mask-star-2 bg-primary mask-half-1" 
-                                       checked disabled />
-                                <input type="radio" name="drawer-menu-rating-{{ $selectedMenu->id }}" 
-                                       class="mask mask-star-2 bg-primary mask-half-2" 
-                                       checked disabled />
-                            @endif
-
-                            <!-- Empty Stars -->
-                            @for ($i = 0; $i < $emptyStars; $i++)
-                                <input type="radio" name="drawer-menu-rating-{{ $selectedMenu->id }}" 
-                                       class="mask mask-star-2 bg-gray-300" disabled />
+                            @for ($i = 1; $i <= 5; $i++)
+                                @if($rating >= $i)
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-primary" viewBox="0 0 20 20" fill="currentColor">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.973a1 1 0 00.95.69h4.177c.969 0 1.371 1.24.588 1.81l-3.38 2.455a1 1 0 00-.364 1.118l1.286 3.973c.3.921-.755 1.688-1.54 1.118l-3.38-2.455a1 1 0 00-1.175 0l-3.38 2.455c-.784.57-1.838-.197-1.54-1.118l1.286-3.973a1 1 0 00-.364-1.118L2.05 9.4c-.783-.57-.38-1.81.588-1.81h4.177a1 1 0 00.95-.69l1.286-3.973z" />
+                                    </svg>
+                                @elseif($rating >= $i - 0.5)
+                                    <div class="relative inline-block">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-300" viewBox="0 0 20 20" fill="currentColor">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.973a1 1 0 00.95.69h4.177c.969 0 1.371 1.24.588 1.81l-3.38 2.455a1 1 0 00-.364 1.118l1.286 3.973c.3.921-.755 1.688-1.54 1.118l-3.38-2.455a1 1 0 00-1.175 0l-3.38 2.455c-.784.57-1.838-.197-1.54-1.118l1.286-3.973a1 1 0 00-.364-1.118L2.05 9.4c-.783-.57-.38-1.81.588-1.81h4.177a1 1 0 00.95-.69l1.286-3.973z" />
+                                        </svg>
+                                        <div class="absolute top-0 left-0 overflow-hidden" style="width:50%;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-primary" viewBox="0 0 20 20" fill="currentColor">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.973a1 1 0 00.95.69h4.177c.969 0 1.371 1.24.588 1.81l-3.38 2.455a1 1 0 00-.364 1.118l1.286 3.973c.3.921-.755 1.688-1.54 1.118l-3.38-2.455a1 1 0 00-1.175 0l-3.38 2.455c-.784.57-1.838-.197-1.54-1.118l1.286-3.973a1 1 0 00-.364-1.118L2.05 9.4c-.783-.57-.38-1.81.588-1.81h4.177a1 1 0 00.95-.69l1.286-3.973z" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                @else
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-300" viewBox="0 0 20 20" fill="currentColor">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.973a1 1 0 00.95.69h4.177c.969 0 1.371 1.24.588 1.81l-3.38 2.455a1 1 0 00-.364 1.118l1.286 3.973c.3.921-.755 1.688-1.54 1.118l-3.38-2.455a1 1 0 00-1.175 0l-3.38 2.455c-.784.57-1.838-.197-1.54-1.118l1.286-3.973a1 1 0 00-.364-1.118L2.05 9.4c-.783-.57-.38-1.81.588-1.81h4.177a1 1 0 00.95-.69l1.286-3.973z" />
+                                    </svg>
+                                @endif
                             @endfor
                         </div>
-                        <span class="text-gray-600">
+                        <span class="text-sm text-gray-600">
                             ({{ $selectedMenu->reviews->count() }} avis)
                         </span>
                     </div>
-
-                    <div class="space-y-4">
-                        @foreach($selectedMenu->reviews->take(3) as $review)
-                            <div class="bg-base-100 p-4 rounded-lg">
-                                <div class="flex items-center gap-2 mb-2">
-                                    <div class="font-bold">
-                                        {{ $review->user->name }}
-                                    </div>
-                                    <div class="rating rating-xs">
-                                        @php
-                                            $drawerRating = $review->rating;
-                                            $drawerFull = floor($drawerRating);
-                                            $drawerEmpty = 5 - $drawerFull;
-                                        @endphp
-
-                                        @for($j = 0; $j < $drawerFull; $j++)
-                                            <input type="radio" class="mask mask-star-2 bg-primary" 
-                                                   checked disabled />
-                                        @endfor
-                                        @for($j = 0; $j < $drawerEmpty; $j++)
-                                            <input type="radio" class="mask mask-star-2 bg-gray-300" 
-                                                   disabled />
-                                        @endfor
-                                    </div>
-                                </div>
-                                <p class="text-sm">{{ $review->comment }}</p>
-                            </div>
-                        @endforeach
-                    </div>
+                    <!-- Removed review comment display -->
                 </div>
 
-                <div>
-                    <h3 class="font-bold">Allergènes du menu</h3>
-                    <div class="flex flex-wrap gap-2 mt-2">
-                        @php
-                            $menuAllergens = $selectedMenu->products
-                                ->pluck('allergens')
-                                ->flatten()
-                                ->unique()
-                                ->filter();
-                        @endphp
-                        
-                        @forelse($menuAllergens as $allergen)
-                            <x-badge :value="$allergen" class="badge-outline badge-sm" />
-                        @empty
-                            <span class="text-sm text-gray-500">
-                                Aucun allergène déclaré dans ce menu
-                            </span>
-                        @endforelse
-                    </div>
-                </div>
-            </div>
-
-            <x-slot:actions>
-                <x-button label="Fermer" @click="$wire.showMenuDrawer = false" class="btn-ghost" />
-                <x-button 
-                    label="Ajouter au panier" 
-                    icon="o-shopping-cart" 
-                    wire:click="addToCart('Menu', {{ $selectedMenu->id }})" 
-                    class="btn-primary" 
-                />
-            </x-slot:actions>
-        @endif
-    </x-drawer>
+                <x-slot:actions>
+                    <x-button label="Fermer" @click="$wire.showMenuDrawer = false" class="btn-ghost" />
+                    <x-button 
+                        label="Ajouter au panier" 
+                        icon="o-shopping-cart" 
+                        wire:click="addToCart('Menu', {{ $selectedMenu->id }})" 
+                        class="btn-primary" 
+                    />
+                </x-slot:actions>
+            @endif
+        </x-drawer>
 
     <!-- Product Details Drawer -->
     <x-drawer 
@@ -384,81 +329,49 @@
                 <div>
                     <h3 class="font-bold">Avis</h3>
                     <div class="flex items-center gap-2 mb-4">
-                        <div class="rating rating-md">
+                        <div class="flex items-center">
                             @php
                                 $rating = $selectedProduct->reviews_avg_rating ?? 0;
-                                $fullStars = floor($rating);
-                                $hasHalfStar = ($rating - $fullStars) >= 0.5;
-                                $emptyStars = 5 - $fullStars - ($hasHalfStar ? 1 : 0);
                             @endphp
-
-                            <!-- Full Stars -->
-                            @for ($i = 0; $i < $fullStars; $i++)
-                                <input type="radio" name="drawer-product-rating-{{ $selectedProduct->id }}" 
-                                       class="mask mask-star-2 bg-primary" checked disabled />
-                            @endfor
-
-                            <!-- Half Star -->
-                            @if ($hasHalfStar)
-                                <input type="radio" name="drawer-product-rating-{{ $selectedProduct->id }}" 
-                                       class="mask mask-star-2 bg-primary mask-half-1" 
-                                       checked disabled />
-                                <input type="radio" name="drawer-product-rating-{{ $selectedProduct->id }}" 
-                                       class="mask mask-star-2 bg-primary mask-half-2" 
-                                       checked disabled />
-                            @endif
-
-                            <!-- Empty Stars -->
-                            @for ($i = 0; $i < $emptyStars; $i++)
-                                <input type="radio" name="drawer-product-rating-{{ $selectedProduct->id }}" 
-                                       class="mask mask-star-2 bg-gray-300" disabled />
+                            @for ($i = 1; $i <= 5; $i++)
+                                @if($rating >= $i)
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-primary" viewBox="0 0 20 20" fill="currentColor">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.973a1 1 0 00.95.69h4.177c.969 0 1.371 1.24.588 1.81l-3.38 2.455a1 1 0 00-.364 1.118l1.286 3.973c.3.921-.755 1.688-1.54 1.118l-3.38-2.455a1 1 0 00-1.175 0l-3.38 2.455c-.784.57-1.838-.197-1.54-1.118l1.286-3.973a1 1 0 00-.364-1.118L2.05 9.4c-.783-.57-.38-1.81.588-1.81h4.177a1 1 0 00.95-.69l1.286-3.973z" />
+                                    </svg>
+                                @elseif($rating >= $i - 0.5)
+                                    <div class="relative inline-block">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-300" viewBox="0 0 20 20" fill="currentColor">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.973a1 1 0 00.95.69h4.177c.969 0 1.371 1.24.588 1.81l-3.38 2.455a1 1 0 00-.364 1.118l1.286 3.973c.3.921-.755 1.688-1.54 1.118l-3.38-2.455a1 1 0 00-1.175 0l-3.38 2.455c-.784.57-1.838-.197-1.54-1.118l1.286-3.973a1 1 0 00-.364-1.118L2.05 9.4c-.783-.57-.38-1.81.588-1.81h4.177a1 1 0 00.95-.69l1.286-3.973z" />
+                                        </svg>
+                                        <div class="absolute top-0 left-0 overflow-hidden" style="width:50%;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-primary" viewBox="0 0 20 20" fill="currentColor">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.973a1 1 0 00.95.69h4.177c.969 0 1.371 1.24.588 1.81l-3.38 2.455a1 1 0 00-.364 1.118l1.286 3.973c.3.921-.755 1.688-1.54 1.118l-3.38-2.455a1 1 0 00-1.175 0l-3.38 2.455c-.784.57-1.838-.197-1.54-1.118l1.286-3.973a1 1 0 00-.364-1.118L2.05 9.4c-.783-.57-.38-1.81.588-1.81h4.177a1 1 0 00.95-.69l1.286-3.973z" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                @else
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-300" viewBox="0 0 20 20" fill="currentColor">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.973a1 1 0 00.95.69h4.177c.969 0 1.371 1.24.588 1.81l-3.38 2.455a1 1 0 00-.364 1.118l1.286 3.973c.3.921-.755 1.688-1.54 1.118l-3.38-2.455a1 1 0 00-1.175 0l-3.38 2.455c-.784.57-1.838-.197-1.54-1.118l1.286-3.973a1 1 0 00-.364-1.118L2.05 9.4c-.783-.57-.38-1.81.588-1.81h4.177a1 1 0 00.95-.69l1.286-3.973z" />
+                                    </svg>
+                                @endif
                             @endfor
                         </div>
-                        <span class="text-gray-600">
+                        <span class="text-sm text-gray-600">
                             ({{ $selectedProduct->reviews->count() }} avis)
                         </span>
                     </div>
-
-                    <div class="space-y-4">
-                        @foreach($selectedProduct->reviews->take(3) as $review)
-                            <div class="bg-base-100 p-4 rounded-lg">
-                                <div class="flex items-center gap-2 mb-2">
-                                    <div class="font-bold">
-                                        {{ $review->user->name }}
-                                    </div>
-                                    <div class="rating rating-xs">
-                                        @php
-                                            $drawerRating = $review->rating;
-                                            $drawerFull = floor($drawerRating);
-                                            $drawerEmpty = 5 - $drawerFull;
-                                        @endphp
-
-                                        @for($j = 0; $j < $drawerFull; $j++)
-                                            <input type="radio" class="mask mask-star-2 bg-primary" 
-                                                   checked disabled />
-                                        @endfor
-                                        @for($j = 0; $j < $drawerEmpty; $j++)
-                                            <input type="radio" class="mask mask-star-2 bg-gray-300" 
-                                                   disabled />
-                                        @endfor
-                                    </div>
-                                </div>
-                                <p class="text-sm">{{ $review->comment }}</p>
-                            </div>
-                        @endforeach
-                    </div>
+                    
                 </div>
-            </div>
 
-            <x-slot:actions>
-                <x-button label="Fermer" @click="$wire.showProductDrawer = false" class="btn-ghost" />
-                <x-button 
-                    label="Ajouter au panier" 
-                    icon="o-shopping-cart" 
-                    wire:click="addToCart('Product', {{ $selectedProduct->id }})" 
-                    class="btn-secondary" 
-                />
-            </x-slot:actions>
-        @endif
-    </x-drawer>
+                <x-slot:actions>
+                    <x-button label="Fermer" @click="$wire.showProductDrawer = false" class="btn-ghost" />
+                    <x-button 
+                        label="Ajouter au panier" 
+                        icon="o-shopping-cart" 
+                        wire:click="addToCart('Product', {{ $selectedProduct->id }})" 
+                        class="btn-secondary" 
+                    />
+                </x-slot:actions>
+            @endif
+        </x-drawer>
 </div>

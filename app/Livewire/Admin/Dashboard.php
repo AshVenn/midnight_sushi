@@ -27,7 +27,6 @@ class Dashboard extends Component
     public $bestSellingProductsHeaders = [];
     public $bestSellingProductsRows = [];
 
-    // NEW: add these two for best-selling menus
     public $bestSellingMenusHeaders = [];
     public $bestSellingMenusRows = [];
 
@@ -36,6 +35,8 @@ class Dashboard extends Component
 
     public $productCategoryChart = [];
     public $grossRevenueChart = [];
+    
+    public $showSettings = false;
 
     public function mount()
     {
@@ -92,25 +93,16 @@ class Dashboard extends Component
                 ['key' => 'price', 'label' => 'Prix'],
                 ['key' => 'sales', 'label' => 'Ventes'], // must match 'sales' in Blade
             ];
-            $this->bestSellingProductsRows = Product::withCount([
-                'orderItems as total_sales' => function ($query) {
-                    $query->whereHas('order', function ($q) {
-                        $q->whereNotIn('status', ['cancelled']);
-                    });
-                }
-            ])
-            ->orderByDesc('total_sales')
-            ->limit(5)
-            ->get()
-            ->map(function ($product) {
-                return [
-                    'name'  => $product->name ?? 'N/A',
-                    'price' => $product->price ?? 0,
-                    // IMPORTANT: pass as 'sales' to match the Blade
-                    'sales' => $product->total_sales ?? 0,
-                ];
-            })
-            ->toArray();
+            
+            $productsRaw = \App\Models\Product::topSellingProducts(5);
+            $this->bestSellingProductsRows = collect($productsRaw)
+                ->map(function ($product) {
+                    return [
+                        'name'  => $product->name,
+                        'price' => $product->price,
+                        'sales' => $product->total_sales,
+                    ];
+                })->toArray();
 
             // NEW: Menus les plus vendus
             $this->bestSellingMenusHeaders = [
@@ -118,27 +110,19 @@ class Dashboard extends Component
                 ['key' => 'price', 'label' => 'Prix'],
                 ['key' => 'sales', 'label' => 'Ventes'],
             ];
-            $this->bestSellingMenusRows = Menu::withCount([
-                'orderItems as total_sales' => function ($query) {
-                    $query->whereHas('order', function ($q) {
-                        $q->whereNotIn('status', ['cancelled']);
-                    });
-                }
-            ])
-            ->orderByDesc('total_sales')
-            ->limit(5)
-            ->get()
-            ->map(function ($menu) {
-                return [
-                    'name'  => $menu->name ?? 'N/A',
-                    'price' => $menu->price ?? 0,
-                    'sales' => $menu->total_sales ?? 0,
-                ];
-            })
-            ->toArray();
+            
+            $menusRaw = \App\Models\Menu::topSellingMenus(5);
+            $this->bestSellingMenusRows = collect($menusRaw)
+                ->map(function ($menu) {
+                    return [
+                        'name'  => $menu->name,
+                        'price' => $menu->price,
+                        'sales' => $menu->total_sales,
+                    ];
+                })->toArray();
+            
 
-            // Commandes récentes, etc. (unchanged code)...
-
+            
             // Catégories de produits (chart)
             $categories = Category::withCount('products')->get();
             $this->productCategoryChart = [
@@ -226,6 +210,7 @@ class Dashboard extends Component
             \Log::error('Dashboard mount error: ' . $e->getMessage());
         }
     }
+    
 
     public function render()
     {

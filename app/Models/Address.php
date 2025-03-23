@@ -30,6 +30,11 @@ class Address extends Model
 
     public function getFullAddressAttribute(): string
     {
-        return "{$this->recipient_name}, {$this->street_address}, {$this->city}, {$this->postal_code}, {$this->country}";
+        return implode("\n", [
+            $this->recipient_name,
+            $this->street_address,
+            "$this->postal_code $this->city",
+            $this->country
+        ]);
     }
 }

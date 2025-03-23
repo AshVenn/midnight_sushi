@@ -51,7 +51,7 @@ class Cart extends Component
         $this->totalItems = 0;
         $this->totalPrice = 0;
         $this->success('Panier vidé.');
-        $this->dispatch('cartUpdated'); // Dispatch de l'événement pour notifier le panier
+        $this->dispatch('cartUpdated'); 
     }
 
     public function proceedToCheckout()

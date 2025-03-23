@@ -40,7 +40,6 @@ class ReviewFactory extends Factory
             'reviewable_id'    => $reviewable->id,
             'reviewable_type'  => $reviewable instanceof Product ? 'Product' : 'Menu',
             'rating'           => $this->faker->numberBetween(1, 5),
-            'comment'          => $this->faker->sentence(),
-        ];
+                ];
     }
 }

@@ -41,7 +41,6 @@ class ReviewsSeeder extends Seeder
                 'reviewable_id'    => $reviewable->id,
                 'reviewable_type'  => $reviewable instanceof Product ? 'Product' : 'Menu',
                 'rating'           => rand(1, 5),
-                'comment'          => fake()->sentence(),
             ]);
         }
     }

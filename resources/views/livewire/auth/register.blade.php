@@ -2,9 +2,9 @@
     <h2 class="text-xl font-bold text-center mb-4">Créez Votre Compte</h2>
 
     <x-form wire:submit.prevent="register">
-        <x-input label="Prénom" wire:model="first_name" required />
-        <x-input label="Nom" wire:model="last_name" required />
-        <x-input label="Email" type="email" wire:model="email" required />
+        <x-input label="Prénom" wire:model="first_name" required autocomplete="off"/>
+        <x-input label="Nom" wire:model="last_name" required autocomplete="off"/>
+        <x-input label="Email" type="email" wire:model="email" required autocomplete="off"/>
         <x-input label="Mot de Passe" type="password" wire:model="password" required />
 
         <div style="display: none;">

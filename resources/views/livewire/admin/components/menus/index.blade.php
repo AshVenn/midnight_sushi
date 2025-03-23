@@ -19,6 +19,7 @@
                 icon="o-magnifying-glass" 
                 autocomplete="off" 
                 wire:enter="search"
+                autocomplete="off"
             />
         </div>
     </div>

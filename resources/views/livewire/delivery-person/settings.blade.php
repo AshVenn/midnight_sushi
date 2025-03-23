@@ -30,21 +30,6 @@
                 />
             </div>
 
-            <!-- Row 3: Password & Confirm Password -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <x-input
-                    wire:model="password"
-                    label="Mot de Passe"
-                    type="password"
-                    placeholder="Entrez un nouveau mot de passe (facultatif)"
-                />
-                <x-input
-                    wire:model="confirm_password"
-                    label="Confirmer le Mot de Passe"
-                    type="password"
-                    placeholder="Confirmez votre mot de passe"
-                />
-            </div>
 
             <!-- Avatar Upload + Preview -->
             <div class="space-y-4">

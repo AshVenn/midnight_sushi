@@ -19,7 +19,7 @@ class ContactInquiry extends Model
 
         return match($this->status){
             'open'=>'Ouverte',
-            'closed'=>'Résolue',
+            'resolved'=>'Résolue',
             default=> 'inconnu',
         };
     }
@@ -28,7 +28,7 @@ class ContactInquiry extends Model
             return match($this->status) {
                
                 'open'=>'badge-error',
-                'closed'=>'badge-success',
+                'resolved'=>'badge-success',
                 default => 'badge-neutral',
             };
         }

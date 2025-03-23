@@ -5,6 +5,7 @@ namespace App\Livewire;
 use Livewire\Component;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Address;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
@@ -18,18 +19,40 @@ class Checkout extends Component
     use Toast;
 
     public $phone_number;
-    public $address_text;
+    public $addresses;
+    public $address_type = 'custom';
+    public $selected_address = null;
+    public $address_text = '';
     public $notes;
 
     protected $rules = [
-        'phone_number' => 'required|string|max:15',
-        'address_text' => 'required|string|max:255',
-        'notes'        => 'nullable|string|max:500',
+        'selected_address' => 'required_if:address_type,saved|exists:addresses,id',
+        'phone_number' => [
+            'required',
+            'string',
+            'regex:/^(\+41|0)(\d{2} ?\d{3} ?\d{2} ?\d{2}|\d{9})$/'
+        ],
+        'address_text' => 'required_if:address_type,custom|string|max:500',
+        'notes' => 'nullable|string|max:500',
+    ];
+    
+    protected $messages = [
+        'selected_address.required_if' => 'Veuillez sélectionner une adresse enregistrée.',
+        'address_text.required_if' => 'Veuillez entrer une adresse de livraison.',
+        'phone_number.required' => 'Le numéro de téléphone est obligatoire.',
+        'phone_number.regex' => 'Format invalide. Ex: +41 79 123 45 67 ou 079 123 45 67',
     ];
 
     public function placeOrder()
     {
+        $this->phone_number = preg_replace('/\s+/', '', $this->phone_number);
         $this->validate();
+
+        if($this->address_type === 'saved') {
+            $address = Address::find($this->selected_address);
+            $this->address_text = $address->full_address;
+        }
+
 
         // Retrieve the cart from the session
         $cart = Session::get('cart', []);
@@ -55,7 +78,7 @@ class Checkout extends Component
                 'order_number'  => Order::generateOrderNumber(),
                 'customer_id'   => Auth::id(),
                 'total_price'   => $total_price,
-                'status'        => 'pending',   // or 'preparing', your choice
+                'status'        => 'pending',  
                 'payment_status'=> 'unpaid',
                 'phone_number'  => $this->phone_number,
                 'address_text'  => $this->address_text,
@@ -87,9 +110,9 @@ class Checkout extends Component
                 foreach ($items as $item) {
                     $lineItems[] = [
                         'price_data' => [
-                            'currency'     => 'chf',  // or your currency
+                            'currency'     => 'chf',  
                             'product_data' => [
-                                'name' => $item['name'], // or "T-Shirt" etc.
+                                'name' => $item['name'], 
                             ],
                             // Stripe amounts are in cents
                             'unit_amount' => (int) ($item['price'] * 100),
@@ -123,6 +146,30 @@ class Checkout extends Component
             return;
         }
     }
+    public function updateAddressText()
+        {
+            if ($this->selected_address) {
+                $address = Address::find($this->selected_address);
+                $this->address_text = $address->full_address;
+            }else{
+                $this->address_type="custom";
+            }
+        }
+
+    public function mount()
+    {
+        $this->addresses = Auth::check() 
+            ? Auth::user()->addresses()->get()
+            : collect();
+    
+        // Pre-select first address if available
+        if ($this->addresses->isNotEmpty()) {
+            $this->address_type = 'saved';
+            $this->selected_address = $this->addresses->first()->id;
+            $this->address_text = $this->addresses->first()->full_address;
+        }
+    }
+
 
     public function render()
     {

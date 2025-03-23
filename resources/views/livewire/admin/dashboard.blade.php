@@ -1,5 +1,13 @@
 <div>
     <x-card title="Tableau de Bord Administrateur" subtitle="Vue d'ensemble des activités de l'administrateur" shadow separator>
+        <x-slot:menu>
+            <x-button 
+                icon="o-cog-6-tooth" 
+                label="Paramètres" 
+                @click="$wire.showSettings = true" 
+                class="btn-ghost" 
+            />
+        </x-slot:menu>
         {{-- Statistiques Principales --}}
         <div class="flex flex-wrap justify-between gap-4 mb-6">
             <x-stat title="Revenu Brut" value="CHF{{ number_format($totalRevenue ?? 0, 2) }}" icon="s-currency-euro" class="flex-1 min-w-[200px] drop-shadow-lg" />
@@ -86,4 +94,14 @@
             </div>
         </div>
     </x-card>
+    {{-- Drawer des paramètres --}}
+    <x-drawer 
+        wire:model="showSettings" 
+        title="Paramètres du site" 
+        class="lg:w-1/3"
+        separator
+        with-close-button
+    >
+        <livewire:admin.settings />
+    </x-drawer>
 </div>
