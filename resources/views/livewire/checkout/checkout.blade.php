@@ -1,4 +1,3 @@
-<!-- resources/views/livewire/checkout.blade.php -->
 <div class="grid lg:grid-cols-8 gap-10">
     <!-- IMAGE -->
     <div class="lg:col-span-2 flex items-center justify-center">
@@ -8,18 +7,20 @@
     @php
         $cart = Session::get('cart', []);
         $totalItems = 0;
-        $totalPrice = 0;
+        $subTotal = 0;
 
         foreach ($cart as $type => $items) {
             foreach ($items as $item) {
                 $totalItems += $item['quantity'];
-                $totalPrice += ($item['price'] * $item['quantity']);
+                $subTotal += ($item['price'] * $item['quantity']);
             }
         }
+        $deliveryFee = $this->deliveryFee;
+        $finalTotal = $subTotal + $deliveryFee;
     @endphp
 
     @if($totalItems > 0)
-        <!-- LISTE DES ITEMS DU PANIER -->
+        <!-- CART ITEMS -->
         <div class="lg:col-span-3">
             <x-card title="Votre Panier" separator>
                 @foreach($cart as $type => $items)
@@ -40,11 +41,19 @@
 
                 <hr class="my-5" />
 
-                <!-- TOTAL -->
-                <div class="flex justify-between items-center mx-3">
-                    <div>Total</div>
-                    <div class="font-black text-lg">
-                        CHF{{ number_format($totalPrice, 2) }}
+                <!-- PRICE SUMMARY -->
+                <div class="space-y-2 mx-3">
+                    <div class="flex justify-between">
+                        <div>Sous-total</div>
+                        <div>CHF{{ number_format($subTotal, 2) }}</div>
+                    </div>
+                    <div class="flex justify-between">
+                        <div>Frais de livraison</div>
+                        <div>CHF{{ number_format($deliveryFee, 2) }}</div>
+                    </div>
+                    <div class="flex justify-between font-bold text-lg pt-2">
+                        <div>Total</div>
+                        <div>CHF{{ number_format($finalTotal, 2) }}</div>
                     </div>
                 </div>
             </x-card>
@@ -139,7 +148,8 @@
                 </form>
             </x-card>
         </div>
-    @else
+        @else
+        <!-- EMPTY CART MESSAGE -->
         <div class="lg:col-span-6">
             <div class="font-bold text-3xl mb-8">Votre panier est vide</div>
             <x-button 

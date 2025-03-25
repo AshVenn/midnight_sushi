@@ -167,7 +167,6 @@
                                     
                     <x-menu-item title="Menus & Produits" icon="o-swatch" link="{{ route('menus-products') }}" />
                     <x-menu-item title="À propos" icon="o-information-circle" link="/about" />
-                    <x-menu-item title="Contact" icon="o-envelope" link="/contact" />
                     <x-menu-item title="Faq" icon="o-question-mark-circle" link="/faq" />
 
                 </x-menu>

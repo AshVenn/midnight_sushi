@@ -4,6 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+
 class CreateOrdersTable extends Migration
 {
     public function up(): void
@@ -26,7 +27,7 @@ class CreateOrdersTable extends Migration
             $table->string('phone_number');
             $table->text('address_text')->nullable();
             $table->text('notes')->nullable();
-
+            $table->decimal('delivery_fee', 8, 2)->default(0);
             $table->timestamps();
         });
     }

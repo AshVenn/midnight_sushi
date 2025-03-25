@@ -2,45 +2,38 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Review;
 use App\Models\User;
 use App\Models\Product;
 use App\Models\Menu;
+use Illuminate\Database\Seeder;
 
 class ReviewsSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
-    public function run(): void
+    public function run()
     {
-        $users    = User::all();
-        $products = Product::all();
-        $menus    = Menu::all();
+        
+        $customers = User::where('role', 'customer')->get();
+        
+        
+        Product::all()->each(function ($product) use ($customers) {
+            $this->createReviewsForItem($product, $customers);
+        });
 
-        if ($users->isEmpty() || ($products->isEmpty() && $menus->isEmpty())) {
-            $this->command->warn("Skipping review seeding: Not enough users, products, or menus.");
-            return;
-        }
+     
+        Menu::all()->each(function ($menu) use ($customers) {
+            $this->createReviewsForItem($menu, $customers);
+        });
+    }
 
-        for ($i = 0; $i < 30; $i++) {
-            $user = $users->random();
-            $reviewable = rand(0, 1) ? $products->random() : $menus->random();
-
-            // Check if a review already exists for this user and item
-            if (Review::where('user_id', $user->id)
-                ->where('reviewable_id', $reviewable->id)
-                ->where('reviewable_type', $reviewable instanceof Product ? 'Product' : 'Menu')
-                ->exists()) {
-                continue;
-            }
-
+    private function createReviewsForItem($item, $customers)
+    {
+        foreach ($customers as $customer) {
             Review::create([
-                'user_id'          => $user->id,
-                'reviewable_id'    => $reviewable->id,
-                'reviewable_type'  => $reviewable instanceof Product ? 'Product' : 'Menu',
-                'rating'           => rand(1, 5),
+                'user_id'         => $customer->id,
+                'reviewable_id'   => $item->id,
+                'reviewable_type' => $item instanceof Product ? 'Product' : 'Menu',
+                'rating'          => 5,
             ]);
         }
     }

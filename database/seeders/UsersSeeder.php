@@ -2,73 +2,77 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\User;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use Carbon\Carbon;
 
 class UsersSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
-    public function run(): void
+    public function run()
     {
-        $users = [
+        // Create core team
+        $this->createCoreTeam();
+        
+        // Create 2 delivery persons
+        $this->createDeliveryPersons();
+        
+        // Create 2 customers with addresses
+        $this->createCustomers();
+    }
+
+    private function createCoreTeam()
+    {
+        User::factory()->create([
+            'first_name' => 'Admin',
+            'last_name' => 'User',
+            'email' => 'admin@midnight-sushi.ch',
+            'password' => Hash::make('secret'),
+            'role' => 'admin',
+            'avatar' => '/images/midnight_sushi/midnight_sushi_user.jpg'
+        ]);
+
+        User::factory()->create([
+            'first_name' => 'Manager',
+            'last_name' => 'User',
+            'email' => 'manager@midnight-sushi.ch',
+            'password' => Hash::make('secret'),
+            'role' => 'manager',
+            'avatar' => '/images/midnight_sushi/midnight_sushi_user.jpg'
+        ]);
+    }
+
+    private function createDeliveryPersons()
+    {
+        User::factory()->count(2)->state([
+            'role' => 'delivery_person',
+            'avatar' => '/images/midnight_sushi/midnight_sushi_user.jpg',
+            'password' => Hash::make('secret')
+        ])->create();
+    }
+
+    private function createCustomers()
+    {
+        $customers = [
             [
-                'first_name' => 'Admin',
-                'last_name' => 'User',
-                'email' => 'admin1@example.com',
-                'password' => Hash::make('admin1@example.com'),
-                'avatar' => '/images/midnight_sushi/midnight_sushi_user.jpg',
-                'role' => 'admin',
-                'email_verified_at' => now(), // Ensure email is verified
+                'first_name' => 'Jean',
+                'last_name' => 'Dupont',
+                'email' => 'jean.dupont@example.com',
+                'phone_number' => '+41791234567'
             ],
             [
-                'first_name' => 'Manager',
-                'last_name' => 'User',
-                'email' => 'manager1@example.com',
-                'password' => Hash::make('manager1@example.com'),
-                'avatar' => '/images/midnight_sushi/midnight_sushi_user.jpg',
-                'role' => 'manager',
-                'email_verified_at' => now(),
-            ],
-            [
-                'first_name' => 'Customer',
-                'last_name' => 'User',
-                'email' => 'customer1@example.com',
-                'password' => Hash::make('customer1@example.com'),
-                'avatar' => '/images/midnight_sushi/midnight_sushi_user.jpg',
-                'role' => 'customer',
-                'email_verified_at' => now(),
-            ],
-            [
-                'first_name' => 'Delivery',
-                'last_name' => 'Person',
-                'email' => 'delivery1@example.com',
-                'password' => Hash::make('delivery1@example.com'),
-                'avatar' => '/images/midnight_sushi/midnight_sushi_user.jpg',
-                'role' => 'delivery_person',
-                'email_verified_at' => now(),
-            ],
+                'first_name' => 'Marie',
+                'last_name' => 'Curie',
+                'email' => 'marie.curie@example.com',
+                'phone_number' => '+41797654321'
+            ]
         ];
 
-        foreach ($users as $user) {
-            User::updateOrCreate(
-                ['email' => $user['email']],
-                $user
-            );
+        foreach ($customers as $customer) {
+            User::factory()->create(array_merge($customer, [
+                'role' => 'customer',
+                'avatar' => '/images/midnight_sushi/midnight_sushi_user.jpg',
+                'password' => Hash::make('secret')
+            ]));
         }
-
-        // Generate additional users with verified emails
-        User::factory()->count(3)->state([
-            'role' => 'delivery_person',
-            'email_verified_at' => now(),
-        ])->create();
-
-        User::factory()->count(10)->state([
-            'role' => 'customer',
-            'email_verified_at' => now(),
-        ])->create();
     }
 }

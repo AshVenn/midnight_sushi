@@ -56,13 +56,13 @@ class Index extends Component
         $this->resetPage();
     }
 
-    // Filter updaters
+
     public function updatingDeliveryStatusFilter(): void { $this->resetPage(); }
     public function updatingDeliveryPersonFilter(): void { $this->resetPage(); }
     public function updatingStartDate(): void { $this->resetPage(); }
     public function updatingEndDate(): void { $this->resetPage(); }
 
-    // Sorting
+ 
     protected function isSortable(string $column): bool
     {
         $header = collect($this->headers())->firstWhere('key', $column);
@@ -119,19 +119,19 @@ class Index extends Component
                 $addressText = $order->address_text;
 
                 if (!$delivery) {
-                    // Creating a new delivery record for this order
+                 
                     Delivery::create([
                         'order_id'           => $order->id,
                         'delivery_person_id' => $this->selectedDeliveryPerson,
                         'status'             => 'assigned',
                         'assigned_at'        => now(),
                         'address_text'       => $addressText,
-                        // Transfer phone_number and notes from the Order
                         'phone_number'       => $order->phone_number,
                         'notes'              => $order->notes,
+                        'delivery_fee'       => $order->delivery_fee,
                     ]);
                 } else {
-                    // Updating existing delivery
+                   
                     $delivery->update([
                         'delivery_person_id' => $this->selectedDeliveryPerson,
                         'status'             => 'assigned',
@@ -139,6 +139,7 @@ class Index extends Component
                         'address_text'       => $addressText,
                         'phone_number'       => $order->phone_number,
                         'notes'              => $order->notes,
+                        'delivery_fee'       => $order->delivery_fee,
                     ]);
                 }
 
@@ -152,7 +153,7 @@ class Index extends Component
         }
     }
 
-    // Show Reassign Modal
+   
     public function reassignDelivery(int $orderId): void
     {
         $this->orderToAssign = $orderId;
@@ -198,7 +199,7 @@ class Index extends Component
         }
     }
 
-    // Cancel modals
+
     public function cancelAssign(): void
     {
         $this->reset(['showAssignModal', 'selectedDeliveryPerson', 'orderToAssign']);
@@ -209,9 +210,7 @@ class Index extends Component
         $this->reset(['showReassignModal', 'selectedDeliveryPerson', 'orderToAssign']);
     }
 
-    /**
-     * Show order details in a modal
-     */
+
     public function viewOrderDetails(int $orderId): void
     {
         $order = Order::with(['customer', 'orderItems.order', 'orderItems.orderable'])
@@ -275,7 +274,7 @@ class Index extends Component
 
     public function render()
     {
-        return view('livewire.manager.orders.index', [
+        return view('livewire.admin.orders.index', [
             'orders'  => $this->orders(),
             'headers' => $this->headers(),
         ]);

@@ -3,42 +3,58 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use App\Models\Delivery;
 use App\Models\Order;
 use App\Models\User;
-use App\Models\Delivery;
+use App\Models\Setting; // <-- important if you want to fetch fee from settings
 use Carbon\Carbon;
 
 class DeliveriesSeeder extends Seeder
 {
     public function run(): void
     {
-        $orders = Order::where('status', 'pending')->get();
-        $deliveryPersons = User::where('role', 'delivery_person')->get();
+        // If you only want to assign deliveries for orders currently 'pending':
+        // $orders = Order::where('status', 'pending')->get();
+
+        // Or, if you want deliveries for *all* orders:
+        $orders = Order::all();
+
+        // Use your existing scope: role('delivery_person')
+        $deliveryPersons = User::role('delivery_person')->get();
 
         if ($orders->isEmpty()) {
-            $this->command->warn('No pending orders found. Skipping DeliveriesSeeder.');
+            $this->command->warn('No orders found. Skipping DeliveriesSeeder.');
             return;
         }
 
         if ($deliveryPersons->isEmpty()) {
+            // Optionally generate some new delivery persons
             User::factory(5)->create(['role' => 'delivery_person']);
-            $deliveryPersons = User::where('role', 'delivery_person')->get();
+            $deliveryPersons = User::role('delivery_person')->get();
         }
 
         $returnReasons = [
             'Client absent',
             'Adresse incorrecte',
             'Problème de paiement',
-            'Autre raison'
+            'Autre raison',
         ];
 
         foreach ($orders as $order) {
+            // Random final status for demonstration (assigned, picked_up, delivered, returned)
             $status = collect(['assigned', 'picked_up', 'delivered', 'returned'])->random();
 
+            // Build timestamps
             $assignedAt = Carbon::now()->subDays(rand(1, 5));
-            $pickedUpAt = $status !== 'assigned' ? $assignedAt->copy()->addHours(rand(1, 6)) : null;
-            $deliveredAt = $status === 'delivered' ? $pickedUpAt->copy()->addHours(rand(1, 6)) : null;
-            $returnedAt = $status === 'returned' ? $pickedUpAt->copy()->addHours(rand(1, 6)) : null;
+            $pickedUpAt = $status !== 'assigned'
+                ? $assignedAt->copy()->addHours(rand(1, 6))
+                : null;
+            $deliveredAt = $status === 'delivered'
+                ? $pickedUpAt->copy()->addHours(rand(1, 6))
+                : null;
+            $returnedAt = $status === 'returned'
+                ? $pickedUpAt->copy()->addHours(rand(1, 6))
+                : null;
 
             Delivery::create([
                 'order_id'           => $order->id,
@@ -50,9 +66,9 @@ class DeliveriesSeeder extends Seeder
                 'returned_at'        => $returnedAt,
                 'return_reason'      => $status === 'returned' ? collect($returnReasons)->random() : null,
                 'address_text'       => $order->address_text,
-                'phone_number'       => '555-1234',
+                'phone_number'       => $order->phone_number,
                 'notes'              => 'Please deliver ASAP.',
-                'delivery_fee'       => 2.50,
+                'delivery_fee'       => Setting::getValue('delivery_fee', 2.50),
             ]);
         }
 

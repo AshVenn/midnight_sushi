@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\Menu;
 use App\Models\OrderItem;
 
+
 class OrderItemsSeeder extends Seeder
 {
     /**

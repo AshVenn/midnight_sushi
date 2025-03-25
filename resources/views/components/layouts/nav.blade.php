@@ -8,27 +8,17 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-
+ 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="font-sans antialiased">
-        @if(session('success'))
-        <div class="alert alert-success">
-            {{ session('success') }}
-        </div>
-        @endif
-
-        @if(session('error'))
-        <div class="alert alert-error">
-            {{ session('error') }}
-        </div>
-        @endif
     {{-- Navbar --}}
-    <x-nav sticky full-width>
-        <x-slot:brand>
+    <x-nav sticky full-width class="sticky top-0 z-50">
+    <x-slot:brand class="z-50">
             <label for="main-drawer" class="lg:hidden mr-3">
                 <x-icon name="o-bars-3" class="cursor-pointer" />
             </label>
+
             <a href="/">
             <img
                 src="/images/midnight_sushi/Logo midnight sushi Light.svg"
@@ -56,11 +46,16 @@
                 />
 
         </a>
+
         </x-slot:brand>
 
+
         <x-slot:actions>
-            <x-theme-toggle class="btn btn-circle" />
-            @livewire('cart')
+            <x-theme-toggle class="btn btn-circle btn-ghost" />
+            @unless(auth()->check() && in_array(auth()->user()->role, ['admin', 'manager', 'delivery_person']))
+            <x-button icon="o-shopping-bag" class="btn-circle btn-ghost" link="/menus-products" />
+                @livewire('cart')
+            @endunless
             @if(auth()->check())
             <form method="POST" action="{{ route('logout') }}">
                         @csrf
@@ -82,15 +77,16 @@
         <x-slot:sidebar drawer="main-drawer" collapsible class="bg-base-200">
             @if($user = auth()->user())
                 {{-- User Info --}}
-                <x-list-item :item="$user" value="first_name" sub-value="email" no-separator no-hover class="pt-2">
-                    <x-slot:actions>
+            <x-list-item :item="$user" value="first_name" sub-value="email" no-separator no-hover class="pt-2">
+                <x-slot:actions>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <x-button icon="o-power" type="submit" class="btn-circle btn-ghost btn-xs" tooltip-left="Déconnexion" no-wire-navigate />
                     </form>
-                        
-                    </x-slot:actions>
-                </x-list-item>
+                </x-slot:actions>
+            </x-list-item>
+            
+
                 <x-menu-separator />
 
                 {{-- Role-Based Sidebar --}}
@@ -106,6 +102,7 @@
                             <x-menu-item title="Commandes" icon="s-shopping-cart" link="/admin/orders" />
                             <x-menu-item title="Livraisons" icon="o-truck" link="/admin/deliveries" />
                         </x-menu-sub>
+                        <x-menu-item title="Demandes de contact" icon="o-information-circle" link="/admin/contactinquiries" />
                         <x-menu-item title="Paramètres" icon="o-cog-6-tooth" link="/admin/settings" />
                     </x-menu>
 
@@ -113,7 +110,8 @@
 
                     @case('customer')
                         <x-menu activate-by-route>
-                            <x-menu-item title="Orders" icon="o-shopping-cart" link="/customer/orders" />   
+                            <x-menu-item title="Tableau de Bord" icon="o-home" link="/customer/dashboard" />
+                            <x-menu-item title="Orders" icon="o-shopping-cart" link="/customer/orders" />
                             <x-menu-item title="Profile" icon="o-user" link="/customer/profile" />
                             <x-menu-item title="Support" icon="o-information-circle" link="/customer/support" />
                         </x-menu>
@@ -129,6 +127,7 @@
                                 <x-menu-item title="Commandes" icon="s-shopping-cart" link="/manager/orders" />
                                 <x-menu-item title="Livraisons" icon="o-truck" link="/manager/deliveries" />
                             </x-menu-sub>
+                            <x-menu-item title="Demandes de contact" icon="o-information-circle" link="/manager/contactinquiries" />
                             <x-menu-item title="Paramètres" icon="o-cog-6-tooth" link="/manager/settings" />
                         </x-menu>
 
@@ -145,16 +144,29 @@
 
                     @default
                         <x-menu activate-by-route>
-                            <x-menu-item title="Home" icon="o-home" link="/" />
+                      
+                        <x-menu-item 
+                            title="Home" 
+                            icon="o-home" 
+                            x-data 
+                            @click="location.reload()" 
+                        />
+                    
                         </x-menu>
                 @endswitch
             @else
                 {{-- Default Sidebar for Guests --}}
                 <x-menu activate-by-route>
-                    <x-menu-item title="Home" icon="o-home" link="/" />
+                                
+                        <x-menu-item 
+                            title="Home" 
+                            icon="o-home" 
+                            x-data 
+                            @click="window.location.href = '/';" 
+                        />
+                                    
                     <x-menu-item title="Menus & Produits" icon="o-swatch" link="{{ route('menus-products') }}" />
                     <x-menu-item title="À propos" icon="o-information-circle" link="/about" />
-                    <x-menu-item title="Contact" icon="o-envelope" link="/contact" />
                     <x-menu-item title="Faq" icon="o-question-mark-circle" link="/faq" />
 
                 </x-menu>
@@ -163,7 +175,7 @@
 
         {{-- Main Content --}}
         <x-slot:content>
-        @yield('content')
+            @yield('content')
         </x-slot:content>
     </x-main>
 

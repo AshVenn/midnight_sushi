@@ -92,12 +92,12 @@
                                 <x-button 
                                     icon="o-eye" 
                                     class="btn-ghost" 
-                                    wire:click="showMenuDetails({{ $menu->id }})"
+                                    wire:click.prevent="showMenuDetails({{ $menu->id }})"
                                 />
                                 <x-button 
                                     icon="o-plus" 
                                     class="btn-primary" 
-                                    wire:click="addToCart('menu', {{ $menu->id }})"
+                                    wire:click.prevent="addToCart('menu', {{ $menu->id }})"
                                 />
                             </div>
                         </div>
@@ -178,12 +178,12 @@
                                 <x-button 
                                     icon="o-eye" 
                                     class="btn-ghost" 
-                                    wire:click="showProductDetails({{ $product->id }})"
+                                    wire:click.prevent="showProductDetails({{ $product->id }})"
                                 />
                                 <x-button 
                                     icon="o-plus" 
                                     class="btn-secondary" 
-                                    wire:click="addToCart('product', {{ $product->id }})"
+                                    wire:click.prevent="addToCart('product', {{ $product->id }})"
                                 />
                             </div>
                         </div>
@@ -271,7 +271,25 @@
                             ({{ $selectedMenu->reviews->count() }} avis)
                         </span>
                     </div>
-                    <!-- Removed review comment display -->
+                    <div>
+                    <h3 class="font-bold">Allergènes du menu</h3>
+                    <div class="flex flex-wrap gap-2 mt-2">
+                        @php
+                            $menuAllergens = $selectedMenu->products
+                                ->pluck('allergens')
+                                ->flatten()
+                                ->unique()
+                                ->filter();
+                        @endphp
+                        
+                        @forelse($menuAllergens as $allergen)
+                            <x-badge :value="$allergen" class="badge-outline badge-sm" />
+                        @empty
+                            <span class="text-sm text-gray-500">
+                                Aucun allergène déclaré dans ce menu
+                            </span>
+                        @endforelse
+                    </div>
                 </div>
 
                 <x-slot:actions>

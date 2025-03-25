@@ -21,6 +21,7 @@ class Order extends Model
         'phone_number',
         'address_text',
         'notes',
+        'delivery_fee',
     ];
 
     protected static function boot()

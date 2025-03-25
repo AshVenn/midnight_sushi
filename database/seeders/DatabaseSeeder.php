@@ -12,16 +12,17 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            UsersSeeder::class,            // Seed users first (required for relationships with orders and deliveries)
-            AddressesSeeder::class,       // Seed addresses (required for deliveries)
-            CategoriesSeeder::class,      // Seed categories (required for products)
-            ProductsSeeder::class,        // Seed products (depends on categories)
-            MenuSeeder::class,            // Seed menus (depends on products),
-            OrdersSeeder::class,          // Seed orders (depends on users)
-            OrderItemsSeeder::class,      // Seed order items (depends on orders and products)
-            DeliveriesSeeder::class,      // Seed deliveries (depends on orders and addresses)
-            ContactInquiriesSeeder::class,// Seed contactinquiries
-            ReviewsSeeder::class, //Seed reviews
+            SettingsSeeder::class,
+            UsersSeeder::class,
+            CategoriesSeeder::class,
+            ProductsSeeder::class,
+            MenuSeeder::class,
+            AddressesSeeder::class,
+            OrdersSeeder::class,
+            OrderItemsSeeder::class,
+            DeliveriesSeeder::class,
+            ReviewsSeeder::class,
+            ContactInquiriesSeeder::class
         ]);
     }
 }
