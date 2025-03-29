@@ -26,12 +26,12 @@
 
     {{-- Table --}}
     <x-table :headers="$headers" :rows="$menus" :sort-by="$sortBy" with-pagination>
-        {{-- Image --}}
+            {{-- Colonne Image --}}
         @scope('cell_image', $menu)
-            @if($menu->image)
-            <x-avatar image="{{$menu->image}}" title="{{$menu->name}}" class="!w-14 !rounded-lg"/>
+            @if(str_starts_with($menu->image, 'images/midnight_sushi/'))
+                <x-avatar :image="asset($menu->image)" class="!w-10 !h-10 rounded-full" />
             @else
-            <x-avatar image="{{$menu->image}}" title="{{$menu->name}}" class="!w-14 !rounded-lg"/>
+                <x-avatar :image="$menu->image" class="!w-10 !h-10 rounded-full" />
             @endif
         @endscope
 

@@ -123,6 +123,7 @@
                             <x-menu-item title="Utilisateurs" icon="o-users" link="/manager/users" />
                             <x-menu-item title="Catégories" icon="o-clipboard-document-list" link="/manager/categories" />
                             <x-menu-item title="Produits" icon="o-shopping-bag" link="/manager/products" />
+                            <x-menu-item title="Menus" icon="o-swatch" link="/manager/menus" />
                             <x-menu-sub title="Gestion" icon="o-user-group">
                                 <x-menu-item title="Commandes" icon="s-shopping-cart" link="/manager/orders" />
                                 <x-menu-item title="Livraisons" icon="o-truck" link="/manager/deliveries" />
