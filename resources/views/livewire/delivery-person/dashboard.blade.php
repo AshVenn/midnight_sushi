@@ -73,15 +73,7 @@
                 @endscope
 
                 @scope('cell_status', $row)
-                    @php
-                        $colors = [
-                            'assigned'   => 'badge-primary',
-                            'picked_up'  => 'badge-warning',
-                            'delivered'  => 'badge-success',
-                            'returned'   => 'badge-error'
-                        ];
-                    @endphp
-                    <x-badge :value="$row->status" :class="$colors[$row->status] ?? 'badge-neutral'" />
+                    <x-badge :value="$row->status_text" :class="$row->status_color" />
                 @endscope
 
                 @scope('cell_assigned_at', $row)

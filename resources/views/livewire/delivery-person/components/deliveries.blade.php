@@ -51,25 +51,9 @@
             @endscope
 
             @scope('cell_status', $delivery)
-                @php
-                    $status = $delivery->status;
-                    $label  = match($status) {
-                        'assigned'  => 'Attribuée',
-                        'picked_up' => 'Ramassée',
-                        'delivered' => 'Livrée',
-                        'returned'  => 'Retournée',
-                        default     => ucfirst($status),
-                    };
-                    $badgeClass = match($status) {
-                        'assigned'  => 'badge-primary',
-                        'picked_up' => 'badge-warning',
-                        'delivered' => 'badge-success',
-                        'returned'  => 'badge-error',
-                        default     => 'badge-neutral',
-                    };
-                @endphp
 
-                <x-badge :value="$label" class="{{ $badgeClass }}" />
+
+                <x-badge :value="$delivery->status_text" :class="$delivery->status_color" />
             @endscope
 
             @scope('cell_assigned_at', $delivery)
