@@ -33,7 +33,7 @@
                         src="{{ $menu->image }}" 
                         alt="{{ $menu->name }}"
                         class="w-full h-48 object-cover rounded-t-lg"
-                        onerror="this.src='{{ asset('images/placeholder.jpg') }}'"
+                        onerror="this.src='{{ asset('images/midnight_sushi/midnight_menu.jpg.jpg') }}'"
                     />
                     
                     <div class="p-4 space-y-3">
@@ -122,7 +122,7 @@
                         src="{{ $product->image }}" 
                         alt="{{ $product->name }}"
                         class="w-full h-48 object-cover rounded-t-lg"
-                        onerror="this.src='{{ asset('images/placeholder.jpg') }}'"
+                        onerror="this.src='{{ asset('images/midnight_sushi/midnight_product.jpg.jpg') }}'"
                     />
                     
                     <div class="p-4 space-y-3">

@@ -6,29 +6,23 @@ use Illuminate\Database\Seeder;
 use App\Models\Delivery;
 use App\Models\Order;
 use App\Models\User;
-use App\Models\Setting; // <-- important if you want to fetch fee from settings
+use App\Models\Setting;
 use Carbon\Carbon;
 
 class DeliveriesSeeder extends Seeder
 {
     public function run(): void
     {
-        // If you only want to assign deliveries for orders currently 'pending':
-        // $orders = Order::where('status', 'pending')->get();
-
-        // Or, if you want deliveries for *all* orders:
+        $referenceDate = Carbon::create(2024, 1, 1, 0, 0, 0);
         $orders = Order::all();
-
-        // Use your existing scope: role('delivery_person')
         $deliveryPersons = User::role('delivery_person')->get();
 
         if ($orders->isEmpty()) {
-            $this->command->warn('No orders found. Skipping DeliveriesSeeder.');
+            $this->command->warn('Aucune commande trouvée. DeliveriesSeeder ignoré.');
             return;
         }
 
         if ($deliveryPersons->isEmpty()) {
-            // Optionally generate some new delivery persons
             User::factory(5)->create(['role' => 'delivery_person']);
             $deliveryPersons = User::role('delivery_person')->get();
         }
@@ -41,18 +35,19 @@ class DeliveriesSeeder extends Seeder
         ];
 
         foreach ($orders as $order) {
-            // Random final status for demonstration (assigned, picked_up, delivered, returned)
             $status = collect(['assigned', 'picked_up', 'delivered', 'returned'])->random();
 
-            // Build timestamps
-            $assignedAt = Carbon::now()->subDays(rand(1, 5));
+            // Generate dates relative to reference date
+            $assignedAt = $referenceDate->copy()->subDays(rand(1, 5));
             $pickedUpAt = $status !== 'assigned'
                 ? $assignedAt->copy()->addHours(rand(1, 6))
                 : null;
-            $deliveredAt = $status === 'delivered'
+
+            $deliveredAt = ($status === 'delivered' && $pickedUpAt)
                 ? $pickedUpAt->copy()->addHours(rand(1, 6))
                 : null;
-            $returnedAt = $status === 'returned'
+
+            $returnedAt = ($status === 'returned' && $pickedUpAt)
                 ? $pickedUpAt->copy()->addHours(rand(1, 6))
                 : null;
 
@@ -60,10 +55,10 @@ class DeliveriesSeeder extends Seeder
                 'order_id'           => $order->id,
                 'delivery_person_id' => $deliveryPersons->random()->id,
                 'status'             => $status,
-                'assigned_at'        => $assignedAt,
-                'picked_up_at'       => $pickedUpAt,
-                'delivered_at'       => $deliveredAt,
-                'returned_at'        => $returnedAt,
+                'assigned_at'        => $assignedAt->format('Y-m-d H:i:s'),
+                'picked_up_at'       => $pickedUpAt instanceof Carbon ? $pickedUpAt->format('Y-m-d H:i:s') : null,
+                'delivered_at'       => $deliveredAt instanceof Carbon ? $deliveredAt->format('Y-m-d H:i:s') : null,
+                'returned_at'        => $returnedAt instanceof Carbon ? $returnedAt->format('Y-m-d H:i:s') : null,
                 'return_reason'      => $status === 'returned' ? collect($returnReasons)->random() : null,
                 'address_text'       => $order->address_text,
                 'phone_number'       => $order->phone_number,
@@ -71,7 +66,5 @@ class DeliveriesSeeder extends Seeder
                 'delivery_fee'       => Setting::getValue('delivery_fee', 2.50),
             ]);
         }
-
-        $this->command->info('Deliveries seeded successfully!');
     }
 }

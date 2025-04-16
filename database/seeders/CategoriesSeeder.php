@@ -15,6 +15,7 @@ class CategoriesSeeder extends Seeder
             ['name' => 'Nigiris'],
             ['name' => 'Desserts'],
             ['name' => 'Menus'],
+            ['name'=>'Boissons']
         ];
 
         foreach ($categories as $category) {

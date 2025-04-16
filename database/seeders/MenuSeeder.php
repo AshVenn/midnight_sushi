@@ -13,7 +13,7 @@ class MenuSeeder extends Seeder
         $menus = [
             [
                 'name' => 'Menu California S',
-                'price' => 20.00,
+                'price' => 22.00,
                 'description' => '8 californias au choix, une boisson et un dessert',
                 'image' => 'images/midnight_sushi/menu-california-s.jpg'
             ],
