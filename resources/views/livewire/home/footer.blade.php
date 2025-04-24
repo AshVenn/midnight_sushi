@@ -4,7 +4,8 @@
         <div class="flex flex-wrap justify-center items-center gap-2 text-gray-500">
             <p>Livraison de 23h à 5h</p>
             <span class="hidden md:inline">•</span>
-            <p>Contact : 078 326 25 92</p>
+            <p>Contact 1 : 078 326 25 92</p>
+            <p>Contact 2: 078 268 24 98</p>
             <span class="hidden md:inline">•</span>
             <a href="https://instagram.com/midnight_sushi_geneva" 
                class="underline hover:text-primary">

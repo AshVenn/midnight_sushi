@@ -20,6 +20,11 @@ class Menu extends Model
         'promotion_start',
         'promotion_end',
         'image',
+        'is_featured',
+    ];
+    
+    protected $casts = [
+        'is_featured' => 'boolean',
     ];
 
     protected static function boot()

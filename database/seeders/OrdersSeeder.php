@@ -10,16 +10,16 @@ use App\Models\Menu;
 
 class OrdersSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
-        // Get only customers
+        // clients uniquement
         $customers = User::where('role', 'customer')->get();
         if ($customers->isEmpty()) {
             $this->command->warn('No customers found. Skipping OrdersSeeder.');
             return;
         }
 
-        // Make sure we have products or menus to attach
+        // s’assurer qu’il y a au moins un produit ou un menu
         $productCount = Product::count();
         $menuCount    = Menu::count();
         if ($productCount === 0 && $menuCount === 0) {
@@ -27,10 +27,9 @@ class OrdersSeeder extends Seeder
             return;
         }
 
-        // Create e.g. 30 orders total
+        // 30 commandes
         Order::factory(30)->create()->each(function ($order) use ($customers) {
-            // Ensure this order belongs to a random customer, never admin/manager/delivery
-            $order->customer_id = $customers->random()->id;
+            $order->customer_id = $customers->random()->id; // jamais admin/manager etc.
             $order->save();
         });
 

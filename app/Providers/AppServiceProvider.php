@@ -5,6 +5,8 @@ namespace App\Providers;
 use App\Models\Menu;
 use App\Models\Product;
 use App\Models\Address;
+use App\Models\CustomMenu;
+use App\Models\MenuTemplate;
 
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
@@ -32,6 +34,8 @@ class AppServiceProvider extends ServiceProvider
             'Menu' => Menu::class,
             'Product' => Product::class,
             'Address'=>Address::class,
+            'CustomMenu'  => CustomMenu::class,
+            'MenuTemplate' => \App\Models\MenuTemplate::class,
         ]);
         
     }

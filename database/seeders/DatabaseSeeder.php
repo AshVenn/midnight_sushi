@@ -22,7 +22,8 @@ class DatabaseSeeder extends Seeder
             OrderItemsSeeder::class,
             DeliveriesSeeder::class,
             ReviewsSeeder::class,
-            ContactInquiriesSeeder::class
+            ContactInquiriesSeeder::class,
+            MenuTemplatesSeeder::class,
         ]);
     }
 }

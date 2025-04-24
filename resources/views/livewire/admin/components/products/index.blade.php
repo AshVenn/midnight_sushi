@@ -34,13 +34,9 @@
 
     {{-- Tableau --}}
     <x-table :headers="$headers" :rows="$products" :sort-by="$sortBy" with-pagination>
-            {{-- Colonne Image --}}
+        {{-- Colonne Image --}}
         @scope('cell_image', $product)
-            @if(str_starts_with($product->image, 'images/midnight_sushi/'))
-                <x-avatar :image="asset($product->image)" class="!w-10 !h-10 rounded-full" />
-            @else
-                <x-avatar :image="$product->image" class="!w-10 !h-10 rounded-full" />
-            @endif
+            <x-avatar image="{{ $product->image ?? '/empty-image.jpg' }}" class="!w-16 !h-16" />
         @endscope
 
         {{-- Colonne Nom --}}
@@ -59,6 +55,7 @@
         {{-- Colonne Prix Actuel (en tenant compte de la promotion) --}}
         @scope('cell_price', $product)
             @php
+                // If there's a discount_price, you might want to show it, or show both
                 $actualPrice = $product->price; // Using getPriceAttribute
             @endphp
             <div>
