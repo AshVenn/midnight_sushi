@@ -35,7 +35,7 @@ class AppServiceProvider extends ServiceProvider
             'Product' => Product::class,
             'Address'=>Address::class,
             'CustomMenu'  => CustomMenu::class,
-            'MenuTemplate' => \App\Models\MenuTemplate::class,
+            'MenuTemplate' => MenuTemplate::class,
         ]);
         
     }

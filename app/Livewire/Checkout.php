@@ -23,12 +23,12 @@ class Checkout extends Component
 
     /* ----------------------- Validation --------------------------- */
     protected $rules = [
-        'selected_address' => 'required_if:address_type,saved|exists:addresses,id',
+        'selected_address' => 'nullable|required_if:address_type,saved|exists:addresses,id',
         'phone_number'     => ['required','string','regex:/^(\+41|0)(\d{2} ?\d{3} ?\d{2} ?\d{2}|\d{9})$/'],
         'address_text'     => 'required_if:address_type,custom|string|max:500',
         'notes'            => 'nullable|string|max:500',
     ];
-
+    
     protected $messages = [
         'selected_address.required_if' => 'Veuillez sélectionner une adresse enregistrée.',
         'address_text.required_if'     => 'Veuillez saisir une adresse de livraison.',
