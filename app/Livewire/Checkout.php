@@ -141,7 +141,7 @@ class Checkout extends Component
                 'metadata'             => ['order_id' => $order->id],
             ]);
 
-            return redirect()->away($session->url);
+            return $this->redirect($session->url);
 
         } catch (\Exception $e) {
             DB::rollBack();
